@@ -2,10 +2,10 @@ pub mod types;
 pub mod user;
 mod util;
 
-use Context;
+use {Context, db};
 use error::*;
 
-use hayaku::{Request, Response, ResDone, ResponseDone, Status};
+use hayaku::{self, Request, Response, ResDone, ResponseDone, Status};
 
 // GET /
 pub fn home(req: &mut Request, res: Response, ctx: &Context)
@@ -15,6 +15,36 @@ pub fn home(req: &mut Request, res: Response, ctx: &Context)
         user::home(req, res, ctx)
     } else {
         Ok(res.body(include_str!("../../templates/home.html")))
+    }
+}
+
+// GET /{user}
+pub fn user(req: &mut Request, res: Response, ctx: &Context)
+    -> ResponseDone<Error>
+{
+    if util::check_login(ctx, &req.get_cookies()) {
+        return user::user(req, res, ctx);
+    }
+    let params = hayaku::get_path_params(req);
+    let username = &params["user"];
+
+    let pool = &ctx.db_pool;
+    let user =  if let Some(u) = try_res!(res, db::read::user(pool, username)) {
+        u
+    } else {
+        return not_found(req, res, ctx);
+    };
+    Ok(res.body(""))
+}
+
+// GET /{user}/{repo}
+pub fn repo(req: &mut Request, res: Response, ctx: &Context)
+    -> ResponseDone<Error>
+{
+    if util::check_login(ctx, &req.get_cookies()) {
+        user::repo(req, res, ctx)
+    } else {
+        Ok(res.body(""))
     }
 }
 

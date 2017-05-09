@@ -3,16 +3,18 @@ use hayaku::Request;
 
 pub struct NewUser {
     pub username: String,
+    pub email: String,
     pub password: String,
 }
 
 impl NewUser {
     pub fn new(req: &mut Request) -> Option<Self> {
         let username = try_opt!(req.form_value("username"));
+        let email = try_opt!(req.form_value("email"));
         let password = try_opt!(req.form_value("password"));
         let password_confirm = try_opt!(req.form_value("password_confirm"));
 
-        if username.is_empty() || password.is_empty() {
+        if username.is_empty() || email.is_empty() || password.is_empty() {
             return None;
         } else if password != password_confirm {
             return None;
@@ -21,6 +23,7 @@ impl NewUser {
         let password_hash = try_opt!(bcrypt::hash(&password, DEFAULT_COST).ok());
         Some(NewUser {
             username: username,
+            email: email,
             password: password_hash,
         })
     }
@@ -45,4 +48,16 @@ impl Login {
             password: password,
         })
     }
+}
+
+#[derive(BartDisplay)]
+#[template = "templates/user.html"]
+pub struct User {
+    pub username: String,
+    pub repos: Vec<Repo>,
+}
+
+pub struct Repo {
+    pub name: String,
+    pub description: String,
 }

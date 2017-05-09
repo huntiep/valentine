@@ -4,7 +4,7 @@ use super::types::*;
 use super::util;
 
 use chrono::Duration;
-use hayaku::{Cookie, Request, Response, ResponseDone, Status};
+use hayaku::{self, Cookie, Request, Response, ResponseDone, Status};
 use time;
 
 // GET /signup
@@ -34,7 +34,7 @@ pub fn signup_post(req: &mut Request, mut res: Response, ctx: &Context)
 
     let pool = &ctx.db_pool;
     try_res!(res, db::create::user(pool, &new_user));
-    util::login(new_user.username, &mut res, ctx);
+    util::login(new_user.username, &mut res.cookies(), ctx);
     Ok(res.redirect(Status::Found, "/", "Signup sucessfull"))
 }
 
@@ -69,7 +69,7 @@ pub fn login_post(req: &mut Request, mut res: Response, ctx: &Context)
         return Ok(res.redirect(Status::Found, "/login", "Login failed"));
     }
 
-    util::login(login.username, &mut res, ctx);
+    util::login(login.username, &mut res.cookies(), ctx);
     Ok(res.redirect(Status::Found, "/", "Login successful"))
 }
 
@@ -79,18 +79,19 @@ pub fn logout(req: &mut Request, mut res: Response, ctx: &Context)
 {
     let cookies = req.get_cookies();
     if let Some(cookie) = cookies.get("session_key") {
+        let cookies = res.cookies();
         ctx.logins.lock().unwrap().remove(cookie.value());
         let del_cookie = Cookie::build("session_key", "")
             .max_age(Duration::seconds(0))
             .expires(time::empty_tm())
             .finish();
-        res.set_cookie(del_cookie);
+        cookies.add(del_cookie);
 
         let del_cookie = Cookie::build("dotcom_user", "")
             .max_age(Duration::seconds(0))
             .expires(time::empty_tm())
             .finish();
-        res.set_cookie(del_cookie);
+        cookies.add(del_cookie);
     }
     Ok(res.redirect(Status::Found, "/", "Logout successful"))
 }
@@ -114,4 +115,16 @@ pub fn home(req: &mut Request, res: Response, _ctx: &Context)
         username: username.unwrap(),
     };
     Ok(res.body(format!("{}", template)))
+}
+
+pub fn user(_req: &mut Request, res: Response, _ctx: &Context)
+    -> ResponseDone<Error>
+{
+    Ok(res.body(""))
+}
+
+pub fn repo(_req: &mut Request, res: Response, _ctx: &Context)
+    -> ResponseDone<Error>
+{
+    Ok(res.body(""))
 }

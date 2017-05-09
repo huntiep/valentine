@@ -15,3 +15,38 @@ pub fn check_login(pool: &Pool, login: &Login) -> Result<bool> {
         Ok(valid)
     }
 }
+
+pub fn user_exists(pool: &Pool, username: &str) -> Result<bool> {
+    let conn = pool.get()?;
+    let rows = conn.query(include_str!("../sql/read/user_exists.sql"),
+                          &[&username])?;
+    Ok(!rows.is_empty())
+}
+
+pub fn user(pool: &Pool, username: &str) -> Result<Option<User>> {
+    if !user_exists(pool, username)? {
+        return Ok(None);
+    }
+
+    let conn = pool.get()?;
+    let rows = conn.query(include_str!("../sql/read/user.sql"),
+                          &[&username])?;
+
+    if rows.is_empty() {
+        return Ok(None);
+    }
+
+    let mut repos = Vec::new();
+    for row in rows.iter() {
+        let repo = Repo {
+            name: row.get(0),
+            description: row.get(1),
+        };
+        repos.push(repo);
+    }
+
+    Ok(Some(User {
+        username: username.to_string(),
+        repos: repos,
+    }))
+}

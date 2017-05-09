@@ -5,9 +5,6 @@ quick_error! {
         Bcrypt(err: &'static str) {
             from(_e: ::bcrypt::BcryptError) -> ("bcrypt error")
         }
-        /*Handlebars(err: ::handlebars::RenderError) {
-            from()
-        }*/
         Io(err: &'static str) {
             from(_e: ::std::io::Error) -> ("io error")
         }

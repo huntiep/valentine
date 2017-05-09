@@ -29,7 +29,8 @@ features = ["serde"]
 version = "0.3"
 
 [dependencies.hayaku]
-git = "https://git.nokaa.moe/hayaku/hayaku"
+#git = "https://git.nokaa.moe/hayaku/hayaku"
+path = "../hayaku/hayaku"
 
 [dependencies.postgres]
 features = ["with-chrono"]

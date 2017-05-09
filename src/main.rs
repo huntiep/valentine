@@ -17,7 +17,6 @@ extern crate time;
 
 mod db;
 mod error;
-#[macro_use] mod macros;
 mod routes;
 
 use routes::*;
@@ -41,6 +40,15 @@ fn main() {
     env_logger::init().unwrap();
     info!("Starting up");
 
+    /*let repo = git2::Repository::open(".").expect("failed to open repo");
+    let head = repo.head().expect("failed to get head");
+    let oid = head.target().expect("failed to get oid");
+    let commit = repo.find_commit(oid).expect("failed to get commit");
+    let tree = commit.tree().expect("failed to get tree");
+    for entry in tree.iter() {
+        println!("{}", entry.name().unwrap());
+    }*/
+
     // Read database url from `.env`
     let db_url = env::var("DATABASE_URL").expect("$DATABASE_URL must be set");
     info!("db url: {}", db_url);
@@ -63,6 +71,8 @@ fn main() {
     router.set_not_found_handler(Arc::new(not_found));
     router.set_internal_error_handler(Arc::new(internal_error));
     router.get("/", Arc::new(home));
+    router.get("/{user}", Arc::new(user));
+    router.get("/{user}/{repo}", Arc::new(repo));
 
     // User
     router.get("/signup", Arc::new(user::signup));
