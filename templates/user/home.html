@@ -1,7 +1,9 @@
-<html>
-    <head>
-    </head>
-    <body>
-        <p>Hello {{username}}</p>
-    </body>
-</html>
+<p>Hello {{username}}</p>
+
+<h1>{{username}}</h1>
+
+<ul>
+    {{#repos}}
+    <li>{{.name}} - {{.description}}</li>
+    {{/repos}}
+<ul>

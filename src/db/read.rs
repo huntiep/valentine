@@ -1,5 +1,6 @@
 use error::*;
 use routes::types::*;
+use templates::*;
 use super::Pool;
 
 pub fn check_login(pool: &Pool, login: &Login) -> Result<bool> {
@@ -20,6 +21,13 @@ pub fn user_exists(pool: &Pool, username: &str) -> Result<bool> {
     let conn = pool.get()?;
     let rows = conn.query(include_str!("../sql/read/user_exists.sql"),
                           &[&username])?;
+    Ok(!rows.is_empty())
+}
+
+pub fn repo_exists(pool: &Pool, username: &str, reponame: &str) -> Result<bool> {
+    let conn = pool.get()?;
+    let rows = conn.query(include_str!("../sql/read/repo_exists.sql"),
+                          &[&username, &reponame])?;
     Ok(!rows.is_empty())
 }
 

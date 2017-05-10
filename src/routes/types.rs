@@ -49,15 +49,3 @@ impl Login {
         })
     }
 }
-
-#[derive(BartDisplay)]
-#[template = "templates/user.html"]
-pub struct User {
-    pub username: String,
-    pub repos: Vec<Repo>,
-}
-
-pub struct Repo {
-    pub name: String,
-    pub description: String,
-}

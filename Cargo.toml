@@ -30,7 +30,7 @@ version = "0.3"
 
 [dependencies.hayaku]
 #git = "https://git.nokaa.moe/hayaku/hayaku"
-path = "../hayaku/hayaku"
+path = "../hayaku"
 
 [dependencies.postgres]
 features = ["with-chrono"]

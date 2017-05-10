@@ -18,6 +18,7 @@ extern crate time;
 mod db;
 mod error;
 mod routes;
+mod templates;
 
 use routes::*;
 
@@ -33,6 +34,7 @@ use std::sync::{Arc, Mutex};
 pub struct Context {
     pub db_pool: db::Pool,
     pub logins: Arc<Mutex<HashSet<String>>>,
+    pub name: String,
 }
 
 fn main() {
@@ -65,6 +67,7 @@ fn main() {
     let ctx = Context {
         db_pool: pool,
         logins: Arc::new(Mutex::new(HashSet::new())),
+        name: String::from("wanker"),
     };
 
     let mut router = Router::new();

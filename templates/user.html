@@ -1,13 +1,7 @@
-<html>
-    <head>
-    </head>
-    <body>
-        <h1>{{username}}</h1>
+<h1>{{username}}</h1>
 
-        <ul>
-            {{#repos}}
-            <li>{{.name}} - {{.description}}</li>
-            {{/repos}}
-        <ul>
-    </body>
-</html>
+<ul>
+    {{#repos}}
+    <li>{{.name}} - {{.description}}</li>
+    {{/repos}}
+<ul>

@@ -1,5 +1,6 @@
 use error::*;
 use routes::types::*;
+use templates::*;
 use super::Pool;
 
 pub fn tables(pool: &Pool) -> Result<()> {

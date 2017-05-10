@@ -1,7 +1,8 @@
 use {Context, db};
 use error::*;
+use templates::*;
 use super::types::*;
-use super::util;
+use super::{not_found, util};
 
 use chrono::Duration;
 use hayaku::{self, Cookie, Request, Response, ResponseDone, Status};
@@ -14,7 +15,9 @@ pub fn signup(req: &mut Request, res: Response, ctx: &Context)
     if util::check_login(ctx, &req.get_cookies()) {
         Ok(res.redirect(Status::Found, "/", "You already have an account"))
     } else {
-        Ok(res.body(include_str!("../../templates/user/signup.html")))
+        let body = include_str!("../../templates/user/signup.html");
+        let tmpl = Template::new(ctx, Some("Signup"), body);
+        Ok(res.fmt_body(tmpl))
     }
 }
 
@@ -45,7 +48,9 @@ pub fn login(req: &mut Request, res: Response, ctx: &Context)
     if util::check_login(ctx, &req.get_cookies()) {
         Ok(res.redirect(Status::Found, "/", "You are already logged in"))
     } else {
-        Ok(res.body(include_str!("../../templates/user/login.html")))
+        let body = include_str!("../../templates/user/login.html");
+        let tmpl = Template::new(ctx, Some("Login"), body);
+        Ok(res.fmt_body(tmpl))
     }
 }
 
@@ -96,13 +101,7 @@ pub fn logout(req: &mut Request, mut res: Response, ctx: &Context)
     Ok(res.redirect(Status::Found, "/", "Logout successful"))
 }
 
-#[derive(BartDisplay)]
-#[template = "templates/user/home.html"]
-pub struct HomeTemplate<'a> {
-    username: &'a str,
-}
-
-pub fn home(req: &mut Request, res: Response, _ctx: &Context)
+pub fn home(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
     let cookies = req.get_cookies();
@@ -110,11 +109,15 @@ pub fn home(req: &mut Request, res: Response, _ctx: &Context)
     if username.is_none() {
         return Ok(res.redirect(Status::Found, "/login", "Error"));
     }
+    let username = username.unwrap();
 
-    let template = HomeTemplate {
-        username: username.unwrap(),
-    };
-    Ok(res.body(format!("{}", template)))
+    let pool = &ctx.db_pool;
+    if let Some(user) = try_res!(res, db::read::user(pool, &username)) {
+        let tmpl = Template::new(ctx, Some(&username), user);
+        Ok(res.fmt_body(tmpl))
+    } else {
+        not_found(req, res, ctx)
+    }
 }
 
 pub fn user(_req: &mut Request, res: Response, _ctx: &Context)
