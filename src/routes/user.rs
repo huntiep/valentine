@@ -120,14 +120,68 @@ pub fn home(req: &mut Request, res: Response, ctx: &Context)
     }
 }
 
-pub fn user(_req: &mut Request, res: Response, _ctx: &Context)
+pub fn user(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    Ok(res.body(""))
+    let params = hayaku::get_path_params(req);
+    let username = &params["user"];
+
+    let pool = &ctx.db_pool;
+    if let Some(user) = try_res!(res, db::read::user(pool, username)) {
+        let tmpl = Template::new(ctx, Some(username), user);
+        Ok(res.fmt_body(tmpl))
+    } else {
+        not_found(req, res, ctx)
+    }
 }
 
 pub fn repo(_req: &mut Request, res: Response, _ctx: &Context)
     -> ResponseDone<Error>
 {
     Ok(res.body(""))
+}
+
+// GET /repo/new
+pub fn new_repo(req: &mut Request, res: Response, ctx: &Context)
+    -> ResponseDone<Error>
+{
+    if !util::check_login(ctx, &req.get_cookies()) {
+        return Ok(res.redirect(Status::Found, "/login",
+                               "You must be logged in for this operation"));
+    }
+
+    let body = include_str!("../../templates/user/repo_new.html");
+    let tmpl = Template::new(ctx, Some("Create a New Repository"), body);
+    Ok(res.fmt_body(tmpl))
+}
+
+// POST /repo/new
+pub fn new_repo_post(req: &mut Request, res: Response, ctx: &Context)
+    -> ResponseDone<Error>
+{
+    if !util::check_login(ctx, &req.get_cookies()) {
+        return Ok(res.redirect(Status::Found, "/login",
+                               "You must be logged in for this operation"));
+    }
+
+    let cookies = req.get_cookies();
+    let username = if let Some(name) = util::retrieve_username(&cookies) {
+        name
+    } else {
+        return Ok(res.redirect(Status::Found, "/login",
+                               "You must be logged in for this operation"));
+    };
+
+    let repo = if let Some(repo) = Repo::new(req) {
+        repo
+    } else {
+        return Ok(res.redirect(Status::Found, "/user/new", "Invalid input"));
+    };
+
+    let pool = &ctx.db_pool;
+    if try_res!(res, db::read::repo_exists(pool, username, &repo.name)) {
+        return Ok(res.redirect(Status::Found, "/user/new", "That repo already exists"));
+    }
+    try_res!(res, db::create::repo(pool, username, &repo));
+    Ok(res.redirect(Status::Found, format!("/{}/{}", username, repo.name), "Repo created"))
 }

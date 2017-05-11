@@ -12,9 +12,7 @@ pub fn check_login(ctx: &Context, cookies: &CookieJar) -> bool {
     }
 }
 
-//pub fn login(username: String, res: &mut Response, ctx: &Context) {
 pub fn login(username: String, cookies: &mut CookieJar, ctx: &Context) {
-    //let cookies = res.cookies();
     let key: String = OsRng::new().unwrap().gen_ascii_chars().take(50).collect();
     ctx.logins.lock().unwrap().insert(key.clone());
     let cookie = Cookie::build("session_key", key)
@@ -24,7 +22,6 @@ pub fn login(username: String, cookies: &mut CookieJar, ctx: &Context) {
         .max_age(Duration::days(1))
         .finish();
     cookies.add(cookie);
-    //res.set_cookie(cookie);
 
     let cookie = Cookie::build("dotcom_user", username)
         .secure(false)
@@ -33,7 +30,6 @@ pub fn login(username: String, cookies: &mut CookieJar, ctx: &Context) {
         .max_age(Duration::days(1))
         .finish();
     cookies.add(cookie);
-    //res.set_cookie(cookie);
 }
 
 pub fn retrieve_username<'a>(cookies: &'a CookieJar) -> Option<&'a str> {

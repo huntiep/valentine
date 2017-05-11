@@ -83,6 +83,8 @@ fn main() {
     router.get("/login", Arc::new(user::login));
     router.post("/login", Arc::new(user::login_post));
     router.get("/logout", Arc::new(user::logout));
+    router.get("/repo/new", Arc::new(user::new_repo));
+    router.post("/repo/new", Arc::new(user::new_repo_post));
 
     let addr = "127.0.0.1:3000".parse().unwrap();
     Http::new(router, ctx).listen_and_serve(addr);

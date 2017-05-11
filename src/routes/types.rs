@@ -49,3 +49,24 @@ impl Login {
         })
     }
 }
+
+pub struct Repo {
+    pub name: String,
+    pub description: String,
+}
+
+impl Repo {
+    pub fn new(req: &mut Request) -> Option<Self> {
+        let name = try_opt!(req.form_value("name"));
+        let description = try_opt!(req.form_value("description"));
+
+        if name.is_empty() {
+            None
+        } else {
+            Some(Repo {
+                name: name,
+                description: description,
+            })
+        }
+    }
+}
