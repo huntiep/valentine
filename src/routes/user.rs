@@ -183,5 +183,5 @@ pub fn new_repo_post(req: &mut Request, res: Response, ctx: &Context)
         return Ok(res.redirect(Status::Found, "/user/new", "That repo already exists"));
     }
     try_res!(res, db::create::repo(pool, username, &repo));
-    Ok(res.redirect(Status::Found, format!("/{}/{}", username, repo.name), "Repo created"))
+    Ok(res.redirect(Status::Found, &format!("/{}/{}", username, repo.name), "Repo created"))
 }

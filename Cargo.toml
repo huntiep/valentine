@@ -1,6 +1,6 @@
 [package]
 authors = ["nokaa <nokaa@cock.li>"]
-name = "wanker"
+name = "valentine"
 version = "0.1.0"
 
 [dependencies]
@@ -29,8 +29,7 @@ features = ["serde"]
 version = "0.3"
 
 [dependencies.hayaku]
-#git = "https://git.nokaa.moe/hayaku/hayaku"
-path = "../hayaku"
+git = "https://git.nokaa.moe/hayaku/hayaku"
 
 [dependencies.postgres]
 features = ["with-chrono"]
