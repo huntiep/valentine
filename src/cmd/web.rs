@@ -1,67 +1,17 @@
-#[macro_use] extern crate bart_derive;
-extern crate bcrypt;
-extern crate chrono;
-#[macro_use] extern crate clap;
-extern crate dotenv;
-extern crate env_logger;
-extern crate git2;
-#[macro_use] extern crate hayaku;
-#[macro_use(info, log)] extern crate log;
-extern crate postgres;
-#[macro_use] extern crate quick_error;
-extern crate r2d2;
-extern crate r2d2_postgres;
-extern crate rand;
-#[macro_use] extern crate serde_derive;
-extern crate serde_json;
-extern crate time;
-
-mod cmd;
-mod db;
-mod error;
-mod repo;
-mod routes;
-mod templates;
-
+use {Context, db};
 use routes::*;
 
 use clap::{App, Arg, SubCommand};
 use dotenv::dotenv;
+use hayaku::{Http, Router};
+use r2d2;
+use r2d2_postgres::{PostgresConnectionManager, TlsMode};
 
+use std::{env, fs, path};
 use std::collections::HashSet;
 use std::sync::{Arc, Mutex};
 
-#[derive(Clone)]
-pub struct Context {
-    pub db_pool: db::Pool,
-    pub logins: Arc<Mutex<HashSet<String>>>,
-    pub name: String,
-}
-
-fn main() {
-    dotenv().ok();
-    env_logger::init().unwrap();
-
-    let matches = App::new(crate_name!())
-        .version(crate_version!())
-        .author(crate_authors!())
-        .about(crate_description!())
-        .subcommand(SubCommand::with_name("web")
-                    .about("Run the valentine server"))
-        .subcommand(SubCommand::with_name("serv")
-                    .about("Command used for ssh"))
-        .get_matches();
-
-    if let Some(_matches) = matches.subcommand_matches("web") {
-        cmd::web::run();
-    } else if let Some(_matches) = matches.subcommand_matches("serv") {
-        cmd::serv::run();
-    }
-}
-
-/*fn main() {
-    dotenv().ok();
-    env_logger::init().unwrap();
+pub fn run() {
     info!("Starting up");
 
     /*let repo = git2::Repository::open(".").expect("failed to open repo");
@@ -120,4 +70,4 @@ fn main() {
     let addr = "127.0.0.1:3000".parse().unwrap();
     info!("running server at {}", addr);
     Http::new(router, ctx).listen_and_serve(addr);
-}*/
+}

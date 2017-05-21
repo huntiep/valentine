@@ -12,7 +12,7 @@ js:
     @cp javascript/* resources
 
 run: build
-    @RUST_LOG=info ./target/debug/valentine
+    @RUST_LOG=info ./target/debug/valentine web
 
 clean:
     rm -r resources target valentine.tgz
