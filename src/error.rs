@@ -5,6 +5,9 @@ quick_error! {
         Bcrypt(err: &'static str) {
             from(_e: ::bcrypt::BcryptError) -> ("bcrypt error")
         }
+        Git(err: &'static str) {
+            from(_e: ::git2::Error) -> ("git error")
+        }
         Io(err: &'static str) {
             from(_e: ::std::io::Error) -> ("io error")
         }

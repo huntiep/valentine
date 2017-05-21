@@ -12,10 +12,10 @@ js:
     @cp javascript/* resources
 
 run: build
-    @RUST_LOG=info ./target/debug/neppit
+    @RUST_LOG=info ./target/debug/valentine
 
 clean:
-    rm -r resources target neppit.tgz
+    rm -r resources target valentine.tgz
 
 drop-tables:
     @./drop_tables.sh
@@ -27,4 +27,4 @@ run-release: build-release
     @cargo run --release
 
 tar: build-release
-    @tar -cf wanker.tgz target/release/wanker resources
+    @tar -cf valentine.tgz target/release/valentine resources

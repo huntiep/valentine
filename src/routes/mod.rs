@@ -45,7 +45,7 @@ pub fn repo(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
     if util::check_login(ctx, &req.get_cookies()) {
-        user::repo(req, res, ctx)
+        user::view_repo(req, res, ctx)
     } else {
         Ok(res.body(""))
     }

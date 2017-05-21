@@ -33,16 +33,13 @@ pub fn repo_exists(pool: &Pool, username: &str, reponame: &str) -> Result<bool> 
 
 pub fn user(pool: &Pool, username: &str) -> Result<Option<User>> {
     if !user_exists(pool, username)? {
+        info!("user doesn't exist!");
         return Ok(None);
     }
 
     let conn = pool.get()?;
     let rows = conn.query(include_str!("../sql/read/user.sql"),
                           &[&username])?;
-
-    if rows.is_empty() {
-        return Ok(None);
-    }
 
     let mut repos = Vec::new();
     for row in rows.iter() {

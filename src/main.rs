@@ -17,6 +17,7 @@ extern crate time;
 
 mod db;
 mod error;
+mod repo;
 mod routes;
 mod templates;
 
@@ -26,8 +27,8 @@ use dotenv::dotenv;
 use hayaku::{Http, Router};
 use r2d2_postgres::{PostgresConnectionManager, TlsMode};
 
+use std::{env, fs, path};
 use std::collections::HashSet;
-use std::env;
 use std::sync::{Arc, Mutex};
 
 #[derive(Clone)]
@@ -64,10 +65,18 @@ fn main() {
     info!("Creating tables");
     db::create::tables(&pool).expect("failed to create tables");
 
+    // Create repository folder
+    let path = path::Path::new("valentine-repos");
+    if !path.exists() {
+        fs::create_dir(path).unwrap();
+    } else if !path.is_dir() {
+        panic!("unable to create repository folder, file already exists!");
+    }
+
     let ctx = Context {
         db_pool: pool,
         logins: Arc::new(Mutex::new(HashSet::new())),
-        name: String::from("wanker"),
+        name: String::from("Valentine"),
     };
 
     let mut router = Router::new();
@@ -85,7 +94,9 @@ fn main() {
     router.get("/logout", Arc::new(user::logout));
     router.get("/repo/new", Arc::new(user::new_repo));
     router.post("/repo/new", Arc::new(user::new_repo_post));
+    router.get("/{user}/{repo}/delete", Arc::new(user::delete_repo));
 
     let addr = "127.0.0.1:3000".parse().unwrap();
+    info!("running server at {}", addr);
     Http::new(router, ctx).listen_and_serve(addr);
 }

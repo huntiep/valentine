@@ -1,1 +1,1 @@
-SELECT * FROM repos WHERE owner = $1 && name = $2;
+SELECT * FROM repos WHERE owner = $1 AND name = $2;

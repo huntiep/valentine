@@ -24,7 +24,7 @@ impl<'a, 'b> TemplateHead<'a, 'b> {
 pub struct TemplateFoot;
 
 #[derive(BartDisplay)]
-#[template_string = "{{head}}{{body}}{{foot}}"]
+#[template_string = "{{{head}}}{{{body}}}{{{foot}}}"]
 pub struct Template<'a, 'b, T: Display> {
     head: TemplateHead<'a, 'b>,
     body: T,
