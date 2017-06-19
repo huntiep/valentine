@@ -1,4 +1,4 @@
-use error::*;
+use Result;
 use super::Pool;
 
 pub fn user(pool: &Pool, username: &str) -> Result<()> {

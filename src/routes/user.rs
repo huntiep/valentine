@@ -1,5 +1,4 @@
-use {Context, db, repo};
-use error::*;
+use {Context, Error, db, repo};
 use templates::*;
 use super::types::*;
 use super::{not_found, util};
@@ -37,7 +36,7 @@ pub fn signup_post(req: &mut Request, mut res: Response, ctx: &Context)
 
     let pool = &ctx.db_pool;
     try_res!(res, db::create::user(pool, &new_user));
-    try_res!(res, repo::create_user(&new_user.username));
+    try_res!(res, repo::create_user(ctx, &new_user.username));
     util::login(new_user.username, &mut res.cookies(), ctx);
     Ok(res.redirect(Status::Found, "/", "Signup sucessfull"))
 }
@@ -187,7 +186,7 @@ pub fn new_repo_post(req: &mut Request, res: Response, ctx: &Context)
     }
     try_res!(res, db::create::repo(pool, username, &repo));
 
-    try_res!(res, repo::init(&repo.name));
+    try_res!(res, repo::init(ctx, &repo.name));
 
     Ok(res.redirect(Status::Found, &format!("/{}/{}", username, repo.name), "Repo created"))
 }
@@ -219,6 +218,6 @@ pub fn delete_repo(req: &mut Request, res: Response, ctx: &Context)
 
     let pool = &ctx.db_pool;
     try_res!(res, db::delete::repo(pool, username, repo_name));
-    try_res!(res, repo::delete(username, repo_name));
+    try_res!(res, repo::delete(ctx, username, repo_name));
     Ok(res.redirect(Status::Found, &format!("/{}", username), "Repo deleted"))
 }

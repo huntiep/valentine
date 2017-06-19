@@ -9,6 +9,7 @@ use r2d2_postgres::{PostgresConnectionManager, TlsMode};
 
 use std::{env, fs, path};
 use std::collections::HashSet;
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
 pub fn run() {
@@ -48,6 +49,7 @@ pub fn run() {
         db_pool: pool,
         logins: Arc::new(Mutex::new(HashSet::new())),
         name: String::from("Valentine"),
+        repo_dir: PathBuf::from("val-repos"),
     };
 
     let mut router = Router::new();

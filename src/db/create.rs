@@ -1,4 +1,4 @@
-use error::*;
+use Result;
 use routes::types::*;
 use super::Pool;
 

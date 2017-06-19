@@ -2,8 +2,7 @@ pub mod types;
 pub mod user;
 mod util;
 
-use {Context, db};
-use error::*;
+use {Context, Error, db};
 use templates::*;
 
 use hayaku::{self, Request, Response, ResDone, ResponseDone, Status};

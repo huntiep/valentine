@@ -18,7 +18,6 @@ extern crate time;
 
 mod cmd;
 mod db;
-mod error;
 mod repo;
 mod routes;
 mod templates;
@@ -29,13 +28,37 @@ use clap::{App, Arg, SubCommand};
 use dotenv::dotenv;
 
 use std::collections::HashSet;
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
+
+pub type Result<T> = ::std::result::Result<T, Error>;
+quick_error! {
+    #[derive(Debug, Clone)]
+    pub enum Error {
+        Bcrypt(err: &'static str) {
+            from(_e: ::bcrypt::BcryptError) -> ("bcrypt error")
+        }
+        Git(err: &'static str) {
+            from(_e: ::git2::Error) -> ("git error")
+        }
+        Io(err: &'static str) {
+            from(_e: ::std::io::Error) -> ("io error")
+        }
+        PostGres(err: &'static str) {
+            from(_e: ::postgres::error::Error) -> ("postgres error")
+        }
+        R2D2(err: &'static str) {
+            from(_e: ::r2d2::GetTimeout) -> ("r2d2 error")
+        }
+    }
+}
 
 #[derive(Clone)]
 pub struct Context {
     pub db_pool: db::Pool,
     pub logins: Arc<Mutex<HashSet<String>>>,
     pub name: String,
+    pub repo_dir: PathBuf,
 }
 
 fn main() {
@@ -46,16 +69,25 @@ fn main() {
         .version(crate_version!())
         .author(crate_authors!())
         .about(crate_description!())
+        .subcommand(SubCommand::with_name("backup")
+                    .about("Create a backup of the database and user repositories")
+                    .arg(Arg::with_name("FILE")
+                         .help("The file to output the backup to e.g. val.tgz")
+                         .required(true)
+                         .index(1)))
+        .subcommand(SubCommand::with_name("serve")
+                    .about("Command used for ssh"))
         .subcommand(SubCommand::with_name("web")
                     .about("Run the valentine server"))
-        .subcommand(SubCommand::with_name("serv")
-                    .about("Command used for ssh"))
         .get_matches();
 
-    if let Some(_matches) = matches.subcommand_matches("web") {
+    if let Some(_matches) = matches.subcommand_matches("backup") {
+        let file = matches.value_of("FILE").unwrap();
+        cmd::backup::run(file);
+    } else if let Some(_matches) = matches.subcommand_matches("serve") {
+        cmd::serve::run();
+    } else if let Some(_matches) = matches.subcommand_matches("web") {
         cmd::web::run();
-    } else if let Some(_matches) = matches.subcommand_matches("serv") {
-        cmd::serv::run();
     }
 }
 
