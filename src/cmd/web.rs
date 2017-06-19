@@ -1,4 +1,4 @@
-use {Context, db};
+use {Config, Context, db};
 use routes::*;
 
 use clap::{App, Arg, SubCommand};
@@ -6,14 +6,22 @@ use dotenv::dotenv;
 use hayaku::{Http, Router};
 use r2d2;
 use r2d2_postgres::{PostgresConnectionManager, TlsMode};
+use toml;
 
 use std::{env, fs, path};
 use std::collections::HashSet;
+use std::io::Read;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
-pub fn run() {
+pub fn run(config: &str) {
     info!("Starting up");
+
+    info!("Reading config");
+    let mut buf = String::new();
+    let mut file = fs::File::open(config).expect("Unable to open config file");
+    file.read_to_string(&mut buf).expect("Unable to read config file");
+    let config: Config = toml::from_str(&buf).expect("Invalid config file");
 
     /*let repo = git2::Repository::open(".").expect("failed to open repo");
     let head = repo.head().expect("failed to get head");
@@ -38,18 +46,20 @@ pub fn run() {
     db::create::tables(&pool).expect("failed to create tables");
 
     // Create repository folder
-    let path = path::Path::new("valentine-repos");
-    if !path.exists() {
-        fs::create_dir(path).unwrap();
-    } else if !path.is_dir() {
-        panic!("unable to create repository folder, file already exists!");
+    {
+        let path = &config.repo_dir;
+        if !path.exists() {
+            fs::create_dir(path).unwrap();
+        } else if !path.is_dir() {
+            panic!("unable to create repository folder, file already exists!");
+        }
     }
 
     let ctx = Context {
         db_pool: pool,
         logins: Arc::new(Mutex::new(HashSet::new())),
         name: String::from("Valentine"),
-        repo_dir: PathBuf::from("val-repos"),
+        repo_dir: config.repo_dir,
     };
 
     let mut router = Router::new();

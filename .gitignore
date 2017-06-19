@@ -2,4 +2,6 @@ target/
 **/*.rs.bk
 .env
 valentine-repos
+val-repos
 resources
+valentine.toml

@@ -1,7 +1,16 @@
-use std::{env, fs, process};
-use std::io::Write;
+use Config;
 
-pub fn run() {
+use toml;
+
+use std::{env, fs, process};
+use std::io::{Read, Write};
+
+pub fn run(config: &str) {
+    let mut buf = String::new();
+    let mut file = fs::File::open(config).unwrap();
+    file.read_to_string(&mut buf).unwrap();
+    let config: Config = toml::from_str(&buf).unwrap();
+
     let mut log = fs::OpenOptions::new()
         .read(true)
         .write(true)
@@ -45,8 +54,8 @@ pub fn run() {
     }
 
     let mut current_dir = env::current_dir().unwrap();
-    current_dir.push("val-repos");
-//    env::set_current_dir(current_dir).unwrap();
+    current_dir.push(&config.repo_dir);
+
     eprintln!("{} {}", verb, repo_path);
     let command = process::Command::new(verb)
         .arg(repo_path)

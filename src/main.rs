@@ -15,6 +15,7 @@ extern crate rand;
 #[macro_use] extern crate serde_derive;
 extern crate serde_json;
 extern crate time;
+extern crate toml;
 
 mod cmd;
 mod db;
@@ -61,6 +62,11 @@ pub struct Context {
     pub repo_dir: PathBuf,
 }
 
+#[derive(Clone, Serialize, Deserialize)]
+pub struct Config {
+    pub repo_dir: PathBuf,
+}
+
 fn main() {
     dotenv().ok();
     env_logger::init().unwrap();
@@ -76,80 +82,31 @@ fn main() {
                          .required(true)
                          .index(1)))
         .subcommand(SubCommand::with_name("serve")
-                    .about("Command used for ssh"))
+                    .about("Command used for ssh")
+                    .arg(Arg::with_name("config")
+                         .short("c")
+                         .long("config")
+                         .value_name("FILE")
+                         .help("Specifies where to find the config file")
+                         .takes_value(true)))
         .subcommand(SubCommand::with_name("web")
-                    .about("Run the valentine server"))
+                    .about("Run the valentine server")
+                    .arg(Arg::with_name("config")
+                         .short("c")
+                         .long("config")
+                         .value_name("FILE")
+                         .help("Specifies where to find the config file")
+                         .takes_value(true)))
         .get_matches();
 
-    if let Some(_matches) = matches.subcommand_matches("backup") {
+    if let Some(matches) = matches.subcommand_matches("backup") {
         let file = matches.value_of("FILE").unwrap();
         cmd::backup::run(file);
-    } else if let Some(_matches) = matches.subcommand_matches("serve") {
-        cmd::serve::run();
-    } else if let Some(_matches) = matches.subcommand_matches("web") {
-        cmd::web::run();
+    } else if let Some(matches) = matches.subcommand_matches("serve") {
+        let config = matches.value_of("config").unwrap_or("valentine.toml");
+        cmd::serve::run(config);
+    } else if let Some(matches) = matches.subcommand_matches("web") {
+        let config = matches.value_of("config").unwrap_or("valentine.toml");
+        cmd::web::run(config);
     }
 }
-
-/*fn main() {
-    dotenv().ok();
-    env_logger::init().unwrap();
-    info!("Starting up");
-
-    /*let repo = git2::Repository::open(".").expect("failed to open repo");
-    let head = repo.head().expect("failed to get head");
-    let oid = head.target().expect("failed to get oid");
-    let commit = repo.find_commit(oid).expect("failed to get commit");
-    let tree = commit.tree().expect("failed to get tree");
-    for entry in tree.iter() {
-        println!("{}", entry.name().unwrap());
-    }*/
-
-    // Read database url from `.env`
-    let db_url = env::var("DATABASE_URL").expect("$DATABASE_URL must be set");
-    info!("db url: {}", db_url);
-
-    // Create db connection pool
-    let r2d2_config = r2d2::Config::default();
-    let manager = PostgresConnectionManager::new(db_url, TlsMode::None).unwrap();
-    let pool = r2d2::Pool::new(r2d2_config, manager).expect("Failed to create pool");
-
-    // Create the tables if they do not already exist
-    info!("Creating tables");
-    db::create::tables(&pool).expect("failed to create tables");
-
-    // Create repository folder
-    let path = path::Path::new("valentine-repos");
-    if !path.exists() {
-        fs::create_dir(path).unwrap();
-    } else if !path.is_dir() {
-        panic!("unable to create repository folder, file already exists!");
-    }
-
-    let ctx = Context {
-        db_pool: pool,
-        logins: Arc::new(Mutex::new(HashSet::new())),
-        name: String::from("Valentine"),
-    };
-
-    let mut router = Router::new();
-    router.set_not_found_handler(Arc::new(not_found));
-    router.set_internal_error_handler(Arc::new(internal_error));
-    router.get("/", Arc::new(home));
-    router.get("/{user}", Arc::new(user));
-    router.get("/{user}/{repo}", Arc::new(repo));
-
-    // User
-    router.get("/signup", Arc::new(user::signup));
-    router.post("/signup", Arc::new(user::signup_post));
-    router.get("/login", Arc::new(user::login));
-    router.post("/login", Arc::new(user::login_post));
-    router.get("/logout", Arc::new(user::logout));
-    router.get("/repo/new", Arc::new(user::new_repo));
-    router.post("/repo/new", Arc::new(user::new_repo_post));
-    router.get("/{user}/{repo}/delete", Arc::new(user::delete_repo));
-
-    let addr = "127.0.0.1:3000".parse().unwrap();
-    info!("running server at {}", addr);
-    Http::new(router, ctx).listen_and_serve(addr);
-}*/
