@@ -5,30 +5,15 @@ use toml;
 use std::{env, fs, process};
 use std::io::{Read, Write};
 
-pub fn run(config: &str) {
-    let mut buf = String::new();
-    let mut file = fs::File::open(config).unwrap();
-    file.read_to_string(&mut buf).unwrap();
-    let config: Config = toml::from_str(&buf).unwrap();
-
-    let mut log = fs::OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create(true)
-        .open("/home/git/valentine/val.log")
-        .expect("failed to open log file");
-
+pub fn run(config: Config) {
     let cmd = if let Ok(cmd) = env::var("SSH_ORIGINAL_COMMAND") {
         cmd
     } else {
         println!("Hi there, you've successfully authenticated, but Valentine does not provide shell access.");
         println!("If this is unexpected, please log in with password and setup Valentine under another user.");
-        writeln!(log, "Hi there, you've successfully authenticated, but Valentine does not provide shell access.");
-        writeln!(log, "If this is unexpected, please log in with password and setup Valentine under another user.");
         return;
     };
 
-    writeln!(log, "{}", cmd);
     let (verb, args) = parse_cmd(&cmd);
 
     let repo_path = args.trim_matches('\'');
@@ -47,19 +32,14 @@ pub fn run(config: &str) {
         _ => fail("Unknown git command", None),
     };
 
-    writeln!(log, "requested mode: {:?}", requested_mode);
-
     if requested_mode == AccessMode::Write {
     } else {
     }
 
-    let mut current_dir = env::current_dir().unwrap();
-    current_dir.push(&config.repo_dir);
-
     eprintln!("{} {}", verb, repo_path);
     let command = process::Command::new(verb)
         .arg(repo_path)
-        .current_dir(current_dir)
+        .current_dir(config.repo_dir)
         .status();
     if let Ok(status) = command {
         if !status.success() {
@@ -84,6 +64,7 @@ fn parse_cmd(cmd: &str) -> (String, String) {
 fn fail(user_msg: &str, log_msg: Option<&str>) -> ! {
     eprintln!("Valentine: {}", user_msg);
     if let Some(log_msg) = log_msg {
+        info!("{}", log_msg);
     }
 
     process::exit(1);

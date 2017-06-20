@@ -2,7 +2,6 @@ use {Config, Context, db};
 use routes::*;
 
 use clap::{App, Arg, SubCommand};
-use dotenv::dotenv;
 use hayaku::{Http, Router};
 use r2d2;
 use r2d2_postgres::{PostgresConnectionManager, TlsMode};
@@ -14,14 +13,8 @@ use std::io::Read;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
-pub fn run(config: &str) {
+pub fn run(config: Config) {
     info!("Starting up");
-
-    info!("Reading config");
-    let mut buf = String::new();
-    let mut file = fs::File::open(config).expect("Unable to open config file");
-    file.read_to_string(&mut buf).expect("Unable to read config file");
-    let config: Config = toml::from_str(&buf).expect("Invalid config file");
 
     /*let repo = git2::Repository::open(".").expect("failed to open repo");
     let head = repo.head().expect("failed to get head");
@@ -32,13 +25,9 @@ pub fn run(config: &str) {
         println!("{}", entry.name().unwrap());
     }*/
 
-    // Read database url from `.env`
-    let db_url = env::var("DATABASE_URL").expect("$DATABASE_URL must be set");
-    info!("db url: {}", db_url);
-
     // Create db connection pool
     let r2d2_config = r2d2::Config::default();
-    let manager = PostgresConnectionManager::new(db_url, TlsMode::None).unwrap();
+    let manager = PostgresConnectionManager::new(config.db_url, TlsMode::None).unwrap();
     let pool = r2d2::Pool::new(r2d2_config, manager).expect("Failed to create pool");
 
     // Create the tables if they do not already exist
