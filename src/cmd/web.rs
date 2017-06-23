@@ -47,7 +47,7 @@ pub fn run(config: Config) {
     let ctx = Context {
         db_pool: pool,
         logins: Arc::new(Mutex::new(HashSet::new())),
-        name: String::from("Valentine"),
+        name: config.name.unwrap_or(String::from("Valentine")),
         repo_dir: config.repo_dir,
     };
 
@@ -57,6 +57,9 @@ pub fn run(config: Config) {
     router.get("/", Arc::new(home));
     router.get("/{user}", Arc::new(user));
     router.get("/{user}/{repo}", Arc::new(repo));
+    // TODO: use regex to assert that `repo` ends with .git
+    router.get("/{user}/{repo}/info/refs", Arc::new(pull_handshake));
+    router.post("/{user}/{repo}/git-upload-pack", Arc::new(pull));
 
     // User
     router.get("/signup", Arc::new(user::signup));
@@ -64,11 +67,13 @@ pub fn run(config: Config) {
     router.get("/login", Arc::new(user::login));
     router.post("/login", Arc::new(user::login_post));
     router.get("/logout", Arc::new(user::logout));
+    //router.get("/settings", Arc::new(user::settings));
     router.get("/repo/new", Arc::new(user::new_repo));
     router.post("/repo/new", Arc::new(user::new_repo_post));
+    //router.get("/{user}/{repo}/settings", Arc::new(user::repo_settings));
     router.get("/{user}/{repo}/delete", Arc::new(user::delete_repo));
 
-    let addr = "127.0.0.1:3000".parse().unwrap();
+    let addr = config.addr.unwrap_or("127.0.0.1:3000".parse().unwrap());
     info!("running server at {}", addr);
     Http::new(router, ctx).listen_and_serve(addr);
 }

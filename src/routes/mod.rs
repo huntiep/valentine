@@ -1,11 +1,10 @@
-pub mod types;
 pub mod user;
 mod util;
 
-use {Context, Error, db};
+use {Context, Error, db, git};
 use templates::*;
 
-use hayaku::{self, Request, Response, ResDone, ResponseDone, Status};
+use hayaku::{self, headers, Request, Response, ResDone, ResponseDone, Status};
 
 // GET /
 pub fn home(req: &mut Request, res: Response, ctx: &Context)
@@ -50,6 +49,69 @@ pub fn repo(req: &mut Request, res: Response, ctx: &Context)
     }
 }
 
+// GET /{user}/{repo}/info/refs
+pub fn pull_handshake(req: &mut Request, mut res: Response, ctx: &Context)
+    -> ResponseDone<Error>
+{
+    let params = hayaku::get_path_params(req);
+    let username = &params["user"];
+    let repo = &params["repo"];
+
+    let pool = &ctx.db_pool;
+    // Make sure that repo exists
+    let repo_name = repo.trim_right_matches(".git");
+    if !try_res!(res, db::read::repo_exists(pool, username, repo_name)) {
+        return not_found(req, res, ctx);
+    } else if try_res!(res, db::read::repo_is_private(pool, username, repo_name)) {
+        return not_found(req, res, ctx);
+    }
+
+    let mode = if let Some(verb) = req.form_value("service") {
+        if let Some(mode) = git::AccessMode::new(&verb) {
+            mode
+        } else {
+            res.status(Status::Forbidden);
+            return Ok(res.body("Unknown git command"));
+        }
+    } else {
+        res.status(Status::Forbidden);
+        let body = format!("Please upgrade your git client. {} does not support git over dumb-http.", ctx.name);
+        return Ok(res.body(body));
+    };
+
+    if mode == git::AccessMode::Write {
+        res.status(Status::Forbidden);
+        let body = format!("{} does not support git-receive-pack over HTTP.", ctx.name);
+        return Ok(res.body(body));
+    }
+
+    let packet = "# service=git-upload-pack\n";
+    let length = packet.len() + 4;
+    let prefix = format!("{:04x}{}0000", length, packet);
+
+    let mut pack = try_res!(res, git::info(ctx, username, repo));
+    res.add_header(headers::ContentType("application/x-git-upload-pack-advertisement"));
+
+    // Build body
+    let mut body = Vec::new();
+    body.append(&mut prefix.into_bytes());
+    body.append(&mut pack);
+    Ok(res.body(body))
+}
+
+// POST /{user}/{repo}/git-upload-pack
+pub fn pull(req: &mut Request, mut res: Response, ctx: &Context)
+    -> ResponseDone<Error>
+{
+    let params = hayaku::get_path_params(req);
+    let username = &params["user"];
+    let repo = &params["repo"];
+
+    let pack = try_res!(res, git::pull(ctx, username, repo, req.body()));
+    res.add_header(headers::ContentType("application/x-git-upload-pack-result"));
+    Ok(res.body(pack))
+}
+
 pub fn not_found(_req: &mut Request, mut res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
@@ -71,5 +133,4 @@ pub fn internal_error(_req: &mut Request, mut res: Response, ctx: &Context, err:
             return res.fmt_body(tmpl);
         }
     }
-    //res.body(include_str!("../../templates/template_error.html"))
 }

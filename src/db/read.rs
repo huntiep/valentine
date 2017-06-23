@@ -1,6 +1,6 @@
 use Result;
-use routes::types::*;
 use templates::*;
+use types::*;
 use super::Pool;
 
 pub fn check_login(pool: &Pool, login: &Login) -> Result<bool> {
@@ -11,10 +11,24 @@ pub fn check_login(pool: &Pool, login: &Login) -> Result<bool> {
         Ok(false)
     } else {
         let row = rows.get(0);
-        let password_hash: String = row.get(1);
+        let password_hash: String = row.get(0);
         let valid = ::bcrypt::verify(&login.password, &password_hash)?;
         Ok(valid)
     }
+}
+
+pub fn user_uuid(pool: &Pool, username: &str) -> Result<Option<Uuid>> {
+    let conn = pool.get()?;
+
+    // Get user uuid
+    let rows = conn.query(include_str!("../sql/read/user_uuid.sql"),
+                          &[&username])?;
+    if rows.is_empty() {
+        return Ok(None);
+    }
+    let row = rows.get(0);
+    let owner: Uuid = row.get(0);
+    Ok(Some(owner))
 }
 
 pub fn user_exists(pool: &Pool, username: &str) -> Result<bool> {
@@ -25,27 +39,53 @@ pub fn user_exists(pool: &Pool, username: &str) -> Result<bool> {
 }
 
 pub fn repo_exists(pool: &Pool, username: &str, reponame: &str) -> Result<bool> {
+    let owner = if let Some(owner) = user_uuid(pool, username)? {
+        owner
+    } else {
+        return Ok(false);
+    };
+
     let conn = pool.get()?;
     let rows = conn.query(include_str!("../sql/read/repo_exists.sql"),
-                          &[&username, &reponame])?;
+                          &[&owner, &reponame])?;
     Ok(!rows.is_empty())
 }
 
-pub fn user(pool: &Pool, username: &str) -> Result<Option<User>> {
-    if !user_exists(pool, username)? {
-        info!("user doesn't exist!");
-        return Ok(None);
+pub fn repo_is_private(pool: &Pool, username: &str, reponame: &str) -> Result<bool> {
+    let owner = if let Some(owner) = user_uuid(pool, username)? {
+        owner
+    } else {
+        return Ok(false);
+    };
+
+    let conn = pool.get()?;
+    let rows = conn.query(include_str!("../sql/read/repo_is_private.sql"),
+                          &[&owner, &reponame])?;
+    if rows.is_empty() {
+        Ok(false)
+    } else {
+        let row = rows.get(0);
+        Ok(row.get(0))
     }
+}
+
+pub fn user(pool: &Pool, username: &str) -> Result<Option<User>> {
+    let owner = if let Some(owner) = user_uuid(pool, username)? {
+        owner
+    } else {
+        return Ok(None);
+    };
 
     let conn = pool.get()?;
     let rows = conn.query(include_str!("../sql/read/user.sql"),
-                          &[&username])?;
+                          &[&owner])?;
 
     let mut repos = Vec::new();
     for row in rows.iter() {
         let repo = Repo {
-            name: row.get(0),
-            description: row.get(1),
+            name: row.get(1),
+            description: row.get(2),
+            private: row.get(4),
         };
         repos.push(repo);
     }

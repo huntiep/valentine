@@ -1,5 +1,5 @@
 use Context;
-use routes::types::*;
+use types::*;
 
 use std::fmt::Display;
 

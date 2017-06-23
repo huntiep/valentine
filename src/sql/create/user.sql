@@ -1,1 +1,1 @@
-INSERT INTO users VALUES ($1, $2, $3, 0);
+INSERT INTO users VALUES ($1, $2, $3, $4, 0);

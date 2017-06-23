@@ -62,7 +62,7 @@ impl Repo {
     pub fn new(req: &mut Request) -> Option<Self> {
         let name = try_opt!(req.form_value("name"));
         let description = try_opt!(req.form_value("description"));
-        let private = try_opt!(req.form_value("private"));
+        let private = req.form_value("private");
 
         if name.is_empty() {
             None
@@ -70,7 +70,7 @@ impl Repo {
             Some(Repo {
                 name: name,
                 description: description,
-                private: private == "on",
+                private: private == Some(String::from("on")),
             })
         }
     }

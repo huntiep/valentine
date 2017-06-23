@@ -30,11 +30,15 @@ git = "https://github.com/maghoff/bart"
 
 [dependencies.chrono]
 features = ["serde"]
-version = "0.3"
+version = "0.4"
 
 [dependencies.hayaku]
 git = "https://git.nokaa.moe/hayaku/hayaku"
 
 [dependencies.postgres]
-features = ["with-chrono"]
+features = ["with-chrono", "with-uuid"]
 version = "0.14"
+
+[dependencies.uuid]
+features = ["v4", "serde"]
+version = "0.5.0"

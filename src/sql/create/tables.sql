@@ -1,13 +1,25 @@
 CREATE TABLE IF NOT EXISTS users (
-    username VARCHAR PRIMARY KEY,
+    uuid UUID PRIMARY KEY,
+    username VARCHAR NOT NULL UNIQUE,
     email VARCHAR NOT NULL,
     password VARCHAR NOT NULL,
     num_repos BIGINT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS repos (
+    uuid UUID PRIMARY KEY,
     name VARCHAR NOT NULL,
     description VARCHAR NOT NULL,
-    owner VARCHAR NOT NULL,
-    PRIMARY KEY (name, owner)
+    owner UUID REFERENCES users (uuid) ON DELETE CASCADE,
+    private BOOLEAN NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS issues (
+    repo UUID REFERENCES repos (uuid) ON DELETE CASCADE,
+    id BIGINT NOT NULL,
+    parent BIGINT NOT NULL,
+    subject VARCHAR,
+    content TEXT NOT NULL,
+    created TIMESTAMP,
+    PRIMARY KEY (repo, id)
 );

@@ -1,6 +1,6 @@
-use {Context, Error, db, repo};
+use {Context, Error, db, git};
 use templates::*;
-use super::types::*;
+use types::*;
 use super::{not_found, util};
 
 use chrono::Duration;
@@ -36,7 +36,7 @@ pub fn signup_post(req: &mut Request, mut res: Response, ctx: &Context)
 
     let pool = &ctx.db_pool;
     try_res!(res, db::create::user(pool, &new_user));
-    try_res!(res, repo::create_user(ctx, &new_user.username));
+    try_res!(res, git::create_user(ctx, &new_user.username));
     util::login(new_user.username, &mut res.cookies(), ctx);
     Ok(res.redirect(Status::Found, "/", "Signup sucessfull"))
 }
@@ -177,16 +177,16 @@ pub fn new_repo_post(req: &mut Request, res: Response, ctx: &Context)
     let repo = if let Some(repo) = Repo::new(req) {
         repo
     } else {
-        return Ok(res.redirect(Status::Found, "/user/new", "Invalid input"));
+        return Ok(res.redirect(Status::Found, "/repo/new", "Invalid input"));
     };
 
     let pool = &ctx.db_pool;
     if try_res!(res, db::read::repo_exists(pool, username, &repo.name)) {
-        return Ok(res.redirect(Status::Found, "/user/new", "That repo already exists"));
+        return Ok(res.redirect(Status::Found, "/repo/new", "That repo already exists"));
     }
     try_res!(res, db::create::repo(pool, username, &repo));
 
-    try_res!(res, repo::init(ctx, &repo.name));
+    try_res!(res, git::init(ctx, username, repo.name.clone()));
 
     Ok(res.redirect(Status::Found, &format!("/{}/{}", username, repo.name), "Repo created"))
 }
@@ -218,6 +218,6 @@ pub fn delete_repo(req: &mut Request, res: Response, ctx: &Context)
 
     let pool = &ctx.db_pool;
     try_res!(res, db::delete::repo(pool, username, repo_name));
-    try_res!(res, repo::delete(ctx, username, repo_name));
+    try_res!(res, git::delete(ctx, username, repo_name));
     Ok(res.redirect(Status::Found, &format!("/{}", username), "Repo deleted"))
 }

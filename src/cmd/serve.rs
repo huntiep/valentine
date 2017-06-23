@@ -1,4 +1,5 @@
 use Config;
+use git::AccessMode;
 
 use toml;
 
@@ -25,11 +26,10 @@ pub fn run(config: Config) {
     let username = rr[0];
     let reponame = rr[1].trim_right_matches(".git");
 
-    let requested_mode = match verb.as_str() {
-        "git-upload-pack" => AccessMode::Read,
-        "git-upload-archive" => AccessMode::Read,
-        "git-receive-pack" => AccessMode::Write,
-        _ => fail("Unknown git command", None),
+    let requested_mode = if let Some(mode) = AccessMode::new(&verb) {
+        mode
+    } else {
+        fail("Unknown git command", None);
     };
 
     if requested_mode == AccessMode::Write {
@@ -68,10 +68,4 @@ fn fail(user_msg: &str, log_msg: Option<&str>) -> ! {
     }
 
     process::exit(1);
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-enum AccessMode {
-    Read,
-    Write,
 }

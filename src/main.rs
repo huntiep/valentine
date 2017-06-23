@@ -18,14 +18,14 @@ extern crate slog_stdlog;
 extern crate slog_term;
 extern crate time;
 extern crate toml;
+extern crate uuid;
 
 mod cmd;
 mod db;
-mod repo;
+mod git;
 mod routes;
 mod templates;
-
-use routes::*;
+mod types;
 
 use clap::{App, Arg, SubCommand};
 use slog::Drain;
@@ -33,6 +33,7 @@ use slog::Drain;
 use std::collections::HashSet;
 use std::fs;
 use std::io::Read;
+use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
@@ -49,7 +50,7 @@ quick_error! {
         Io(err: &'static str) {
             from(_e: ::std::io::Error) -> ("io error")
         }
-        PostGres(err: &'static str) {
+        Postgres(err: &'static str) {
             from(_e: ::postgres::error::Error) -> ("postgres error")
         }
         R2D2(err: &'static str) {
@@ -71,6 +72,8 @@ pub struct Config {
     pub repo_dir: PathBuf,
     pub db_url: String,
     pub log_path: Option<PathBuf>,
+    pub name: Option<String>,
+    pub addr: Option<SocketAddr>,
 }
 
 fn main() {
