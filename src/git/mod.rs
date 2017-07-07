@@ -1,4 +1,5 @@
 use {Context, Result};
+use types::*;
 
 use git2::Repository;
 
@@ -101,4 +102,20 @@ pub fn pull(ctx: &Context, username: &str, repo_name: &str, body: &[u8]) -> Resu
     }
 
     Ok(output.stdout)
+}
+
+pub fn add_ssh_key(ssh_key: &SshKey, key_id: i32) -> Result<()> {
+    let mut file = fs::OpenOptions::new()
+        .append(true)
+        .create(true)
+        // TODO: maybe use a better path
+        .open("~/.ssh/authorized_keys")?;
+
+    println!("opened file");
+    // TODO: don't hardcode paths
+    let key = format!("command=\"/home/git/valentine/valentine \
+-c '/home/git/valentine/valentine.toml' serve key-{}\",\
+no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty {}",
+                          key_id, ssh_key.content);
+    Ok(file.write_all(key.as_bytes())?)
 }

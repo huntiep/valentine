@@ -1,4 +1,4 @@
-use Result;
+use {Error, Result};
 use templates::*;
 use types::*;
 use super::Pool;
@@ -94,4 +94,36 @@ pub fn user(pool: &Pool, username: &str) -> Result<Option<User>> {
         username: username.to_string(),
         repos: repos,
     }))
+}
+
+pub fn settings(pool: &Pool, username: &str) -> Result<UserSettings> {
+    let conn = pool.get()?;
+    let rows = conn.query("SELECT uuid, username, email FROM users WHERE username = $1;",
+                          &[&username])?;
+    if rows.is_empty() {
+        return Err(Error::Postgres("postgres error"));
+    }
+    let row = rows.get(0);
+    let uuid: Uuid = row.get(0);
+    let name: String = row.get(1);
+    let email: String = row.get(2);
+
+    let rows = conn.query("SELECT name, fingerprint FROM public_key WHERE owner = $1",
+                          &[&uuid])?;
+
+    let mut keys = Vec::with_capacity(rows.len());
+    for row in rows.iter() {
+        let key = SshKey {
+            fingerprint: row.get(1),
+            content: String::new(),
+            name: row.get(0),
+        };
+        keys.push(key);
+    }
+
+    Ok(UserSettings {
+        username: name,
+        email: email,
+        keys: keys,
+    })
 }

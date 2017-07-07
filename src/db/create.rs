@@ -12,8 +12,23 @@ pub fn user(pool: &Pool, user: &NewUser) -> Result<()> {
     let conn = pool.get()?;
     let uuid = Uuid::new_v4();
     conn.execute(include_str!("../sql/create/user.sql"),
-                 &[&uuid, &user.username, &user.email, &user.password])?;
+                 &[&uuid, &user.username, &user.email, &user.password, &false])?;
     Ok(())
+}
+
+pub fn public_key(pool: &Pool, username: &str, key: &SshKey) -> Result<i32> {
+    let owner = if let Some(owner) = read::user_uuid(pool, username)? {
+        owner
+    } else {
+        return Err(Error::Postgres("postgres error"));
+    };
+
+    let conn = pool.get()?;
+    let rows = conn.query(include_str!("../sql/create/public_key.sql"),
+                          &[&owner, &key.name, &key.fingerprint, &key.content])?;
+    let row = rows.get(0);
+    let id = row.get(0);
+    Ok(id)
 }
 
 pub fn repo(pool: &Pool, username: &str, repo: &Repo) -> Result<()> {

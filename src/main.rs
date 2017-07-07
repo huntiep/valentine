@@ -1,4 +1,5 @@
 #[macro_use] extern crate bart_derive;
+extern crate base64;
 extern crate bcrypt;
 extern crate chrono;
 #[macro_use] extern crate clap;
@@ -12,6 +13,7 @@ extern crate r2d2_postgres;
 extern crate rand;
 #[macro_use] extern crate serde_derive;
 extern crate serde_json;
+extern crate sha2;
 #[macro_use(o, kv)] extern crate slog;
 extern crate slog_scope;
 extern crate slog_stdlog;
@@ -30,7 +32,7 @@ mod types;
 use clap::{App, Arg, SubCommand};
 use slog::Drain;
 
-use std::collections::HashSet;
+use std::collections::HashMap;
 use std::fs;
 use std::io::Read;
 use std::net::SocketAddr;
@@ -41,6 +43,9 @@ pub type Result<T> = ::std::result::Result<T, Error>;
 quick_error! {
     #[derive(Debug, Clone)]
     pub enum Error {
+        Base64(err: &'static str) {
+            from(_e: ::base64::DecodeError) -> ("base64 error")
+        }
         Bcrypt(err: &'static str) {
             from(_e: ::bcrypt::BcryptError) -> ("bcrypt error")
         }
@@ -59,10 +64,13 @@ quick_error! {
     }
 }
 
+pub type SessionKey = String;
+pub type UserName = String;
+
 #[derive(Clone)]
 pub struct Context {
     pub db_pool: db::Pool,
-    pub logins: Arc<Mutex<HashSet<String>>>,
+    pub logins: Arc<Mutex<HashMap<SessionKey, UserName>>>,
     pub name: String,
     pub repo_dir: PathBuf,
 }
@@ -74,6 +82,7 @@ pub struct Config {
     pub log_path: Option<PathBuf>,
     pub name: Option<String>,
     pub addr: Option<SocketAddr>,
+    pub allow_registration: Option<bool>,
 }
 
 fn main() {
@@ -125,8 +134,8 @@ fn main() {
     if let Some(matches) = matches.subcommand_matches("backup") {
         let file = matches.value_of("FILE").unwrap();
         cmd::backup::run(file);
-    } else if let Some(_matches) = matches.subcommand_matches("serve") {
-        cmd::serve::run(config);
+    } else if let Some(matches) = matches.subcommand_matches("serve") {
+        cmd::serve::run(config, matches);
     } else if let Some(_matches) = matches.subcommand_matches("web") {
         cmd::web::run(config);
     }

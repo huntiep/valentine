@@ -8,7 +8,7 @@ use r2d2_postgres::{PostgresConnectionManager, TlsMode};
 use toml;
 
 use std::{env, fs, path};
-use std::collections::HashSet;
+use std::collections::HashMap;
 use std::io::Read;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
@@ -46,7 +46,7 @@ pub fn run(config: Config) {
 
     let ctx = Context {
         db_pool: pool,
-        logins: Arc::new(Mutex::new(HashSet::new())),
+        logins: Arc::new(Mutex::new(HashMap::new())),
         name: config.name.unwrap_or(String::from("Valentine")),
         repo_dir: config.repo_dir,
     };
@@ -67,7 +67,8 @@ pub fn run(config: Config) {
     router.get("/login", Arc::new(user::login));
     router.post("/login", Arc::new(user::login_post));
     router.get("/logout", Arc::new(user::logout));
-    //router.get("/settings", Arc::new(user::settings));
+    router.get("/settings", Arc::new(user::settings));
+    router.post("/settings/add-ssh-key", Arc::new(user::add_ssh_key));
     router.get("/repo/new", Arc::new(user::new_repo));
     router.post("/repo/new", Arc::new(user::new_repo_post));
     //router.get("/{user}/{repo}/settings", Arc::new(user::repo_settings));

@@ -1,12 +1,13 @@
 use Config;
 use git::AccessMode;
 
+use clap::ArgMatches;
 use toml;
 
 use std::{env, fs, process};
 use std::io::{Read, Write};
 
-pub fn run(config: Config) {
+pub fn run(config: Config, matches: &ArgMatches) {
     let cmd = if let Ok(cmd) = env::var("SSH_ORIGINAL_COMMAND") {
         cmd
     } else {
@@ -32,7 +33,9 @@ pub fn run(config: Config) {
         fail("Unknown git command", None);
     };
 
-    if requested_mode == AccessMode::Write {
+    // TODO read repo from database
+    let private = false;
+    if requested_mode == AccessMode::Write || private {
     } else {
     }
 

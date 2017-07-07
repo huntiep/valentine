@@ -3,19 +3,21 @@ use templates::*;
 use types::*;
 use super::{not_found, util};
 
+use base64;
 use chrono::Duration;
 use hayaku::{self, Cookie, Request, Response, ResponseDone, Status};
+use sha2::{Digest, Sha256};
 use time;
 
 // GET /signup
 pub fn signup(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    if util::check_login(ctx, &req.get_cookies()) {
-        Ok(res.redirect(Status::Found, "/", "You already have an account"))
+    if let (true, _) = util::check_login(ctx, &req.get_cookies()) {
+        Ok(res.redirect(Status::BadRequest, "/", "You already have an account"))
     } else {
         let body = include_str!("../../templates/user/signup.html");
-        let tmpl = Template::new(ctx, Some("Signup"), body);
+        let tmpl = Template::new(ctx, Some("Signup"), None, body);
         Ok(res.fmt_body(tmpl))
     }
 }
@@ -24,13 +26,13 @@ pub fn signup(req: &mut Request, res: Response, ctx: &Context)
 pub fn signup_post(req: &mut Request, mut res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    if util::check_login(ctx, &req.get_cookies()) {
-        return Ok(res.redirect(Status::Found, "/", "You already have an account"));
+    if let (true, _) = util::check_login(ctx, &req.get_cookies()) {
+        return Ok(res.redirect(Status::BadRequest, "/", "You already have an account"));
     }
 
     let new_user = NewUser::new(req);
     if new_user.is_none() {
-        return Ok(res.redirect(Status::Found, "/signup", "Signup failed"));
+        return Ok(res.redirect(Status::BadRequest, "/signup", "Signup failed"));
     }
     let new_user = new_user.unwrap();
 
@@ -45,11 +47,11 @@ pub fn signup_post(req: &mut Request, mut res: Response, ctx: &Context)
 pub fn login(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    if util::check_login(ctx, &req.get_cookies()) {
-        Ok(res.redirect(Status::Found, "/", "You are already logged in"))
+    if let (true, _) = util::check_login(ctx, &req.get_cookies()) {
+        Ok(res.redirect(Status::BadRequest, "/", "You are already logged in"))
     } else {
         let body = include_str!("../../templates/user/login.html");
-        let tmpl = Template::new(ctx, Some("Login"), body);
+        let tmpl = Template::new(ctx, Some("Login"), None, body);
         Ok(res.fmt_body(tmpl))
     }
 }
@@ -58,20 +60,20 @@ pub fn login(req: &mut Request, res: Response, ctx: &Context)
 pub fn login_post(req: &mut Request, mut res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    if util::check_login(ctx, &req.get_cookies()) {
-        return Ok(res.redirect(Status::Found, "/", "You are already logged in"));
+    if let (true, _) = util::check_login(ctx, &req.get_cookies()) {
+        return Ok(res.redirect(Status::BadRequest, "/", "You are already logged in"));
     }
 
     let login = Login::new(req);
     if login.is_none() {
-        return Ok(res.redirect(Status::Found, "/login", "Login failed"));
+        return Ok(res.redirect(Status::BadRequest, "/login", "Login failed"));
     }
     let login = login.unwrap();
 
     let pool = &ctx.db_pool;
     let login_check = try_res!(res, db::read::check_login(pool, &login));
     if !login_check {
-        return Ok(res.redirect(Status::Found, "/login", "Login failed"));
+        return Ok(res.redirect(Status::BadRequest, "/login", "Login failed"));
     }
 
     util::login(login.username, &mut res.cookies(), ctx);
@@ -108,14 +110,14 @@ pub fn home(req: &mut Request, res: Response, ctx: &Context)
     let cookies = req.get_cookies();
     let username = util::retrieve_username(&cookies);
     if username.is_none() {
-        return Ok(res.redirect(Status::Found, "/login", "Error"));
+        return Ok(res.redirect(Status::Forbidden, "/login", "Error"));
     }
     let username = username.unwrap();
     info!("read cookie");
 
     let pool = &ctx.db_pool;
     if let Some(user) = try_res!(res, db::read::user(pool, &username)) {
-        let tmpl = Template::new(ctx, Some(&username), user);
+        let tmpl = Template::new(ctx, Some(&username), None, user);
         Ok(res.fmt_body(tmpl))
     } else {
         not_found(req, res, ctx)
@@ -130,7 +132,7 @@ pub fn user(req: &mut Request, res: Response, ctx: &Context)
 
     let pool = &ctx.db_pool;
     if let Some(user) = try_res!(res, db::read::user(pool, username)) {
-        let tmpl = Template::new(ctx, Some(username), user);
+        let tmpl = Template::new(ctx, Some(username), None, user);
         Ok(res.fmt_body(tmpl))
     } else {
         not_found(req, res, ctx)
@@ -143,17 +145,73 @@ pub fn view_repo(_req: &mut Request, res: Response, _ctx: &Context)
     Ok(res.body(""))
 }
 
+// GET /settings
+pub fn settings(req: &mut Request, res: Response, ctx: &Context)
+    -> ResponseDone<Error>
+{
+    let cookies = req.get_cookies();
+    let username = if let (true, Some(name)) = util::check_login(ctx, &cookies) {
+        name
+    } else {
+        return Ok(res.redirect(Status::Forbidden, "/login",
+                               "You must be logged in for this operation"));
+    };
+
+    let settings = try_res!(res, db::read::settings(&ctx.db_pool, username));
+    let tmpl = Template::new(ctx, Some("Settings"), None, settings);
+    Ok(res.fmt_body(tmpl))
+}
+
+// POST /settings/add-ssh-key
+pub fn add_ssh_key(req: &mut Request, res: Response, ctx: &Context)
+    -> ResponseDone<Error>
+{
+    let cookies = req.get_cookies();
+    let username = if let (true, Some(name)) = util::check_login(ctx, &cookies) {
+        name
+    } else {
+        return Ok(res.redirect(Status::Forbidden, "/login",
+                               "You must be logged in for this operation"));
+    };
+
+    let ssh_key = if let Some(key) = SshKey::new(req) {
+        key
+    } else {
+        return Ok(res.redirect(Status::Forbidden, "/settings", "Invalid data"));
+    };
+    // TODO validate key
+    /*if thrussh::parse_public_key_base64(ssh_key).is_err() {
+        // TODO
+        let settings = "";
+        let msg = "Invalid ssh key!";
+        let tmpl = Template::new(ctx, Some("Settings"), Some(msg), settings);
+        res.status(Status::BadRequest);
+        return Ok(res.fmt_body(tmpl));
+    }*/
+    let key_id = try_res!(res, db::create::public_key(&ctx.db_pool, username, &ssh_key));
+    try_res!(res, git::add_ssh_key(&ssh_key, key_id));
+
+    Ok(res.redirect(Status::Ok, "/settings", "SSH key added"))
+}
+
+// TODO
+pub fn delete_ssh_key(req: &mut Request, mut res: Response, ctx: &Context)
+    -> ResponseDone<Error>
+{
+    Ok(res.body(""))
+}
+
 // GET /repo/new
 pub fn new_repo(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    if !util::check_login(ctx, &req.get_cookies()) {
-        return Ok(res.redirect(Status::Found, "/login",
+    if let (false, _) = util::check_login(ctx, &req.get_cookies()) {
+        return Ok(res.redirect(Status::Forbidden, "/login",
                                "You must be logged in for this operation"));
     }
 
     let body = include_str!("../../templates/user/repo_new.html");
-    let tmpl = Template::new(ctx, Some("Create a New Repository"), body);
+    let tmpl = Template::new(ctx, Some("Create a New Repository"), None, body);
     Ok(res.fmt_body(tmpl))
 }
 
@@ -162,27 +220,22 @@ pub fn new_repo_post(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
     let cookies = req.get_cookies();
-    if !util::check_login(ctx, &cookies) {
-        return Ok(res.redirect(Status::Found, "/login",
-                               "You must be logged in for this operation"));
-    }
-
-    let username = if let Some(name) = util::retrieve_username(&cookies) {
+    let username = if let (true, Some(name)) = util::check_login(ctx, &cookies) {
         name
     } else {
-        return Ok(res.redirect(Status::Found, "/login",
+        return Ok(res.redirect(Status::Forbidden, "/login",
                                "You must be logged in for this operation"));
     };
 
     let repo = if let Some(repo) = Repo::new(req) {
         repo
     } else {
-        return Ok(res.redirect(Status::Found, "/repo/new", "Invalid input"));
+        return Ok(res.redirect(Status::BadRequest, "/repo/new", "Invalid input"));
     };
 
     let pool = &ctx.db_pool;
     if try_res!(res, db::read::repo_exists(pool, username, &repo.name)) {
-        return Ok(res.redirect(Status::Found, "/repo/new", "That repo already exists"));
+        return Ok(res.redirect(Status::BadRequest, "/repo/new", "That repo already exists"));
     }
     try_res!(res, db::create::repo(pool, username, &repo));
 
@@ -196,14 +249,10 @@ pub fn delete_repo(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
     let cookies = req.get_cookies();
-    if !util::check_login(ctx, &cookies) {
-        return Ok(res.redirect(Status::Found, "/login",
-                               "You must be logged in for this operation"));
-    }
-    let name = if let Some(name) = util::retrieve_username(&cookies) {
+    let name = if let (true, Some(name)) = util::check_login(ctx, &cookies) {
         name
     } else {
-        return Ok(res.redirect(Status::Found, "/login",
+        return Ok(res.redirect(Status::Forbidden, "/login",
                                "You must be logged in for this operation"));
     };
 
@@ -212,7 +261,7 @@ pub fn delete_repo(req: &mut Request, res: Response, ctx: &Context)
     let repo_name = &params["repo"];
 
     if name != username {
-        return Ok(res.redirect(Status::Found, &format!("/{}/{}", username, repo_name),
+        return Ok(res.redirect(Status::BadRequest, &format!("/{}/{}", username, repo_name),
                                "You must own a repo to delete it"));
     }
 

@@ -10,11 +10,11 @@ use hayaku::{self, headers, Request, Response, ResDone, ResponseDone, Status};
 pub fn home(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    if util::check_login(ctx, &req.get_cookies()) {
+    if let (true, _) = util::check_login(ctx, &req.get_cookies()) {
         user::home(req, res, ctx)
     } else {
         let body = include_str!("../../templates/home.html");
-        let tmpl = Template::new(ctx, None, body);
+        let tmpl = Template::new(ctx, None, None, body);
         Ok(res.fmt_body(tmpl))
     }
 }
@@ -23,7 +23,7 @@ pub fn home(req: &mut Request, res: Response, ctx: &Context)
 pub fn user(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    if util::check_login(ctx, &req.get_cookies()) {
+    if let (true, _) = util::check_login(ctx, &req.get_cookies()) {
         return user::user(req, res, ctx);
     }
     let params = hayaku::get_path_params(req);
@@ -31,7 +31,7 @@ pub fn user(req: &mut Request, res: Response, ctx: &Context)
 
     let pool = &ctx.db_pool;
     if let Some(user) = try_res!(res, db::read::user(pool, username)) {
-        let tmpl = Template::new(ctx, Some(username), user);
+        let tmpl = Template::new(ctx, Some(username), None, user);
         Ok(res.fmt_body(tmpl))
     } else {
         not_found(req, res, ctx)
@@ -42,7 +42,7 @@ pub fn user(req: &mut Request, res: Response, ctx: &Context)
 pub fn repo(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    if util::check_login(ctx, &req.get_cookies()) {
+    if let (true, _) = util::check_login(ctx, &req.get_cookies()) {
         user::view_repo(req, res, ctx)
     } else {
         Ok(res.body(""))
@@ -90,6 +90,10 @@ pub fn pull_handshake(req: &mut Request, mut res: Response, ctx: &Context)
     let prefix = format!("{:04x}{}0000", length, packet);
 
     let mut pack = try_res!(res, git::info(ctx, username, repo));
+    // TODO: set cache headers
+    //res.add_header(headers::Expires("Fri, 01 Jan 1980 00:00:00 GMT"));
+    //res.add_header(headers::Pragma("no-cache"));
+    //res.add_header(headers::CacheControl("no-cache, max-age=0, must-revalidate"));
     res.add_header(headers::ContentType("application/x-git-upload-pack-advertisement"));
 
     // Build body
@@ -108,6 +112,7 @@ pub fn pull(req: &mut Request, mut res: Response, ctx: &Context)
     let repo = &params["repo"];
 
     let pack = try_res!(res, git::pull(ctx, username, repo, req.body()));
+    // TODO: set cache headers
     res.add_header(headers::ContentType("application/x-git-upload-pack-result"));
     Ok(res.body(pack))
 }
@@ -117,7 +122,7 @@ pub fn not_found(_req: &mut Request, mut res: Response, ctx: &Context)
 {
     res.status(Status::NotFound);
     let body = include_str!("../../templates/404.html");
-    let tmpl = Template::new(ctx, Some("404"), body);
+    let tmpl = Template::new(ctx, Some("404"), None, body);
     Ok(res.fmt_body(tmpl))
 }
 
@@ -129,7 +134,7 @@ pub fn internal_error(_req: &mut Request, mut res: Response, ctx: &Context, err:
     match *err {
         _ => {
             let body = include_str!("../../templates/internal_error.html");
-            let tmpl = Template::new(ctx, Some("500"), body);
+            let tmpl = Template::new(ctx, Some("500"), None, body);
             return res.fmt_body(tmpl);
         }
     }

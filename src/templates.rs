@@ -20,22 +20,49 @@ impl<'a, 'b> TemplateHead<'a, 'b> {
 }
 
 #[derive(BartDisplay)]
+#[template = "templates/error.html"]
+pub struct TemplateError<'a> {
+    msg: &'a str,
+}
+
+impl<'a> TemplateError<'a> {
+    pub fn new(msg: &'a str) -> Self {
+        TemplateError {
+            msg: msg,
+        }
+    }
+}
+
+#[derive(BartDisplay)]
 #[template = "templates/foot.html"]
 pub struct TemplateFoot;
 
 #[derive(BartDisplay)]
-#[template_string = "{{{head}}}{{{body}}}{{{foot}}}"]
-pub struct Template<'a, 'b, T: Display> {
+#[template_string = "{{{head}}}{{#error}}{{{.}}}{{/error}}{{{body}}}{{{foot}}}"]
+pub struct Template<'a, 'b, 'c, T: Display> {
     head: TemplateHead<'a, 'b>,
+    error: Option<TemplateError<'c>>,
     body: T,
     foot: TemplateFoot,
 }
 
-impl<'a, 'b, T: Display> Template<'a, 'b, T> {
-    pub fn new(ctx: &'a Context, title: Option<&'b str>, body: T) -> Self {
+impl<'a, 'b, 'c, T: Display> Template<'a, 'b, 'c, T> {
+    pub fn new(ctx: &'a Context,
+               title: Option<&'b str>,
+               error: Option<&'c str>,
+               body: T)
+        -> Self
+    {
         let head = TemplateHead::new(ctx, title);
+        let error = if let Some(msg) = error {
+            Some(TemplateError::new(msg))
+        } else {
+            None
+        };
+
         Template {
             head: head,
+            error: error,
             body: body,
             foot: TemplateFoot,
         }
@@ -47,4 +74,12 @@ impl<'a, 'b, T: Display> Template<'a, 'b, T> {
 pub struct User {
     pub username: String,
     pub repos: Vec<Repo>,
+}
+
+#[derive(BartDisplay)]
+#[template = "templates/user/settings.html"]
+pub struct UserSettings {
+    pub username: String,
+    pub email: String,
+    pub keys: Vec<SshKey>,
 }

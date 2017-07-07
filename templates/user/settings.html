@@ -1,0 +1,18 @@
+<div>
+    <h3>SSH keys</h3>
+    <ul>
+        {{#keys}}
+        <li>
+            <b>{{.name}}</b><br>
+            Fingerprint: {{.fingerprint}}
+        </li>
+        {{/keys}}
+    </ul>
+    <form method="POST" action="/settings/add-ssh-key">
+        <label for="name">Name</label><br>
+        <input name="name" type="text" /><br>
+        <label for="ssh_key">SSH Key</label><br>
+        <textarea name="ssh_key"></textarea><br>
+        <button type="submit">Add SSH Key</button>
+    </form>
+</div>
