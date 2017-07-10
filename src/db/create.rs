@@ -1,13 +1,23 @@
 use {Error, Result};
 use types::*;
-use super::{Pool, read};
+use super::{Pool, public_key, repos, users};
 
-pub fn tables(pool: &Pool) -> Result<()> {
+use diesel;
+use diesel::prelude::*;
+
+/*pub fn tables(pool: &Pool) -> Result<()> {
     let conn = pool.get()?;
     conn.batch_execute(include_str!("../sql/create/tables.sql"))?;
     Ok(())
-}
+}*/
 
+pub fn user(pool: &Pool, user: &NewUser) -> Result<()> {
+    let conn = pool.get()?;
+    diesel::insert(user).into(users::table)
+        .execute(&*conn)?;
+    Ok(())
+}
+/*
 pub fn user(pool: &Pool, user: &NewUser) -> Result<()> {
     let conn = pool.get()?;
     let uuid = Uuid::new_v4();
@@ -47,4 +57,4 @@ pub fn repo(pool: &Pool, username: &str, repo: &Repo) -> Result<()> {
                  &[&uuid, &repo.name, &repo.description, &owner, &repo.private])?;
     trans.commit()?;
     Ok(())
-}
+}*/

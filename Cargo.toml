@@ -1,5 +1,5 @@
 [package]
-authors = ["nokaa <nokaa@cock.li>"]
+authors = ["Hunter Praska <hunter@wiggin-labs.com>"]
 name = "valentine"
 version = "0.1.0"
 
@@ -11,6 +11,7 @@ git2 = "0.6.4"
 log = "0.3.7"
 quick-error = "1.2.0"
 r2d2 = "0.7.2"
+r2d2-diesel = "0.14.0"
 r2d2_postgres = "0.12.0"
 rand = "0.3.15"
 serde = "1.0"
@@ -34,8 +35,16 @@ git = "https://github.com/maghoff/bart"
 features = ["serde"]
 version = "0.4"
 
+[dependencies.diesel]
+features = ["postgres", "chrono", "uuid"]
+version = "0.14.0"
+
+[dependencies.diesel_codegen]
+features = ["postgres"]
+version = "0.14.0"
+
 [dependencies.hayaku]
-git = "https://git.nokaa.moe/hayaku/hayaku"
+git = "https://git.hunterpraska.com/hayaku/hayaku"
 
 [dependencies.postgres]
 features = ["with-chrono", "with-uuid"]

@@ -1,3 +1,5 @@
+use db::{repos, users};
+
 use base64;
 use bcrypt::{self, DEFAULT_COST};
 use hayaku::Request;
@@ -5,10 +7,15 @@ use sha2::{Digest, Sha256};
 
 pub use uuid::Uuid;
 
+#[derive(Insertable)]
+#[table_name = "users"]
 pub struct NewUser {
+    pub uuid: Uuid,
     pub username: String,
     pub email: String,
     pub password: String,
+    pub num_repos: i64,
+    //pub is_admin: bool,
 }
 
 impl NewUser {
@@ -26,9 +33,11 @@ impl NewUser {
 
         let password_hash = try_opt!(bcrypt::hash(&password, DEFAULT_COST).ok());
         Some(NewUser {
+            uuid: Uuid::new_v4(),
             username: username,
             email: email,
             password: password_hash,
+            num_repos: 0,
         })
     }
 }

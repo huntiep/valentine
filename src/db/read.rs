@@ -1,43 +1,36 @@
 use {Error, Result};
 use templates::*;
 use types::*;
-use super::Pool;
+use super::{Pool, repos, users};
+
+use diesel;
+use diesel::prelude::*;
 
 pub fn check_login(pool: &Pool, login: &Login) -> Result<bool> {
     let conn = pool.get()?;
-    let rows = conn.query(include_str!("../sql/read/check_login.sql"),
-                          &[&login.username])?;
-    if rows.is_empty() {
-        Ok(false)
-    } else {
-        let row = rows.get(0);
-        let password_hash: String = row.get(0);
-        let valid = ::bcrypt::verify(&login.password, &password_hash)?;
-        Ok(valid)
-    }
+    let password: String = users::table.filter(users::username.eq(&login.username))
+        .select(users::password)
+        .first(&*conn)?;
+    Ok(::bcrypt::verify(&login.password, &password)?)
 }
 
 pub fn user_uuid(pool: &Pool, username: &str) -> Result<Option<Uuid>> {
     let conn = pool.get()?;
-
-    // Get user uuid
-    let rows = conn.query(include_str!("../sql/read/user_uuid.sql"),
-                          &[&username])?;
-    if rows.is_empty() {
-        return Ok(None);
+    // TODO: look into find for unique items
+    match users::table.filter(users::username.eq(username))
+        .select(users::uuid)
+        .first(&*conn)
+    {
+        Ok(uuid) => Ok(Some(uuid)),
+        Err(diesel::result::Error::NotFound) => Ok(None),
+        Err(e) => Err(Error::from(e)),
     }
-    let row = rows.get(0);
-    let owner: Uuid = row.get(0);
-    Ok(Some(owner))
 }
 
 pub fn user_exists(pool: &Pool, username: &str) -> Result<bool> {
-    let conn = pool.get()?;
-    let rows = conn.query(include_str!("../sql/read/user_exists.sql"),
-                          &[&username])?;
-    Ok(!rows.is_empty())
+    Ok(user_uuid(pool, username)?.is_some())
 }
-
+/*
 pub fn repo_exists(pool: &Pool, username: &str, reponame: &str) -> Result<bool> {
     let owner = if let Some(owner) = user_uuid(pool, username)? {
         owner
@@ -126,4 +119,4 @@ pub fn settings(pool: &Pool, username: &str) -> Result<UserSettings> {
         email: email,
         keys: keys,
     })
-}
+}*/
