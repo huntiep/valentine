@@ -8,8 +8,8 @@ pub mod read;
 pub type Pool = r2d2::Pool<ConnectionManager<diesel::pg::PgConnection>>;
 
 table! {
-    users (uuid) {
-        uuid -> Uuid,
+    users {
+        id -> Integer,
         username -> VarChar,
         email -> VarChar,
         password -> VarChar,
@@ -19,10 +19,9 @@ table! {
 }
 
 table! {
-    public_key (id) {
+    public_keys {
         id -> Integer,
-        // TODO
-        owner -> Uuid,
+        owner -> Integer,
         name -> VarChar,
         fingerprint -> VarChar,
         content -> Text,
@@ -30,20 +29,18 @@ table! {
 }
 
 table! {
-    repos (uuid) {
-        uuid -> Uuid,
+    repos {
+        id -> BigInt,
         name -> VarChar,
         description -> VarChar,
-        // TODO
-        owner -> Uuid,
+        owner -> Integer,
         private -> Bool,
     }
 }
 
 table! {
     issues (repo, id) {
-        // TODO
-        repo -> Uuid,
+        repo -> BigInt,
         id -> BigInt,
         parent -> BigInt,
         subject -> Nullable<VarChar>,

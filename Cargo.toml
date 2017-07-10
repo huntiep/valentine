@@ -12,7 +12,6 @@ log = "0.3.7"
 quick-error = "1.2.0"
 r2d2 = "0.7.2"
 r2d2-diesel = "0.14.0"
-r2d2_postgres = "0.12.0"
 rand = "0.3.15"
 serde = "1.0"
 serde_derive = "1.0"
@@ -36,7 +35,7 @@ features = ["serde"]
 version = "0.4"
 
 [dependencies.diesel]
-features = ["postgres", "chrono", "uuid"]
+features = ["postgres", "chrono"]
 version = "0.14.0"
 
 [dependencies.diesel_codegen]
@@ -45,11 +44,3 @@ version = "0.14.0"
 
 [dependencies.hayaku]
 git = "https://git.hunterpraska.com/hayaku/hayaku"
-
-[dependencies.postgres]
-features = ["with-chrono", "with-uuid"]
-version = "0.14"
-
-[dependencies.uuid]
-features = ["v4", "serde"]
-version = "0.5.0"

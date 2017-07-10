@@ -1,6 +1,6 @@
 use {Error, Result};
 use types::*;
-use super::{Pool, public_key, repos, users};
+use super::{Pool, public_keys, repos, users};
 
 use diesel;
 use diesel::prelude::*;

@@ -5,17 +5,15 @@ use bcrypt::{self, DEFAULT_COST};
 use hayaku::Request;
 use sha2::{Digest, Sha256};
 
-pub use uuid::Uuid;
+//pub use uuid::Uuid;
 
 #[derive(Insertable)]
 #[table_name = "users"]
 pub struct NewUser {
-    pub uuid: Uuid,
     pub username: String,
     pub email: String,
     pub password: String,
     pub num_repos: i64,
-    //pub is_admin: bool,
 }
 
 impl NewUser {
@@ -33,7 +31,6 @@ impl NewUser {
 
         let password_hash = try_opt!(bcrypt::hash(&password, DEFAULT_COST).ok());
         Some(NewUser {
-            uuid: Uuid::new_v4(),
             username: username,
             email: email,
             password: password_hash,
@@ -63,14 +60,17 @@ impl Login {
     }
 }
 
+#[derive(Insertable, Queryable)]
+#[table_name = "repos"]
 pub struct Repo {
     pub name: String,
     pub description: String,
+    pub owner: i32,
     pub private: bool,
 }
 
 impl Repo {
-    pub fn new(req: &mut Request) -> Option<Self> {
+    pub fn new(req: &mut Request, owner: i32) -> Option<Self> {
         let name = try_opt!(req.form_value("name"));
         let description = try_opt!(req.form_value("description"));
         let private = req.form_value("private");
@@ -81,25 +81,32 @@ impl Repo {
             Some(Repo {
                 name: name,
                 description: description,
+                owner: owner,
                 private: private == Some(String::from("on")),
             })
         }
     }
 }
 
+#[derive(Queryable)]
 pub struct SshKey {
+    pub fingerprint: String,
+    pub name: String,
+}
+
+pub struct NewSshKey {
     pub fingerprint: String,
     pub content: String,
     pub name: String,
 }
 
-impl SshKey {
+impl NewSshKey {
     pub fn new(req: &mut Request) -> Option<Self> {
         let name = try_opt!(req.form_value("name"));
         let ssh_key = try_opt!(req.form_value("ssh_key"));
-        let fingerprint = try_opt!(SshKey::fingerprint(&ssh_key));
+        let fingerprint = try_opt!(NewSshKey::fingerprint(&ssh_key));
 
-        Some(SshKey {
+        Some(NewSshKey {
             fingerprint: fingerprint,
             content: ssh_key,
             name: name,
