@@ -1,15 +1,11 @@
 all: build
 
-build: css js
+build: css
     @cargo build
 
 css:
     @mkdir -p resources
     @sassc -t compressed sass/style.sass resources/style.min.css
-
-js:
-    @mkdir -p resources
-    @cp javascript/* resources
 
 run: build
     @RUST_LOG=info ./target/debug/valentine web
@@ -20,7 +16,7 @@ clean:
 drop-tables:
     @./drop_tables.sh
 
-build-release: css js
+build-release: css
     @cargo build --release
 
 run-release: build-release
