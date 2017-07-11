@@ -1,15 +1,9 @@
-use {Error, Result};
+use Result;
 use types::*;
 use super::{Pool, public_keys, repos, users};
 
 use diesel;
 use diesel::prelude::*;
-
-/*pub fn tables(pool: &Pool) -> Result<()> {
-    let conn = pool.get()?;
-    conn.batch_execute(include_str!("../sql/create/tables.sql"))?;
-    Ok(())
-}*/
 
 pub fn user(pool: &Pool, user: &NewUser) -> Result<()> {
     let conn = pool.get()?;
@@ -18,11 +12,10 @@ pub fn user(pool: &Pool, user: &NewUser) -> Result<()> {
     Ok(())
 }
 
-pub fn public_key(pool: &Pool, key: &NewSshKey) -> Result<i32> {
+pub fn public_key(pool: &Pool, key: &NewSshKey) -> Result<SshKey> {
     let conn = pool.get()?;
-    let key = diesel::insert(key).into(public_keys::table)
-        .get_result::<SshKey>(&*conn)?;
-    Ok(key.id)
+    Ok(diesel::insert(key).into(public_keys::table)
+        .get_result::<SshKey>(&*conn)?)
 }
 
 pub fn repo(pool: &Pool, repo: &Repo) -> Result<()> {

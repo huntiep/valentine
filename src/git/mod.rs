@@ -104,7 +104,7 @@ pub fn pull(ctx: &Context, username: &str, repo_name: &str, body: &[u8]) -> Resu
     Ok(output.stdout)
 }
 
-pub fn add_ssh_key(ssh_key: &SshKey, key_id: i32) -> Result<()> {
+pub fn add_ssh_key(ssh_key: &SshKey) -> Result<()> {
     let mut file = fs::OpenOptions::new()
         .append(true)
         .create(true)
@@ -116,6 +116,6 @@ pub fn add_ssh_key(ssh_key: &SshKey, key_id: i32) -> Result<()> {
     let key = format!("command=\"/home/git/valentine/valentine \
 -c '/home/git/valentine/valentine.toml' serve key-{}\",\
 no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty {}",
-                          key_id, ssh_key.content);
+                          ssh_key.id, ssh_key.content);
     Ok(file.write_all(key.as_bytes())?)
 }

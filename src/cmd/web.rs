@@ -1,16 +1,13 @@
 use {Config, Context, db};
 use routes::*;
 
-use clap::{App, Arg, SubCommand};
+use diesel;
 use hayaku::{Http, Router};
 use r2d2;
-use r2d2_postgres::{PostgresConnectionManager, TlsMode};
-use toml;
+use r2d2_diesel::ConnectionManager;
 
-use std::{env, fs, path};
+use std::fs;
 use std::collections::HashMap;
-use std::io::Read;
-use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
 pub fn run(config: Config) {
@@ -27,12 +24,16 @@ pub fn run(config: Config) {
 
     // Create db connection pool
     let r2d2_config = r2d2::Config::default();
-    let manager = PostgresConnectionManager::new(config.db_url, TlsMode::None).unwrap();
+    let manager = ConnectionManager::<diesel::pg::PgConnection>::new(config.db_url);
     let pool = r2d2::Pool::new(r2d2_config, manager).expect("Failed to create pool");
 
-    // Create the tables if they do not already exist
-    info!("Creating tables");
-    db::create::tables(&pool).expect("failed to create tables");
+    {
+        // Run migrations
+        embed_migrations!("migrations");
+        let conn = pool.get().unwrap();
+        info!("Running migrations");
+        embedded_migrations::run(&*conn).expect("failed to run migrations");
+    }
 
     // Create repository folder
     {

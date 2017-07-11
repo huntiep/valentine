@@ -3,10 +3,8 @@ use templates::*;
 use types::*;
 use super::{not_found, util};
 
-use base64;
 use chrono::Duration;
 use hayaku::{self, Cookie, Request, Response, ResponseDone, Status};
-use sha2::{Digest, Sha256};
 use time;
 
 // GET /signup
@@ -174,7 +172,9 @@ pub fn add_ssh_key(req: &mut Request, res: Response, ctx: &Context)
                                "You must be logged in for this operation"));
     };
 
-    let ssh_key = if let Some(key) = SshKey::new(req) {
+    let pool = &ctx.db_pool;
+    let user_id = try_res!(res, db::read::user_id(pool, username)).unwrap();
+    let ssh_key = if let Some(key) = NewSshKey::new(req, user_id) {
         key
     } else {
         return Ok(res.redirect(Status::Forbidden, "/settings", "Invalid data"));
@@ -188,8 +188,8 @@ pub fn add_ssh_key(req: &mut Request, res: Response, ctx: &Context)
         res.status(Status::BadRequest);
         return Ok(res.fmt_body(tmpl));
     }*/
-    let key_id = try_res!(res, db::create::public_key(&ctx.db_pool, username, &ssh_key));
-    try_res!(res, git::add_ssh_key(&ssh_key, key_id));
+    let key = try_res!(res, db::create::public_key(pool, &ssh_key));
+    try_res!(res, git::add_ssh_key(&key));
 
     Ok(res.redirect(Status::Ok, "/settings", "SSH key added"))
 }
@@ -227,17 +227,18 @@ pub fn new_repo_post(req: &mut Request, res: Response, ctx: &Context)
                                "You must be logged in for this operation"));
     };
 
-    let repo = if let Some(repo) = Repo::new(req) {
+    let pool = &ctx.db_pool;
+    let user_id = try_res!(res, db::read::user_id(pool, username)).unwrap();
+    let repo = if let Some(repo) = Repo::new(req, user_id) {
         repo
     } else {
         return Ok(res.redirect(Status::BadRequest, "/repo/new", "Invalid input"));
     };
 
-    let pool = &ctx.db_pool;
     if try_res!(res, db::read::repo_exists(pool, username, &repo.name)) {
         return Ok(res.redirect(Status::BadRequest, "/repo/new", "That repo already exists"));
     }
-    try_res!(res, db::create::repo(pool, username, &repo));
+    try_res!(res, db::create::repo(pool, &repo));
 
     try_res!(res, git::init(ctx, username, repo.name.clone()));
 

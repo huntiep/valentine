@@ -8,11 +8,9 @@ extern crate chrono;
 extern crate git2;
 #[macro_use] extern crate hayaku;
 #[macro_use] extern crate log;
-//extern crate postgres;
 #[macro_use] extern crate quick_error;
 extern crate r2d2;
 extern crate r2d2_diesel;
-//extern crate r2d2_postgres;
 extern crate rand;
 #[macro_use] extern crate serde_derive;
 extern crate serde_json;
@@ -24,10 +22,10 @@ extern crate slog_term;
 extern crate time;
 extern crate toml;
 
-//mod cmd;
+mod cmd;
 mod db;
-//mod git;
-//mod routes;
+mod git;
+mod routes;
 mod templates;
 mod types;
 
@@ -135,10 +133,10 @@ fn main() {
 
     if let Some(matches) = matches.subcommand_matches("backup") {
         let file = matches.value_of("FILE").unwrap();
-        //cmd::backup::run(file);
+        cmd::backup::run(file);
     } else if let Some(matches) = matches.subcommand_matches("serve") {
-        //cmd::serve::run(config, matches);
+        cmd::serve::run(config, matches);
     } else if let Some(_matches) = matches.subcommand_matches("web") {
-        //cmd::web::run(config);
+        cmd::web::run(config);
     }
 }
