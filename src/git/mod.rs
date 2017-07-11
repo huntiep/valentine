@@ -16,8 +16,7 @@ pub enum AccessMode {
 impl AccessMode {
     pub fn new(verb: &str) -> Option<Self> {
         match verb {
-            "git-upload-pack" => Some(AccessMode::Read),
-            "git-upload-archive" => Some(AccessMode::Read),
+            "git-upload-pack" | "git-upload-archive" => Some(AccessMode::Read),
             "git-receive-pack" => Some(AccessMode::Write),
             _ => None
         }

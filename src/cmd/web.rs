@@ -1,4 +1,4 @@
-use {Config, Context, db};
+use {Config, Context};
 use routes::*;
 
 use diesel;
@@ -48,7 +48,7 @@ pub fn run(config: Config) {
     let ctx = Context {
         db_pool: pool,
         logins: Arc::new(Mutex::new(HashMap::new())),
-        name: config.name.unwrap_or(String::from("Valentine")),
+        name: config.name.unwrap_or_else(|| String::from("Valentine")),
         repo_dir: config.repo_dir,
     };
 
@@ -75,7 +75,7 @@ pub fn run(config: Config) {
     //router.get("/{user}/{repo}/settings", Arc::new(user::repo_settings));
     router.get("/{user}/{repo}/delete", Arc::new(user::delete_repo));
 
-    let addr = config.addr.unwrap_or("127.0.0.1:3000".parse().unwrap());
+    let addr = config.addr.unwrap_or_else(|| "127.0.0.1:3000".parse().unwrap());
     info!("running server at {}", addr);
     Http::new(router, ctx).listen_and_serve(addr);
 }

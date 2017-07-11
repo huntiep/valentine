@@ -21,9 +21,9 @@ impl NewUser {
         let password = try_opt!(req.form_value("password"));
         let password_confirm = try_opt!(req.form_value("password_confirm"));
 
-        if username.is_empty() || email.is_empty() || password.is_empty() {
-            return None;
-        } else if password != password_confirm {
+        if username.is_empty() || email.is_empty() || password.is_empty() ||
+            password != password_confirm
+        {
             return None;
         }
 

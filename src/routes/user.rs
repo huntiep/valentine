@@ -114,8 +114,8 @@ pub fn home(req: &mut Request, res: Response, ctx: &Context)
     info!("read cookie");
 
     let pool = &ctx.db_pool;
-    if let Some(user) = try_res!(res, db::read::user(pool, &username)) {
-        let tmpl = Template::new(ctx, Some(&username), None, user);
+    if let Some(user) = try_res!(res, db::read::user(pool, username)) {
+        let tmpl = Template::new(ctx, Some(username), None, user);
         Ok(res.fmt_body(tmpl))
     } else {
         not_found(req, res, ctx)

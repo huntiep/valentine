@@ -60,9 +60,9 @@ pub fn pull_handshake(req: &mut Request, mut res: Response, ctx: &Context)
     let pool = &ctx.db_pool;
     // Make sure that repo exists
     let repo_name = repo.trim_right_matches(".git");
-    if !try_res!(res, db::read::repo_exists(pool, username, repo_name)) {
-        return not_found(req, res, ctx);
-    } else if try_res!(res, db::read::repo_is_private(pool, username, repo_name)) {
+    if !try_res!(res, db::read::repo_exists(pool, username, repo_name)) ||
+       try_res!(res, db::read::repo_is_private(pool, username, repo_name))
+    {
         return not_found(req, res, ctx);
     }
 
@@ -135,7 +135,7 @@ pub fn internal_error(_req: &mut Request, mut res: Response, ctx: &Context, err:
         _ => {
             let body = include_str!("../../templates/internal_error.html");
             let tmpl = Template::new(ctx, Some("500"), None, body);
-            return res.fmt_body(tmpl);
+            res.fmt_body(tmpl)
         }
     }
 }

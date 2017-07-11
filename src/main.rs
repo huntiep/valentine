@@ -115,7 +115,7 @@ fn main() {
     file.read_to_string(&mut buf).expect("Unable to read config file");
     let config: Config = toml::from_str(&buf).expect("Invalid config file");
 
-    let log_path = config.log_path.clone().unwrap_or(PathBuf::from("val.log"));
+    let log_path = config.log_path.clone().unwrap_or_else(|| PathBuf::from("val.log"));
     // Start the logger
     let file = fs::OpenOptions::new()
         .create(true)
