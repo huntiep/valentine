@@ -1,24 +1,35 @@
 use Result;
-use super::Pool;
+use super::{read, repos, users, Pool};
+
+use diesel;
+use diesel::prelude::*;
 
 pub fn user(pool: &Pool, username: &str) -> Result<()> {
+    let owner = if let Some(id) = read::user_id(pool, username)? {
+        id
+    } else {
+        return Ok(())
+    };
+
     let conn = pool.get()?;
-    let trans = conn.transaction()?;
-    trans.execute("DELETE FROM users WHERE username = $1;",
-                  &[&username])?;
-    trans.execute("DELETE FROM repos WHERE owner = $1;",
-                  &[&username])?;
-    trans.commit()?;
+    diesel::delete(users::table.find(owner)).execute(&*conn)?;
+    diesel::delete(repos::table.filter(repos::owner.eq(owner))).execute(&*conn)?;
     Ok(())
 }
 
 pub fn repo(pool: &Pool, username: &str, repo_name: &str) -> Result<()> {
+    let owner = if let Some(id) = read::user_id(pool, username)? {
+        id
+    } else {
+        return Ok(())
+    };
+
     let conn = pool.get()?;
-    let trans = conn.transaction()?;
-    trans.execute("UPDATE users SET num_repos = num_repos - 1 WHERE username = $1;",
-                  &[&username])?;
-    trans.execute("DELETE FROM repos WHERE owner = $1 AND name = $1;",
-                  &[&username, &repo_name])?;
-    trans.commit()?;
+    diesel::delete(repos::table.filter(repos::owner.eq(owner))
+                               .filter(repos::name.eq(repo_name)))
+        .execute(&*conn)?;
+    diesel::update(users::table.find(owner))
+        .set(users::num_repos.eq(users::num_repos - 1))
+        .execute(&*conn)?;
     Ok(())
 }

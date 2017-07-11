@@ -1,11 +1,9 @@
-use db::{repos, users};
+use db::{public_keys, repos, users};
 
 use base64;
 use bcrypt::{self, DEFAULT_COST};
 use hayaku::Request;
 use sha2::{Digest, Sha256};
-
-//pub use uuid::Uuid;
 
 #[derive(Insertable)]
 #[table_name = "users"]
@@ -90,23 +88,30 @@ impl Repo {
 
 #[derive(Queryable)]
 pub struct SshKey {
+    pub id: i32,
+    pub owner: i32,
     pub fingerprint: String,
+    pub content: String,
     pub name: String,
 }
 
+#[derive(Insertable)]
+#[table_name = "public_keys"]
 pub struct NewSshKey {
+    pub owner: i32,
     pub fingerprint: String,
     pub content: String,
     pub name: String,
 }
 
 impl NewSshKey {
-    pub fn new(req: &mut Request) -> Option<Self> {
+    pub fn new(req: &mut Request, owner: i32) -> Option<Self> {
         let name = try_opt!(req.form_value("name"));
         let ssh_key = try_opt!(req.form_value("ssh_key"));
         let fingerprint = try_opt!(NewSshKey::fingerprint(&ssh_key));
 
         Some(NewSshKey {
+            owner: owner,
             fingerprint: fingerprint,
             content: ssh_key,
             name: name,

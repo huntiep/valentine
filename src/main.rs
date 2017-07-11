@@ -23,7 +23,6 @@ extern crate slog_stdlog;
 extern crate slog_term;
 extern crate time;
 extern crate toml;
-//extern crate uuid;
 
 //mod cmd;
 mod db;

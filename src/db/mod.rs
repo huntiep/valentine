@@ -2,7 +2,7 @@ use {diesel, r2d2};
 use r2d2_diesel::ConnectionManager;
 
 pub mod create;
-//pub mod delete;
+pub mod delete;
 pub mod read;
 
 pub type Pool = r2d2::Pool<ConnectionManager<diesel::pg::PgConnection>>;
@@ -17,6 +17,8 @@ table! {
         is_admin -> Bool,
     }
 }
+
+numeric_expr!(users::num_repos);
 
 table! {
     public_keys {

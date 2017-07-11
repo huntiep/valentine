@@ -100,8 +100,8 @@ pub fn settings(pool: &Pool, username: &str) -> Result<UserSettings> {
         .get_result(&*conn)?;
 
     let keys = public_keys::table.filter(public_keys::owner.eq(owner))
-        .select((public_keys::fingerprint, public_keys::name))
         .load::<SshKey>(&*conn)?;
+
     Ok(UserSettings {
         username: username.to_string(),
         email: email,
