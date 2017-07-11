@@ -91,6 +91,26 @@ pub fn user(pool: &Pool, username: &str) -> Result<Option<User>> {
 
 }
 
+pub fn repo(pool: &Pool, username: &str, reponame: &str) -> Result<Option<Repo>> {
+    let owner = if let Some(owner) = user_id(pool, username)? {
+        owner
+    } else {
+        return Ok(None);
+    };
+
+    let conn = pool.get()?;
+    let repo = repos::table.filter(repos::owner.eq(owner))
+        .filter(repos::name.eq(reponame))
+        .select((repos::name, repos::description, repos::owner, repos::private))
+        .first::<Repo>(&*conn);
+
+    match repo {
+        Ok(repo) => Ok(Some(repo)),
+        Err(diesel::result::Error::NotFound) => Ok(None),
+        Err(e) => Err(Error::from(e)),
+    }
+}
+
 pub fn settings(pool: &Pool, username: &str) -> Result<UserSettings> {
     let owner = user_id(pool, username)?.unwrap();
 

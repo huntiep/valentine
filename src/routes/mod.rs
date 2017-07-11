@@ -45,7 +45,23 @@ pub fn repo(req: &mut Request, res: Response, ctx: &Context)
     if let (true, _) = util::check_login(ctx, &req.get_cookies()) {
         user::view_repo(req, res, ctx)
     } else {
-        Ok(res.body(""))
+        let params = hayaku::get_path_params(req);
+        let username = &params["user"];
+        let reponame = &params["repo"];
+
+        let pool = &ctx.db_pool;
+        if !try_res!(res, db::read::user_exists(pool, username)) {
+//           !try_res!(res, db::read::repo_exists(pool, username, reponame))
+            return not_found(req, res, ctx);
+        }
+
+        // TODO: It might be okay to just check that the repo exists rather
+        // than actually reading its data out
+        let repo = try_res!(res, db::read::repo(pool, username, reponame));
+        let repo_git = try_res!(res, git::read(ctx, username, reponame));
+        // TODO
+        let tmpl = Template::new(ctx, Some(username), None, repo_git);
+        Ok(res.fmt_body(tmpl))
     }
 }
 

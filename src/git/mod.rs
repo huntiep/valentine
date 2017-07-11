@@ -62,6 +62,19 @@ pub fn delete<P: AsRef<Path>>(ctx: &Context, username: P, repo_name: P) -> Resul
     Ok(())
 }
 
+// TODO
+#[derive(BartDisplay)]
+#[template_string = ""]
+pub struct RepoData;
+
+pub fn read<P: AsRef<Path>>(ctx: &Context, username: P, repo_name: P) -> Result<RepoData> {
+    let mut root_dir = ctx.repo_dir.clone();
+    root_dir.push(username);
+    root_dir.push(repo_name);
+    // TODO Read repo data and format
+    Ok(RepoData)
+}
+
 pub fn info(ctx: &Context, username: &str, repo_name: &str) -> Result<Vec<u8>> {
     let mut root_dir = ctx.repo_dir.clone();
     root_dir.push(username);
@@ -111,7 +124,6 @@ pub fn add_ssh_key(ctx: &Context, ssh_key: &SshKey) -> Result<()> {
         .create(true)
         .open(ssh_dir)?;
 
-    println!("opened file");
     let key = format!("command=\"{} -c '{}' serve key-{}\",\
 no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty {}",
                           ctx.bin_path.display(), ctx.config_path.display(),

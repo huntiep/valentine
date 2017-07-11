@@ -107,8 +107,12 @@ fn main() {
                          .help("The file to output the backup to e.g. val.tgz")
                          .required(true)
                          .index(1)))
-        .subcommand(SubCommand::with_name("serve")
-                    .about("Command used for ssh"))
+        .subcommand(SubCommand::with_name("ssh")
+                    .about("Command used for ssh. Not intended to be used directly"))
+                    .arg(Arg::with_name("KEYID")
+                         .help("The id of this ssh key")
+                         .required(true)
+                         .index(1))
         .subcommand(SubCommand::with_name("web")
                     .about("Run the valentine server"))
         .get_matches();
@@ -139,9 +143,10 @@ fn main() {
     if let Some(matches) = matches.subcommand_matches("backup") {
         let file = matches.value_of("FILE").unwrap();
         cmd::backup::run(file);
-    } else if let Some(matches) = matches.subcommand_matches("serve") {
-        cmd::serve::run(config, matches);
+    } else if let Some(matches) = matches.subcommand_matches("ssh") {
+        cmd::ssh::run(config, matches);
     } else if let Some(_matches) = matches.subcommand_matches("web") {
-        cmd::web::run(config, config_path.into());
+        let config_path = PathBuf::from(config_path).canonicalize().unwrap();
+        cmd::web::run(config, config_path);
     }
 }

@@ -6,6 +6,7 @@ use clap::ArgMatches;
 use std::{env, process};
 
 pub fn run(config: Config, matches: &ArgMatches) {
+    let key_id = matches.value_of("KEYID").unwrap();
     let cmd = if let Ok(cmd) = env::var("SSH_ORIGINAL_COMMAND") {
         cmd
     } else {
