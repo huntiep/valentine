@@ -189,7 +189,7 @@ pub fn add_ssh_key(req: &mut Request, res: Response, ctx: &Context)
         return Ok(res.fmt_body(tmpl));
     }*/
     let key = try_res!(res, db::create::public_key(pool, &ssh_key));
-    try_res!(res, git::add_ssh_key(&key));
+    try_res!(res, git::add_ssh_key(ctx, &key));
 
     Ok(res.redirect(Status::Ok, "/settings", "SSH key added"))
 }

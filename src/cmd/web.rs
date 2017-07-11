@@ -6,11 +6,12 @@ use hayaku::{Http, Router};
 use r2d2;
 use r2d2_diesel::ConnectionManager;
 
-use std::fs;
+use std::{env, fs};
 use std::collections::HashMap;
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
-pub fn run(config: Config) {
+pub fn run(config: Config, config_path: PathBuf) {
     info!("Starting up");
 
     /*let repo = git2::Repository::open(".").expect("failed to open repo");
@@ -45,11 +46,19 @@ pub fn run(config: Config) {
         }
     }
 
+    let ssh_dir = config.ssh_dir.unwrap_or_else(|| {
+        let mut home = env::home_dir().unwrap();
+        home.push(".ssh");
+        home
+    });
     let ctx = Context {
         db_pool: pool,
         logins: Arc::new(Mutex::new(HashMap::new())),
         name: config.name.unwrap_or_else(|| String::from("Valentine")),
         repo_dir: config.repo_dir,
+        ssh_dir: ssh_dir,
+        bin_path: env::current_exe().unwrap(),
+        config_path: config_path,
     };
 
     let mut router = Router::new();

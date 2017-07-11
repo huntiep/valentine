@@ -103,18 +103,18 @@ pub fn pull(ctx: &Context, username: &str, repo_name: &str, body: &[u8]) -> Resu
     Ok(output.stdout)
 }
 
-pub fn add_ssh_key(ssh_key: &SshKey) -> Result<()> {
+pub fn add_ssh_key(ctx: &Context, ssh_key: &SshKey) -> Result<()> {
+    let mut ssh_dir = ctx.ssh_dir.clone();
+    ssh_dir.push("authorized_keys");
     let mut file = fs::OpenOptions::new()
         .append(true)
         .create(true)
-        // TODO: maybe use a better path
-        .open("~/.ssh/authorized_keys")?;
+        .open(ssh_dir)?;
 
     println!("opened file");
-    // TODO: don't hardcode paths
-    let key = format!("command=\"/home/git/valentine/valentine \
--c '/home/git/valentine/valentine.toml' serve key-{}\",\
+    let key = format!("command=\"{} -c '{}' serve key-{}\",\
 no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty {}",
+                          ctx.bin_path.display(), ctx.config_path.display(),
                           ssh_key.id, ssh_key.content);
     Ok(file.write_all(key.as_bytes())?)
 }

@@ -73,15 +73,20 @@ pub struct Context {
     pub logins: Arc<Mutex<HashMap<SessionKey, UserName>>>,
     pub name: String,
     pub repo_dir: PathBuf,
+    pub ssh_dir: PathBuf,
+    pub bin_path: PathBuf,
+    pub config_path: PathBuf,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Config {
     pub repo_dir: PathBuf,
+    pub ssh_dir: Option<PathBuf>,
     pub db_url: String,
     pub log_path: Option<PathBuf>,
     pub name: Option<String>,
     pub addr: Option<SocketAddr>,
+    // TODO
     pub allow_registration: Option<bool>,
 }
 
@@ -137,6 +142,6 @@ fn main() {
     } else if let Some(matches) = matches.subcommand_matches("serve") {
         cmd::serve::run(config, matches);
     } else if let Some(_matches) = matches.subcommand_matches("web") {
-        cmd::web::run(config);
+        cmd::web::run(config, config_path.into());
     }
 }
