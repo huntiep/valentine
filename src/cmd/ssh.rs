@@ -1,18 +1,27 @@
-use Config;
+use {db, Config, Result};
 use git::AccessMode;
 
 use clap::ArgMatches;
+use diesel;
+use r2d2;
+use r2d2_diesel::ConnectionManager;
 
 use std::{env, process};
 
 pub fn run(config: Config, matches: &ArgMatches) {
-    let key_id = matches.value_of("KEYID").unwrap();
+    if _run(config, matches).is_err() {
+        fail("Internal error", None);
+    }
+}
+
+fn _run(config: Config, matches: &ArgMatches) -> Result<()> {
+    let key_id = value_t!(matches.value_of("KEYID"), i32).unwrap();
     let cmd = if let Ok(cmd) = env::var("SSH_ORIGINAL_COMMAND") {
         cmd
     } else {
         println!("Hi there, you've successfully authenticated, but Valentine does not provide shell access.");
         println!("If this is unexpected, please log in with password and setup Valentine under another user.");
-        return;
+        return Ok(());
     };
 
     let (verb, args) = parse_cmd(&cmd);
@@ -32,10 +41,33 @@ pub fn run(config: Config, matches: &ArgMatches) {
         fail("Unknown git command", None);
     };
 
-    // TODO read repo from database
-    let private = false;
+    // Create db connection pool
+    let r2d2_config = r2d2::Config::default();
+    let manager = ConnectionManager::<diesel::pg::PgConnection>::new(config.db_url);
+    let pool = r2d2::Pool::new(r2d2_config, manager).expect("Failed to create pool");
+
+    if !db::read::user_exists(&pool, username)? {
+        fail("Repository owner does not exist", None);
+    }
+
+    if !db::read::repo_exists(&pool, username, reponame)? {
+        fail("Repository does not exist or you do not have access", None);
+    }
+
+    let private = db::read::repo_is_private(&pool, username, reponame)?;
+
     if requested_mode == AccessMode::Write || private {
-    } else {
+        let user = if let Some(user) = db::read::user_by_key_id(&pool, key_id)? {
+            user
+        } else {
+            fail("Internal error", None);
+        };
+
+        // TODO: We want to check if a user has *access* rather than if the user
+        // owns the repo, whenever we allow access to multiple users
+        if !db::read::user_owns_repo(&pool, user, reponame)? {
+            fail("Repository does not exist or you do not have access", None);
+        };
     }
 
     eprintln!("{} {}", verb, repo_path);
@@ -50,6 +82,8 @@ pub fn run(config: Config, matches: &ArgMatches) {
     } else {
         fail("internal error 2", None);
     }
+
+    Ok(())
 }
 
 fn parse_cmd(cmd: &str) -> (String, String) {

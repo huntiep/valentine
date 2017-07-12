@@ -58,7 +58,7 @@ pub fn repo_is_private(pool: &Pool, username: &str, reponame: &str) -> Result<bo
     let owner = if let Some(owner) = user_id(pool, username)? {
         owner
     } else {
-        return Ok(false);
+        return Ok(true);
     };
 
     let conn = pool.get()?;
@@ -68,7 +68,7 @@ pub fn repo_is_private(pool: &Pool, username: &str, reponame: &str) -> Result<bo
         .first(&*conn)
     {
         Ok(private) => Ok(private),
-        Err(diesel::result::Error::NotFound) => Ok(false),
+        Err(diesel::result::Error::NotFound) => Ok(true),
         Err(e) => Err(Error::from(e)),
     }
 }
@@ -127,4 +127,31 @@ pub fn settings(pool: &Pool, username: &str) -> Result<UserSettings> {
         email: email,
         keys: keys,
     })
+}
+
+pub fn user_by_key_id(pool: &Pool, id: i32) -> Result<Option<i32>> {
+    let conn = pool.get()?;
+
+    match public_keys::table.find(id)
+        .select(public_keys::owner)
+        .get_result::<i32>(&*conn)
+    {
+        Ok(key) => Ok(Some(key)),
+        Err(diesel::result::Error::NotFound) => Ok(None),
+        Err(e) => Err(Error::from(e)),
+    }
+}
+
+pub fn user_owns_repo(pool: &Pool, owner: i32, reponame: &str) -> Result<bool> {
+    let conn = pool.get()?;
+
+    match repos::table.filter(repos::owner.eq(owner))
+        .filter(repos::name.eq(reponame))
+        .select(repos::id)
+        .first::<i64>(&*conn)
+    {
+        Ok(_) => Ok(true),
+        Err(diesel::result::Error::NotFound) => Ok(false),
+        Err(e) => Err(Error::from(e)),
+    }
 }
