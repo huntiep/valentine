@@ -1,8 +1,11 @@
+pub mod network;
+
 use {Context, Result};
 use templates::RepoTmpl;
 use types::*;
 
 use git2::{ObjectType, Repository};
+use hayaku::escape_html;
 use pulldown_cmark;
 
 use std::{fs, process};
@@ -36,6 +39,21 @@ pub fn delete_user<P: AsRef<Path>>(ctx: &Context, path: P) -> Result<()> {
     root_dir.push(path);
     fs::remove_dir_all(root_dir)?;
     Ok(())
+}
+
+pub fn add_ssh_key(ctx: &Context, ssh_key: &SshKey) -> Result<()> {
+    let mut ssh_dir = ctx.ssh_dir.clone();
+    ssh_dir.push("authorized_keys");
+    let mut file = fs::OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open(ssh_dir)?;
+
+    let key = format!("command=\"{} -c '{}' ssh key-{}\",\
+no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty {}",
+                          ctx.bin_path.display(), ctx.config_path.display(),
+                          ssh_key.id, ssh_key.content);
+    Ok(file.write_all(key.as_bytes())?)
 }
 
 pub fn init<P, S>(ctx: &Context, username: P, repo_name: S) -> Result<()>
@@ -102,8 +120,7 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
                 pulldown_cmark::html::push_html(&mut buf, events);
                 readme = Some(buf);
             } else {
-                // TODO Handle new lines and escape HTML
-                readme = Some(content);
+                readme = Some(parse_readme(&content));
             }
         }
 
@@ -124,58 +141,8 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
     Ok(tmpl)
 }
 
-pub fn info(ctx: &Context, username: &str, repo_name: &str) -> Result<Vec<u8>> {
-    let mut root_dir = ctx.repo_dir.clone();
-    root_dir.push(username);
-    root_dir.push(repo_name);
-
-    let command = process::Command::new("git-upload-pack")
-        .arg("--stateless-rpc")
-        .arg("--advertise-refs")
-        .arg(root_dir)
-        .stdin(process::Stdio::piped())
-        .stdout(process::Stdio::piped())
-        .output()?;
-
-    Ok(command.stdout)
-}
-
-pub fn pull(ctx: &Context, username: &str, repo_name: &str, body: &[u8]) -> Result<Vec<u8>> {
-    let mut root_dir = ctx.repo_dir.clone();
-    root_dir.push(username);
-    root_dir.push(repo_name);
-
-    let mut command = process::Command::new("git-upload-pack")
-        .arg("--stateless-rpc")
-        .arg(root_dir)
-        .stdin(process::Stdio::piped())
-        .stdout(process::Stdio::piped())
-        .spawn()?;
-
-    {
-        let mut stdin = command.stdin.as_mut().unwrap();
-        stdin.write_all(body)?;
-    }
-    let output = command.wait_with_output()?;
-
-    if !output.status.success() {
-        // TODO
-    }
-
-    Ok(output.stdout)
-}
-
-pub fn add_ssh_key(ctx: &Context, ssh_key: &SshKey) -> Result<()> {
-    let mut ssh_dir = ctx.ssh_dir.clone();
-    ssh_dir.push("authorized_keys");
-    let mut file = fs::OpenOptions::new()
-        .append(true)
-        .create(true)
-        .open(ssh_dir)?;
-
-    let key = format!("command=\"{} -c '{}' ssh key-{}\",\
-no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty {}",
-                          ctx.bin_path.display(), ctx.config_path.display(),
-                          ssh_key.id, ssh_key.content);
-    Ok(file.write_all(key.as_bytes())?)
+fn parse_readme(readme: &str) -> String {
+    let content = escape_html(readme);
+    content.lines().fold(String::with_capacity(content.len()),
+                         |acc, line| acc + line + "<br>")
 }

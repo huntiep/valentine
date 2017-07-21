@@ -106,7 +106,7 @@ pub fn pull_handshake(req: &mut Request, mut res: Response, ctx: &Context)
     let length = packet.len() + 4;
     let prefix = format!("{:04x}{}0000", length, packet);
 
-    let mut pack = try_res!(res, git::info(ctx, username, repo));
+    let mut pack = try_res!(res, git::network::info(ctx, username, repo));
     // TODO: set cache headers
     //res.add_header(headers::Expires("Fri, 01 Jan 1980 00:00:00 GMT"));
     //res.add_header(headers::Pragma("no-cache"));
@@ -128,7 +128,7 @@ pub fn pull(req: &mut Request, mut res: Response, ctx: &Context)
     let username = &params["user"];
     let repo = &params["repo"];
 
-    let pack = try_res!(res, git::pull(ctx, username, repo, req.body()));
+    let pack = try_res!(res, git::network::pull(ctx, username, repo, req.body()));
     // TODO: set cache headers
     res.add_header(headers::ContentType("application/x-git-upload-pack-result"));
     Ok(res.body(pack))
