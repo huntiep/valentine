@@ -1,8 +1,7 @@
 use {Context, Error, db, git};
-use templates::*;
 use super::not_found;
 
-use hayaku::{self, headers, Request, Response, ResDone, ResponseDone, Status};
+use hayaku::{self, headers, Request, Response, ResponseDone, Status};
 
 // GET /{user}/{repo}/info/refs
 pub fn pull_handshake(req: &mut Request, mut res: Response, ctx: &Context)

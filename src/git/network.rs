@@ -1,14 +1,7 @@
 use {Context, Result};
-use templates::RepoTmpl;
-use types::*;
 
-use git2::{ObjectType, Repository};
-use hayaku::escape_html;
-use pulldown_cmark;
-
-use std::{fs, process};
+use std::process;
 use std::io::Write;
-use std::path::Path;
 
 pub fn info(ctx: &Context, username: &str, repo_name: &str) -> Result<Vec<u8>> {
     let mut root_dir = ctx.repo_dir.clone();

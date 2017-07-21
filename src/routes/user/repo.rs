@@ -3,9 +3,7 @@ use templates::*;
 use types::*;
 use super::{not_found, util};
 
-use chrono::Duration;
-use hayaku::{self, Cookie, Request, Response, ResponseDone, Status};
-use time;
+use hayaku::{self, Request, Response, ResponseDone, Status};
 
 // GET /{user}/{repo}
 pub fn view(req: &mut Request, res: Response, ctx: &Context)
@@ -106,6 +104,46 @@ pub fn settings(req: &mut Request, res: Response, ctx: &Context)
     let body = RepoSettingsTmpl { username: username, repo: repo };
     let tmpl = Template::new(ctx, Some(username), None, body);
     Ok(res.fmt_body(tmpl))
+}
+
+// GET /{user}/{repo}/settings/name
+pub fn settings_name(req: &mut Request, res: Response, ctx: &Context)
+    -> ResponseDone<Error>
+{
+    let cookies = req.get_cookies();
+    let username = if let (true, Some(name)) = util::check_login(ctx, &cookies) {
+        name
+    } else {
+        return Ok(res.redirect(Status::Forbidden, "/login",
+                               "You must be logged in for this operation"));
+    };
+
+    let params = hayaku::get_path_params(req);
+    let user = &params["user"];
+    let reponame = &params["repo"];
+
+    if username != user {
+        return Ok(res.redirect(Status::BadRequest, &format!("/{}/{}", user, reponame),
+                               "You must own a repo to delete it"));
+    }
+
+    let pool = &ctx.db_pool;
+    if !try_res!(res, db::read::repo_exists(pool, username, reponame)) {
+        return Ok(res.redirect(Status::BadRequest, &format!("/{}/{}", user, reponame),
+                               "Repo does not exist"));
+    }
+
+    let new_name = if let Some(name) = req.form_value("name") {
+        name
+    } else {
+        return Ok(res.redirect(Status::BadRequest, &format!("/{}/{}", user, reponame),
+                               "Invalid data"));
+    };
+
+    try_res!(res, db::update::repo_name(pool, username, reponame, &new_name));
+    Ok(res.redirect(Status::Found,
+                    &format!("/{}/{}", username, new_name),
+                    "Repo name changed"))
 }
 
 // GET /{user}/{repo}/delete

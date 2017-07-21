@@ -73,6 +73,7 @@ pub fn run(config: Config, config_path: PathBuf) {
     router.get("/repo/new", Arc::new(user::repo::new));
     router.post("/repo/new", Arc::new(user::repo::new_post));
     router.get("/{user}/{repo}/settings", Arc::new(user::repo::settings));
+    router.post("/{user}/{repo}/settings/name", Arc::new(user::repo::settings_name));
     router.get("/{user}/{repo}/delete", Arc::new(user::repo::delete));
 
     let addr = config.addr.unwrap_or_else(|| "127.0.0.1:3000".parse().unwrap());
