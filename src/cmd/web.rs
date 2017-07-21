@@ -12,16 +12,7 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
 pub fn run(config: Config, config_path: PathBuf) {
-    info!("Starting up");
-
-    /*let repo = git2::Repository::open(".").expect("failed to open repo");
-    let head = repo.head().expect("failed to get head");
-    let oid = head.target().expect("failed to get oid");
-    let commit = repo.find_commit(oid).expect("failed to get commit");
-    let tree = commit.tree().expect("failed to get tree");
-    for entry in tree.iter() {
-        println!("{}", entry.name().unwrap());
-    }*/
+    info!("Starting up server");
 
     // Create db connection pool
     let r2d2_config = r2d2::Config::default();

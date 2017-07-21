@@ -1,7 +1,8 @@
 use {Context, Result};
+use templates::RepoTmpl;
 use types::*;
 
-use git2::Repository;
+use git2::{ObjectType, Repository};
 
 use std::{fs, process};
 use std::io::Write;
@@ -24,9 +25,8 @@ impl AccessMode {
 }
 
 pub fn create_user<P: AsRef<Path>>(ctx: &Context, username: P) -> Result<()> {
-    let mut root_dir = ctx.repo_dir.clone();
-    root_dir.push(username);
-    fs::create_dir_all(root_dir)?;
+    let path = ctx.repo_dir.join(username);
+    fs::create_dir_all(path)?;
     Ok(())
 }
 
@@ -41,38 +41,71 @@ pub fn init<P, S>(ctx: &Context, username: P, repo_name: S) -> Result<()>
     where P: AsRef<Path>,
           S: Into<String>,
 {
-    let mut root_dir = ctx.repo_dir.clone();
-    root_dir.push(username);
+    let path = ctx.repo_dir.join(username);
 
     let mut repo_name = repo_name.into();
     if !repo_name.ends_with(".git") {
         repo_name += ".git";
     }
-    root_dir.push(repo_name);
+    let path = path.join(repo_name);
 
-    Repository::init_bare(root_dir)?;
+    Repository::init_bare(path)?;
     Ok(())
 }
 
 pub fn delete<P: AsRef<Path>>(ctx: &Context, username: P, repo_name: P) -> Result<()> {
-    let mut root_dir = ctx.repo_dir.clone();
-    root_dir.push(username);
-    root_dir.push(repo_name);
-    fs::remove_dir_all(root_dir)?;
+    let path = ctx.repo_dir.join(username).join(repo_name);
+    fs::remove_dir_all(path)?;
     Ok(())
 }
 
-// TODO
-#[derive(BartDisplay)]
-#[template_string = ""]
-pub struct RepoData;
+pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
+    -> Result<RepoTmpl<'a, 'b>>
+{
+    let mut repo_name = repo_info.name.clone();
+    if !repo_name.ends_with(".git") {
+        repo_name += ".git";
+    }
 
-pub fn read<P: AsRef<Path>>(ctx: &Context, username: P, repo_name: P) -> Result<RepoData> {
-    let mut root_dir = ctx.repo_dir.clone();
-    root_dir.push(username);
-    root_dir.push(repo_name);
-    // TODO Read repo data and format
-    Ok(RepoData)
+    let path = ctx.repo_dir.join(username).join(repo_name);
+    let repo = Repository::open(path)?;
+    let head = repo.head()?;
+    // TODO
+    let oid = head.target().unwrap();
+    let commit = repo.find_commit(oid)?;
+    let tree = commit.tree()?;
+
+    let mut readme = None;
+    let mut items = Vec::with_capacity(tree.len());
+    for entry in tree.iter() {
+        let name = entry.name().unwrap_or("Invalid filename").to_string();
+        let kind = entry.kind().unwrap_or(ObjectType::Any);
+        if readme.is_none() && name.to_lowercase().starts_with("readme") &&
+            kind == ObjectType::Blob
+        {
+            let obj = entry.to_object(&repo)?;
+            let blob = obj.as_blob().unwrap();
+            if !blob.is_binary() {
+                // TODO render as markdown
+                readme = String::from_utf8(blob.content().to_vec()).ok();
+            }
+        }
+
+        let item = RepoItem {
+            name: name,
+            obj_type: kind,
+        };
+        items.push(item);
+    }
+
+    let tmpl = RepoTmpl {
+        name: &ctx.name,
+        username: username,
+        repo: repo_info,
+        items: items,
+        readme: readme,
+    };
+    Ok(tmpl)
 }
 
 pub fn info(ctx: &Context, username: &str, repo_name: &str) -> Result<Vec<u8>> {
@@ -124,7 +157,7 @@ pub fn add_ssh_key(ctx: &Context, ssh_key: &SshKey) -> Result<()> {
         .create(true)
         .open(ssh_dir)?;
 
-    let key = format!("command=\"{} -c '{}' serve key-{}\",\
+    let key = format!("command=\"{} -c '{}' ssh key-{}\",\
 no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty {}",
                           ctx.bin_path.display(), ctx.config_path.display(),
                           ssh_key.id, ssh_key.content);

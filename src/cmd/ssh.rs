@@ -15,7 +15,8 @@ pub fn run(config: Config, matches: &ArgMatches) {
 }
 
 fn _run(config: Config, matches: &ArgMatches) -> Result<()> {
-    let key_id = value_t!(matches.value_of("KEYID"), i32).unwrap();
+    let key_id = matches.value_of("KEYID").expect("Missing KEYID argument");
+    let key_id = key_id[4..].parse::<i32>().expect("Invalid KEYID");
     let cmd = if let Ok(cmd) = env::var("SSH_ORIGINAL_COMMAND") {
         cmd
     } else {

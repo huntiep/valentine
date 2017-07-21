@@ -70,6 +70,12 @@ impl<'a, 'b, 'c, T: Display> Template<'a, 'b, 'c, T> {
 }
 
 #[derive(BartDisplay)]
+#[template = "templates/home.html"]
+pub struct HomeTmpl<'a> {
+    pub name: &'a str,
+}
+
+#[derive(BartDisplay)]
 #[template = "templates/user.html"]
 pub struct User {
     pub username: String,
@@ -82,4 +88,14 @@ pub struct UserSettings {
     pub username: String,
     pub email: String,
     pub keys: Vec<SshKey>,
+}
+
+#[derive(BartDisplay)]
+#[template = "templates/repo.html"]
+pub struct RepoTmpl<'a, 'b> {
+    pub name: &'a str,
+    pub username: &'b str,
+    pub repo: Repo,
+    pub items: Vec<RepoItem>,
+    pub readme: Option<String>,
 }

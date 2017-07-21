@@ -122,6 +122,7 @@ pub fn home(req: &mut Request, res: Response, ctx: &Context)
     }
 }
 
+// GET /{user}
 pub fn user(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
@@ -137,10 +138,28 @@ pub fn user(req: &mut Request, res: Response, ctx: &Context)
     }
 }
 
-pub fn view_repo(_req: &mut Request, res: Response, _ctx: &Context)
+// GET /{user}/{repo}
+pub fn view_repo(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    Ok(res.body(""))
+    let params = hayaku::get_path_params(req);
+    let username = &params["user"];
+    let reponame = &params["repo"];
+
+    let pool = &ctx.db_pool;
+    if !try_res!(res, db::read::user_exists(pool, username)) {
+        return not_found(req, res, ctx);
+    }
+
+    let repo = if let Some(repo) = try_res!(res, db::read::repo(pool, username, reponame)) {
+        repo
+    } else {
+        return not_found(req, res, ctx);
+    };
+    let repo_git = try_res!(res, git::read(ctx, username, repo));
+    // TODO
+    let tmpl = Template::new(ctx, Some(username), None, repo_git);
+    Ok(res.fmt_body(tmpl))
 }
 
 // GET /settings

@@ -86,22 +86,27 @@ impl Repo {
     }
 }
 
+pub struct RepoItem {
+    pub name: String,
+    pub obj_type: ::git2::ObjectType,
+}
+
 #[derive(Queryable)]
 pub struct SshKey {
     pub id: i32,
     pub owner: i32,
+    pub name: String,
     pub fingerprint: String,
     pub content: String,
-    pub name: String,
 }
 
 #[derive(Insertable)]
 #[table_name = "public_keys"]
 pub struct NewSshKey {
     pub owner: i32,
+    pub name: String,
     pub fingerprint: String,
     pub content: String,
-    pub name: String,
 }
 
 impl NewSshKey {
@@ -112,9 +117,9 @@ impl NewSshKey {
 
         Some(NewSshKey {
             owner: owner,
+            name: name,
             fingerprint: fingerprint,
             content: ssh_key,
-            name: name,
         })
     }
 

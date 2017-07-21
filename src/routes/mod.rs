@@ -13,7 +13,7 @@ pub fn home(req: &mut Request, res: Response, ctx: &Context)
     if let (true, _) = util::check_login(ctx, &req.get_cookies()) {
         user::home(req, res, ctx)
     } else {
-        let body = include_str!("../../templates/home.html");
+        let body = HomeTmpl { name: &ctx.name };
         let tmpl = Template::new(ctx, None, None, body);
         Ok(res.fmt_body(tmpl))
     }
@@ -51,14 +51,15 @@ pub fn repo(req: &mut Request, res: Response, ctx: &Context)
 
         let pool = &ctx.db_pool;
         if !try_res!(res, db::read::user_exists(pool, username)) {
-//           !try_res!(res, db::read::repo_exists(pool, username, reponame))
             return not_found(req, res, ctx);
         }
 
-        // TODO: It might be okay to just check that the repo exists rather
-        // than actually reading its data out
-        let repo = try_res!(res, db::read::repo(pool, username, reponame));
-        let repo_git = try_res!(res, git::read(ctx, username, reponame));
+        let repo = if let Some(repo) = try_res!(res, db::read::repo(pool, username, reponame)) {
+            repo
+        } else {
+            return not_found(req, res, ctx);
+        };
+        let repo_git = try_res!(res, git::read(ctx, username, repo));
         // TODO
         let tmpl = Template::new(ctx, Some(username), None, repo_git);
         Ok(res.fmt_body(tmpl))

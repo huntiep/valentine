@@ -108,11 +108,11 @@ fn main() {
                          .required(true)
                          .index(1)))
         .subcommand(SubCommand::with_name("ssh")
-                    .about("Command used for ssh. Not intended to be used directly"))
+                    .about("Command used for ssh. Not intended to be used directly")
                     .arg(Arg::with_name("KEYID")
                          .help("The id of this ssh key")
                          .required(true)
-                         .index(1))
+                         .index(1)))
         .subcommand(SubCommand::with_name("web")
                     .about("Run the valentine server"))
         .get_matches();
