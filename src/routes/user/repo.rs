@@ -55,7 +55,7 @@ pub fn new_post(req: &mut Request, res: Response, ctx: &Context)
     };
 
     let pool = &ctx.db_pool;
-    let user_id = try_res!(res, db::read::user_id(pool, username)).unwrap();
+    let user_id = try_res!(res, db::read::user_id(pool, username));
     let repo = if let Some(repo) = Repo::new(req, user_id) {
         repo
     } else {

@@ -170,7 +170,7 @@ pub fn add_ssh_key(req: &mut Request, res: Response, ctx: &Context)
     };
 
     let pool = &ctx.db_pool;
-    let user_id = try_res!(res, db::read::user_id(pool, username)).unwrap();
+    let user_id = try_res!(res, db::read::user_id(pool, username));
     let ssh_key = if let Some(key) = NewSshKey::new(req, user_id) {
         key
     } else {

@@ -5,11 +5,7 @@ use diesel;
 use diesel::prelude::*;
 
 pub fn user(pool: &Pool, username: &str) -> Result<()> {
-    let owner = if let Some(id) = read::user_id(pool, username)? {
-        id
-    } else {
-        return Ok(())
-    };
+    let owner = read::user_id(pool, username)?;
 
     let conn = pool.get()?;
     diesel::delete(users::table.find(owner)).execute(&*conn)?;
@@ -18,11 +14,7 @@ pub fn user(pool: &Pool, username: &str) -> Result<()> {
 }
 
 pub fn repo(pool: &Pool, username: &str, repo_name: &str) -> Result<()> {
-    let owner = if let Some(id) = read::user_id(pool, username)? {
-        id
-    } else {
-        return Ok(())
-    };
+    let owner = read::user_id(pool, username)?;
 
     let conn = pool.get()?;
     diesel::delete(repos::table.filter(repos::owner.eq(owner))

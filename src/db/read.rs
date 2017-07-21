@@ -14,29 +14,24 @@ pub fn check_login(pool: &Pool, login: &Login) -> Result<bool> {
     Ok(::bcrypt::verify(&login.password, &password)?)
 }
 
-pub fn user_id(pool: &Pool, username: &str) -> Result<Option<i32>> {
+pub fn user_id(pool: &Pool, username: &str) -> Result<i32> {
     let conn = pool.get()?;
     // TODO: look into find for unique items
-    match users::table.filter(users::username.eq(username))
+    Ok(users::table.filter(users::username.eq(username))
         .select(users::id)
-        .first(&*conn)
-    {
-        Ok(id) => Ok(Some(id)),
-        Err(diesel::result::Error::NotFound) => Ok(None),
-        Err(e) => Err(Error::from(e)),
-    }
+        .first(&*conn)?)
 }
 
 pub fn user_exists(pool: &Pool, username: &str) -> Result<bool> {
-    Ok(user_id(pool, username)?.is_some())
+    let conn = pool.get()?;
+    Ok(users::table.filter(users::username.eq(username))
+        .select(users::id)
+        .first::<i32>(&*conn)
+        .is_ok())
 }
 
 pub fn repo_id(pool: &Pool, username: &str, reponame: &str) -> Result<Option<i64>> {
-    let owner = if let Some(owner) = user_id(pool, username)? {
-        owner
-    } else {
-        return Ok(None)
-    };
+    let owner = user_id(pool, username)?;
 
     let conn = pool.get()?;
     match repos::table.filter(repos::owner.eq(owner))
@@ -55,11 +50,7 @@ pub fn repo_exists(pool: &Pool, username: &str, reponame: &str) -> Result<bool> 
 }
 
 pub fn repo_is_private(pool: &Pool, username: &str, reponame: &str) -> Result<bool> {
-    let owner = if let Some(owner) = user_id(pool, username)? {
-        owner
-    } else {
-        return Ok(true);
-    };
+    let owner = user_id(pool, username)?;
 
     let conn = pool.get()?;
     match repos::table.filter(repos::owner.eq(owner))
@@ -73,11 +64,7 @@ pub fn repo_is_private(pool: &Pool, username: &str, reponame: &str) -> Result<bo
     }
 }
 pub fn user(pool: &Pool, username: &str) -> Result<Option<User>> {
-    let owner = if let Some(owner) = user_id(pool, username)? {
-        owner
-    } else {
-        return Ok(None);
-    };
+    let owner = user_id(pool, username)?;
 
     let conn = pool.get()?;
     let repos = repos::table.filter(repos::owner.eq(owner))
@@ -92,11 +79,7 @@ pub fn user(pool: &Pool, username: &str) -> Result<Option<User>> {
 }
 
 pub fn repo(pool: &Pool, username: &str, reponame: &str) -> Result<Option<Repo>> {
-    let owner = if let Some(owner) = user_id(pool, username)? {
-        owner
-    } else {
-        return Ok(None);
-    };
+    let owner = user_id(pool, username)?;
 
     let conn = pool.get()?;
     let repo = repos::table.filter(repos::owner.eq(owner))
@@ -112,7 +95,7 @@ pub fn repo(pool: &Pool, username: &str, reponame: &str) -> Result<Option<Repo>>
 }
 
 pub fn settings(pool: &Pool, username: &str) -> Result<UserSettings> {
-    let owner = user_id(pool, username)?.unwrap();
+    let owner = user_id(pool, username)?;
 
     let conn = pool.get()?;
     let email = users::table.find(owner)
