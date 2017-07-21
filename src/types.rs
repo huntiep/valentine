@@ -1,3 +1,4 @@
+use Result;
 use db::{public_keys, repos, users};
 
 use base64;
@@ -89,6 +90,30 @@ impl Repo {
 pub struct RepoItem {
     pub name: String,
     pub obj_type: ::git2::ObjectType,
+}
+
+pub struct Commit {
+    pub author: String,
+    pub time: String,
+    pub message: String,
+}
+
+impl Commit {
+    pub fn new(mut commit: ::git2::Commit) -> Result<Self> {
+        let message = commit.summary().unwrap_or("Invalid commit message").to_string();
+        let author = commit.author();
+        let author_name = author.name().unwrap_or("Invalid author name").to_string();
+        let author_time = author.when();
+        let mut time = ::chrono::format::Parsed::new();
+        time.set_timestamp(author_time.seconds())?;
+        time.set_offset(author_time.offset_minutes() as i64 * 60)?;
+        let time = time.to_datetime()?.to_string();
+        Ok(Commit {
+            author: author_name,
+            time: time,
+            message: message
+        })
+    }
 }
 
 #[derive(Queryable)]

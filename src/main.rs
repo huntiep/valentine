@@ -51,6 +51,9 @@ quick_error! {
         Bcrypt(err: &'static str) {
             from(_e: ::bcrypt::BcryptError) -> ("bcrypt error")
         }
+        Chrono(err: &'static str) {
+            from(_e: ::chrono::ParseError) -> ("chrono error")
+        }
         Git(err: &'static str) {
             from(_e: ::git2::Error) -> ("git error")
         }

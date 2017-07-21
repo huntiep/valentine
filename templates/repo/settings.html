@@ -1,3 +1,6 @@
+<h1><a href="/">{{name}}</a></h1>
+<h3><a href="/{{username}}">{{username}}</a><a href="/{{username}}/{{repo.name}}">{{repo.name}}</a></h3>
+
 <h3>Change Repository Name</h3>
 <form method="POST" action="/{{username}}/{{repo.name}}/settings/name">
     <label for="name">Repository Name</label>

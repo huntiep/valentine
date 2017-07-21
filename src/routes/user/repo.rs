@@ -101,7 +101,7 @@ pub fn settings(req: &mut Request, res: Response, ctx: &Context)
         return not_found(req, res, ctx);
     };
 
-    let body = RepoSettingsTmpl { username: username, repo: repo };
+    let body = RepoSettingsTmpl { name: &ctx.name, username: username, repo: repo };
     let tmpl = Template::new(ctx, Some(username), None, body);
     Ok(res.fmt_body(tmpl))
 }

@@ -1,8 +1,9 @@
 pub mod git_routes;
+pub mod repo;
 pub mod user;
 mod util;
 
-use {Context, Error, db, git};
+use {Context, Error, db};
 use templates::*;
 
 use hayaku::{self, Request, Response, ResDone, ResponseDone, Status};
@@ -37,34 +38,6 @@ pub fn user(req: &mut Request, res: Response, ctx: &Context)
         Ok(res.fmt_body(tmpl))
     } else {
         not_found(req, res, ctx)
-    }
-}
-
-// GET /{user}/{repo}
-pub fn repo(req: &mut Request, res: Response, ctx: &Context)
-    -> ResponseDone<Error>
-{
-    if let (true, _) = util::check_login(ctx, &req.get_cookies()) {
-        user::repo::view(req, res, ctx)
-    } else {
-        let params = hayaku::get_path_params(req);
-        let username = &params["user"];
-        let reponame = &params["repo"];
-
-        let pool = &ctx.db_pool;
-        if !try_res!(res, db::read::user_exists(pool, username)) {
-            return not_found(req, res, ctx);
-        }
-
-        let repo = if let Some(repo) = try_res!(res, db::read::repo(pool, username, reponame)) {
-            repo
-        } else {
-            return not_found(req, res, ctx);
-        };
-        let repo_git = try_res!(res, git::read(ctx, username, repo));
-        // TODO
-        let tmpl = Template::new(ctx, Some(username), None, repo_git);
-        Ok(res.fmt_body(tmpl))
     }
 }
 

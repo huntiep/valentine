@@ -146,3 +146,24 @@ fn parse_readme(readme: &str) -> String {
     content.lines().fold(String::with_capacity(content.len()),
                          |acc, line| acc + line + "<br>")
 }
+
+pub fn log<P: AsRef<Path>>(ctx: &Context, username: P, repo_name: &str) -> Result<Vec<Commit>> {
+    let mut repo_name = repo_name.to_string();
+    if !repo_name.ends_with(".git") {
+        repo_name += ".git";
+    }
+
+    let path = ctx.repo_dir.join(username).join(repo_name);
+    let repo = Repository::open(path)?;
+
+    let mut log = Vec::new();
+    let mut revwalk = repo.revwalk()?;
+    revwalk.push_head()?;
+    for id in revwalk {
+        let id = id?;
+        let commit = repo.find_commit(id)?;
+        let item = Commit::new(commit)?;
+        log.push(item);
+    }
+    Ok(log)
+}

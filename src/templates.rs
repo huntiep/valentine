@@ -105,7 +105,17 @@ pub struct RepoTmpl<'a, 'b> {
 
 #[derive(BartDisplay)]
 #[template = "templates/repo/settings.html"]
-pub struct RepoSettingsTmpl<'a> {
-    pub username: &'a str,
+pub struct RepoSettingsTmpl<'a, 'b> {
+    pub name: &'a str,
+    pub username: &'b str,
     pub repo: Repo,
+}
+
+#[derive(BartDisplay)]
+#[template = "templates/repo/log.html"]
+pub struct RepoLogTmpl<'a, 'b> {
+    pub name: &'a str,
+    pub username: &'b str,
+    pub repo: Repo,
+    pub log: Vec<Commit>,
 }

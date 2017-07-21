@@ -57,7 +57,8 @@ pub fn run(config: Config, config_path: PathBuf) {
     router.set_internal_error_handler(Arc::new(internal_error));
     router.get("/", Arc::new(home));
     router.get("/{user}", Arc::new(user));
-    router.get("/{user}/{repo}", Arc::new(repo));
+    router.get("/{user}/{repo}", Arc::new(repo::view));
+    router.get("/{user}/{repo}/log", Arc::new(repo::log));
     // TODO: use regex to assert that `repo` ends with .git
     router.get("/{user}/{repo}/info/refs", Arc::new(git_routes::pull_handshake));
     router.post("/{user}/{repo}/git-upload-pack", Arc::new(git_routes::pull));
