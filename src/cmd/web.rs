@@ -59,8 +59,8 @@ pub fn run(config: Config, config_path: PathBuf) {
     router.get("/{user}", Arc::new(user));
     router.get("/{user}/{repo}", Arc::new(repo));
     // TODO: use regex to assert that `repo` ends with .git
-    router.get("/{user}/{repo}/info/refs", Arc::new(pull_handshake));
-    router.post("/{user}/{repo}/git-upload-pack", Arc::new(pull));
+    router.get("/{user}/{repo}/info/refs", Arc::new(git_routes::pull_handshake));
+    router.post("/{user}/{repo}/git-upload-pack", Arc::new(git_routes::pull));
 
     // User
     router.get("/signup", Arc::new(user::signup));
@@ -70,10 +70,10 @@ pub fn run(config: Config, config_path: PathBuf) {
     router.get("/logout", Arc::new(user::logout));
     router.get("/settings", Arc::new(user::settings));
     router.post("/settings/add-ssh-key", Arc::new(user::add_ssh_key));
-    router.get("/repo/new", Arc::new(user::new_repo));
-    router.post("/repo/new", Arc::new(user::new_repo_post));
-    //router.get("/{user}/{repo}/settings", Arc::new(user::repo_settings));
-    router.get("/{user}/{repo}/delete", Arc::new(user::delete_repo));
+    router.get("/repo/new", Arc::new(user::repo::new));
+    router.post("/repo/new", Arc::new(user::repo::new_post));
+    router.get("/{user}/{repo}/settings", Arc::new(user::repo::settings));
+    router.get("/{user}/{repo}/delete", Arc::new(user::repo::delete));
 
     let addr = config.addr.unwrap_or_else(|| "127.0.0.1:3000".parse().unwrap());
     info!("running server at {}", addr);

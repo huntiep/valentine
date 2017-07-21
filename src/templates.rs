@@ -99,3 +99,10 @@ pub struct RepoTmpl<'a, 'b> {
     pub items: Vec<RepoItem>,
     pub readme: Option<String>,
 }
+
+#[derive(BartDisplay)]
+#[template = "templates/repo/settings.html"]
+pub struct RepoSettingsTmpl<'a> {
+    pub username: &'a str,
+    pub repo: Repo,
+}
