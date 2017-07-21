@@ -8,6 +8,7 @@ extern crate chrono;
 extern crate git2;
 #[macro_use] extern crate hayaku;
 #[macro_use] extern crate log;
+extern crate pulldown_cmark;
 #[macro_use] extern crate quick_error;
 extern crate r2d2;
 extern crate r2d2_diesel;

@@ -3,6 +3,7 @@ use templates::RepoTmpl;
 use types::*;
 
 use git2::{ObjectType, Repository};
+use pulldown_cmark;
 
 use std::{fs, process};
 use std::io::Write;
@@ -80,14 +81,29 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
     for entry in tree.iter() {
         let name = entry.name().unwrap_or("Invalid filename").to_string();
         let kind = entry.kind().unwrap_or(ObjectType::Any);
-        if readme.is_none() && name.to_lowercase().starts_with("readme") &&
+        let name_lower = name.to_lowercase();
+
+        if readme.is_none() && name_lower.starts_with("readme") &&
             kind == ObjectType::Blob
         {
             let obj = entry.to_object(&repo)?;
             let blob = obj.as_blob().unwrap();
-            if !blob.is_binary() {
-                // TODO render as markdown
-                readme = String::from_utf8(blob.content().to_vec()).ok();
+            if blob.is_binary() {
+                break;
+            }
+            let content = String::from_utf8(blob.content().to_vec()).ok();
+            if content.is_none() {
+                break;
+            }
+            let content = content.unwrap();
+            if name_lower.ends_with(".md") || name_lower.ends_with(".markdown") {
+                let events = pulldown_cmark::Parser::new(&content);
+                let mut buf = String::new();
+                pulldown_cmark::html::push_html(&mut buf, events);
+                readme = Some(buf);
+            } else {
+                // TODO Handle new lines and escape HTML
+                readme = Some(content);
             }
         }
 
