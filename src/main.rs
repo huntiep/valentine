@@ -41,6 +41,7 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
 pub type Result<T> = ::std::result::Result<T, Error>;
+
 quick_error! {
     #[derive(Debug, Clone)]
     pub enum Error {

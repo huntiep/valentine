@@ -115,13 +115,9 @@ pub fn home(req: &mut Request, res: Response, ctx: &Context)
     let username = username.unwrap();
     info!("read cookie");
 
-    let pool = &ctx.db_pool;
-    if let Some(user) = try_res!(res, db::read::user(pool, username)) {
-        let tmpl = Template::new(ctx, Some(username), None, user);
-        Ok(res.fmt_body(tmpl))
-    } else {
-        not_found(req, res, ctx)
-    }
+    let body = HomeTmpl { name: &ctx.name, username: Some(username) };
+    let tmpl = Template::new(ctx, Some(username), None, body);
+    Ok(res.fmt_body(tmpl))
 }
 
 // GET /{user}
@@ -132,7 +128,9 @@ pub fn user(req: &mut Request, res: Response, ctx: &Context)
     let username = &params["user"];
 
     let pool = &ctx.db_pool;
-    if let Some(user) = try_res!(res, db::read::user(pool, username)) {
+    if let Some(mut user) = try_res!(res, db::read::user(pool, username)) {
+        user.auth = true;
+        user.name = &ctx.name;
         let tmpl = Template::new(ctx, Some(username), None, user);
         Ok(res.fmt_body(tmpl))
     } else {

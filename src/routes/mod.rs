@@ -14,7 +14,7 @@ pub fn home(req: &mut Request, res: Response, ctx: &Context)
     if let (true, _) = util::check_login(ctx, &req.get_cookies()) {
         user::home(req, res, ctx)
     } else {
-        let body = HomeTmpl { name: &ctx.name };
+        let body = HomeTmpl { name: &ctx.name, username: None };
         let tmpl = Template::new(ctx, None, None, body);
         Ok(res.fmt_body(tmpl))
     }
@@ -31,7 +31,8 @@ pub fn user(req: &mut Request, res: Response, ctx: &Context)
     let username = &params["user"];
 
     let pool = &ctx.db_pool;
-    if let Some(user) = try_res!(res, db::read::user(pool, username)) {
+    if let Some(mut user) = try_res!(res, db::read::user(pool, username)) {
+        user.name = &ctx.name;
         let tmpl = Template::new(ctx, Some(username), None, user);
         Ok(res.fmt_body(tmpl))
     } else {

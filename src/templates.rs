@@ -71,13 +71,16 @@ impl<'a, 'b, 'c, T: Display> Template<'a, 'b, 'c, T> {
 
 #[derive(BartDisplay)]
 #[template = "templates/home.html"]
-pub struct HomeTmpl<'a> {
+pub struct HomeTmpl<'a, 'b> {
     pub name: &'a str,
+    pub username: Option<&'b str>,
 }
 
 #[derive(BartDisplay)]
 #[template = "templates/user.html"]
-pub struct User {
+pub struct User<'a> {
+    pub name: &'a str,
+    pub auth: bool,
     pub username: String,
     pub repos: Vec<Repo>,
 }
@@ -91,7 +94,7 @@ pub struct UserSettings {
 }
 
 #[derive(BartDisplay)]
-#[template = "templates/repo.html"]
+#[template = "templates/repo/view.html"]
 pub struct RepoTmpl<'a, 'b> {
     pub name: &'a str,
     pub username: &'b str,

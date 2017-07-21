@@ -1,7 +1,10 @@
-<h1>{{username}}</h1>
+<h1><a href="/">{{name}}</a></h1>
+{{#auth?}}<a href="/settings">Settings</a>{{/auth}}
+<h3>{{username}}</h3>
 
 <ul>
     {{#repos}}
-    <li>{{.name}} - {{.description}}</li>
+    <li><h5><a href="/{{username}}/{{.name}}">{{.name}}</a></h5><br>
+        <p>{{.description}}</p></li>
     {{/repos}}
 <ul>

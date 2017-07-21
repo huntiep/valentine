@@ -63,7 +63,7 @@ pub fn repo_is_private(pool: &Pool, username: &str, reponame: &str) -> Result<bo
         Err(e) => Err(Error::from(e)),
     }
 }
-pub fn user(pool: &Pool, username: &str) -> Result<Option<User>> {
+pub fn user(pool: &Pool, username: &str) -> Result<Option<User<'static>>> {
     let owner = user_id(pool, username)?;
 
     let conn = pool.get()?;
@@ -72,6 +72,8 @@ pub fn user(pool: &Pool, username: &str) -> Result<Option<User>> {
         .load::<Repo>(&*conn)?;
 
     Ok(Some(User {
+        name: "",
+        auth: false,
         username: username.to_string(),
         repos: repos,
     }))
