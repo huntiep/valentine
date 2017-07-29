@@ -1,3 +1,4 @@
+{{^empty?}}
 <h1><a href="/">{{name}}</a></h1>
 <h3><a href="/{{username}}">{{username}}</a> / <a href="/{{username}}/{{repo.name}}">{{repo.name}}</a></h3>
 <h4>{{repo.description}}</h4>
@@ -11,3 +12,7 @@
 {{#readme}}
 <p>{{{.}}}</p>
 {{/readme}}
+{{/empty}}
+{{#empty?}}
+<h1>Empty repository TODO</h1>
+{{/empty}}

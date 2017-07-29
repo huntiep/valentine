@@ -1,5 +1,5 @@
 use Result;
-use db::{public_keys, repos, users};
+use db::{issues, public_keys, repos, users};
 
 use base64;
 use bcrypt::{self, DEFAULT_COST};
@@ -64,6 +64,16 @@ impl Login {
             password: password,
         })
     }
+}
+
+#[derive(Queryable)]
+pub struct RepoFull {
+    pub id: i64,
+    pub name: String,
+    pub description: String,
+    pub owner: i32,
+    pub private: bool,
+    pub issue_id: i64,
 }
 
 #[derive(Insertable, Queryable)]
@@ -173,5 +183,49 @@ impl NewSshKey {
         } else {
             None
         }
+    }
+}
+
+#[derive(Insertable, Queryable)]
+#[table_name = "issues"]
+pub struct Issue {
+    pub repo: i64,
+    pub id: i64,
+    pub parent: i64,
+    pub name: Option<String>,
+    pub subject: Option<String>,
+    pub content: String,
+    pub created: ::chrono::NaiveDateTime,
+    pub thread: bool,
+}
+
+impl Issue {
+    pub fn new_thread(req: &mut Request, repo: i64, name: Option<String>) -> Option<Self> {
+        let (subject, content) = form_values!(req, subject, content);
+
+        Some(Issue {
+            repo: repo,
+            id: 0,
+            parent: 0,
+            name: name,
+            subject: Some(subject),
+            content: content,
+            created: ::chrono::Utc::now().naive_utc(),
+            thread: true,
+        })
+    }
+
+    pub fn new_reply(req: &mut Request, repo: i64, parent: i64, name: Option<String>) -> Option<Self> {
+        let content = form_values!(req, content);
+        Some(Issue {
+            repo: repo,
+            id: 0,
+            parent: parent,
+            name: name,
+            subject: None,
+            content: content,
+            created: ::chrono::Utc::now().naive_utc(),
+            thread: false,
+        })
     }
 }

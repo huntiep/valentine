@@ -38,16 +38,21 @@ table! {
         description -> VarChar,
         owner -> Integer,
         private -> Bool,
+        issue_id -> BigInt,
     }
 }
+
+numeric_expr!(repos::issue_id);
 
 table! {
     issues (repo, id) {
         repo -> BigInt,
         id -> BigInt,
         parent -> BigInt,
+        name -> Nullable<VarChar>,
         subject -> Nullable<VarChar>,
         content -> Text,
         created -> Timestamp,
+        thread -> Bool,
     }
 }

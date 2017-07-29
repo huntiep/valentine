@@ -101,6 +101,7 @@ pub struct RepoTmpl<'a, 'b> {
     pub repo: Repo,
     pub items: Vec<RepoItem>,
     pub readme: Option<String>,
+    pub empty: bool,
 }
 
 #[derive(BartDisplay)]
@@ -128,4 +129,24 @@ pub struct RepoSrcTmpl<'a, 'b, 'c> {
     pub repo: Repo,
     pub filename: &'c str,
     pub src: RepoSrc,
+}
+
+#[derive(BartDisplay)]
+#[template = "templates/repo/issues.html"]
+pub struct IssuesTmpl<'a, 'b, 'c> {
+    pub name: &'a str,
+    pub username: &'b str,
+    pub reponame: &'c str,
+    pub issues: Vec<Issue>,
+    pub auth: bool,
+}
+
+#[derive(BartDisplay)]
+#[template = "templates/repo/issue.html"]
+pub struct IssueTmpl<'a, 'b, 'c> {
+    pub name: &'a str,
+    pub username: &'b str,
+    pub reponame: &'c str,
+    pub thread: Vec<Issue>,
+    pub auth: bool,
 }

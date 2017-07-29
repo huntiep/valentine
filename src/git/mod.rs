@@ -140,6 +140,17 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
 
     let path = ctx.repo_dir.join(username).join(repo_name);
     let repo = Repository::open(path)?;
+    if repo.is_empty()? {
+        let tmpl = RepoTmpl {
+            name: &ctx.name,
+            username: username,
+            repo: repo_info,
+            items: Vec::new(),
+            readme: None,
+            empty: true,
+        };
+        return Ok(tmpl);
+    }
     let head = repo.head()?;
     // TODO
     let oid = head.target().unwrap();
@@ -154,6 +165,7 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
         repo: repo_info,
         items: items,
         readme: readme,
+        empty: false,
     };
     Ok(tmpl)
 }

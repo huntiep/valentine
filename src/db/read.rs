@@ -1,7 +1,7 @@
 use {Error, Result};
 use templates::*;
 use types::*;
-use super::{Pool, public_keys, repos, users};
+use super::{Pool, issues, public_keys, repos, users};
 
 use diesel;
 use diesel::prelude::*;
@@ -133,6 +133,53 @@ pub fn user_owns_repo(pool: &Pool, owner: i32, reponame: &str) -> Result<bool> {
     match repos::table.filter(repos::owner.eq(owner))
         .filter(repos::name.eq(reponame))
         .select(repos::id)
+        .first::<i64>(&*conn)
+    {
+        Ok(_) => Ok(true),
+        Err(diesel::result::Error::NotFound) => Ok(false),
+        Err(e) => Err(Error::from(e)),
+    }
+}
+
+pub fn issues(pool: &Pool, username: &str, reponame: &str) -> Result<Option<Vec<Issue>>> {
+    let id = if let Some(id) = repo_id(pool, username, reponame)? {
+        id
+    } else {
+        return Ok(None);
+    };
+
+    let conn = pool.get()?;
+
+    match issues::table.filter(issues::repo.eq(id))
+        .filter(issues::thread.eq(true))
+        .load(&*conn)
+    {
+        Ok(v) => Ok(Some(v)),
+        Err(diesel::result::Error::NotFound) => Ok(Some(Vec::new())),
+        Err(e) => Err(Error::from(e)),
+    }
+}
+
+pub fn issue(pool: &Pool, username: &str, reponame: &str, thread: i64) -> Result<Option<Vec<Issue>>> {
+    let id = if let Some(id) = repo_id(pool, username, reponame)? {
+        id
+    } else {
+        return Ok(None);
+    };
+
+    let conn = pool.get()?;
+    match issues::table.filter(issues::parent.eq(thread)).load(&*conn) {
+        Ok(thread) => Ok(Some(thread)),
+        Err(diesel::result::Error::NotFound) => Ok(None),
+        Err(e) => Err(Error::from(e)),
+    }
+}
+
+pub fn issue_exists(pool: &Pool, repo: i64, thread: i64) -> Result<bool> {
+    let conn = pool.get()?;
+    match issues::table.find((repo, thread))
+        .filter(issues::thread.eq(true))
+        .select(issues::id)
         .first::<i64>(&*conn)
     {
         Ok(_) => Ok(true),
