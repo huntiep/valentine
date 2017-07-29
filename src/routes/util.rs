@@ -4,17 +4,17 @@ use chrono::Duration;
 use hayaku::{Cookie, CookieJar};
 use rand::{OsRng, Rng};
 
-pub fn check_login<'a>(ctx: &Context, cookies: &'a CookieJar) -> (bool, Option<&'a str>) {
+pub fn check_login<'a>(ctx: &Context, cookies: &'a CookieJar) -> Option<&'a str> {
     if let Some(cookie) = cookies.get("session_key") {
         if let Some(name) = ctx.logins.lock().unwrap().get(cookie.value()) {
             if let Some(cookie) = cookies.get("dotcom_user") {
                 if cookie.value() == name {
-                    return (true, Some(cookie.value()));
+                    return Some(cookie.value());
                 }
             }
         }
     }
-    (false, None)
+    None
 }
 
 pub fn login(username: String, cookies: &mut CookieJar, ctx: &Context) {

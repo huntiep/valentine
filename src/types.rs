@@ -6,6 +6,22 @@ use bcrypt::{self, DEFAULT_COST};
 use hayaku::Request;
 use sha2::{Digest, Sha256};
 
+macro_rules! form_values {
+    ( $req:expr, $( $x:expr ),* ) => {
+        {
+            ($(
+                {
+                    let x =  try_opt!($req.form_value(stringify!($x)));
+                    if x.is_empty() {
+                        return None;
+                    }
+                    x
+                }
+            ),*)
+        }
+    };
+}
+
 #[derive(Insertable)]
 #[table_name = "users"]
 pub struct NewUser {
@@ -17,14 +33,10 @@ pub struct NewUser {
 
 impl NewUser {
     pub fn new(req: &mut Request) -> Option<Self> {
-        let username = try_opt!(req.form_value("username"));
-        let email = try_opt!(req.form_value("email"));
-        let password = try_opt!(req.form_value("password"));
-        let password_confirm = try_opt!(req.form_value("password_confirm"));
+        let (username, email) = form_values!(req, username, email);
+        let (password, confirm) = form_values!(req, password, password_confirm);
 
-        if username.is_empty() || email.is_empty() || password.is_empty() ||
-            password != password_confirm
-        {
+        if password != confirm {
             return None;
         }
 
@@ -45,12 +57,7 @@ pub struct Login {
 
 impl Login {
     pub fn new(req: &mut Request) -> Option<Self> {
-        let username = try_opt!(req.form_value("username"));
-        let password = try_opt!(req.form_value("password"));
-
-        if username.is_empty() || password.is_empty() {
-            return None;
-        }
+        let (username, password) = form_values!(req, username, password);
 
         Some(Login {
             username: username,
@@ -143,8 +150,7 @@ pub struct NewSshKey {
 
 impl NewSshKey {
     pub fn new(req: &mut Request, owner: i32) -> Option<Self> {
-        let name = try_opt!(req.form_value("name"));
-        let ssh_key = try_opt!(req.form_value("ssh_key"));
+        let (name, ssh_key) = form_values!(req, name, ssh_key);
         let fingerprint = try_opt!(NewSshKey::fingerprint(&ssh_key));
 
         Some(NewSshKey {

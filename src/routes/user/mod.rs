@@ -13,7 +13,7 @@ use time;
 pub fn signup(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    if let (true, _) = util::check_login(ctx, &req.get_cookies()) {
+    if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
         Ok(res.redirect(Status::BadRequest, "/", "You already have an account"))
     } else {
         let body = include_str!("../../../templates/user/signup.html");
@@ -26,7 +26,7 @@ pub fn signup(req: &mut Request, res: Response, ctx: &Context)
 pub fn signup_post(req: &mut Request, mut res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    if let (true, _) = util::check_login(ctx, &req.get_cookies()) {
+    if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
         return Ok(res.redirect(Status::BadRequest, "/", "You already have an account"));
     }
 
@@ -47,7 +47,7 @@ pub fn signup_post(req: &mut Request, mut res: Response, ctx: &Context)
 pub fn login(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    if let (true, _) = util::check_login(ctx, &req.get_cookies()) {
+    if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
         Ok(res.redirect(Status::BadRequest, "/", "You are already logged in"))
     } else {
         let body = include_str!("../../../templates/user/login.html");
@@ -60,7 +60,7 @@ pub fn login(req: &mut Request, res: Response, ctx: &Context)
 pub fn login_post(req: &mut Request, mut res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    if let (true, _) = util::check_login(ctx, &req.get_cookies()) {
+    if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
         return Ok(res.redirect(Status::BadRequest, "/", "You are already logged in"));
     }
 
@@ -143,7 +143,7 @@ pub fn settings(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
     let cookies = req.get_cookies();
-    let username = if let (true, Some(name)) = util::check_login(ctx, &cookies) {
+    let username = if let Some(name) = util::check_login(ctx, &cookies) {
         name
     } else {
         return Ok(res.redirect(Status::Forbidden, "/login",
@@ -160,12 +160,7 @@ pub fn add_ssh_key(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
     let cookies = req.get_cookies();
-    let username = if let (true, Some(name)) = util::check_login(ctx, &cookies) {
-        name
-    } else {
-        return Ok(res.redirect(Status::Forbidden, "/login",
-                               "You must be logged in for this operation"));
-    };
+    let username = check_login!(&cookies, res, ctx);
 
     let pool = &ctx.db_pool;
     let user_id = try_res!(res, db::read::user_id(pool, username));

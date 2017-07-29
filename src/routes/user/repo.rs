@@ -32,10 +32,7 @@ pub fn view(req: &mut Request, res: Response, ctx: &Context)
 pub fn new(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    if let (false, _) = util::check_login(ctx, &req.get_cookies()) {
-        return Ok(res.redirect(Status::Forbidden, "/login",
-                               "You must be logged in for this operation"));
-    }
+    check_login!(&req.get_cookies(), res, ctx);
 
     let body = include_str!("../../../templates/user/repo_new.html");
     let tmpl = Template::new(ctx, Some("Create a New Repository"), None, body);
@@ -47,12 +44,7 @@ pub fn new_post(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
     let cookies = req.get_cookies();
-    let username = if let (true, Some(name)) = util::check_login(ctx, &cookies) {
-        name
-    } else {
-        return Ok(res.redirect(Status::Forbidden, "/login",
-                               "You must be logged in for this operation"));
-    };
+    let username = check_login!(&cookies, res, ctx);
 
     let pool = &ctx.db_pool;
     let user_id = try_res!(res, db::read::user_id(pool, username));
@@ -77,12 +69,7 @@ pub fn settings(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
     let cookies = req.get_cookies();
-    let username = if let (true, Some(name)) = util::check_login(ctx, &cookies) {
-        name
-    } else {
-        return Ok(res.redirect(Status::Forbidden, "/login",
-                               "You must be logged in for this operation"));
-    };
+    let username = check_login!(&cookies, res, ctx);
 
     let params = hayaku::get_path_params(req);
     let user = &params["user"];
@@ -111,12 +98,7 @@ pub fn settings_name(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
     let cookies = req.get_cookies();
-    let username = if let (true, Some(name)) = util::check_login(ctx, &cookies) {
-        name
-    } else {
-        return Ok(res.redirect(Status::Forbidden, "/login",
-                               "You must be logged in for this operation"));
-    };
+    let username = check_login!(&cookies, res, ctx);
 
     let params = hayaku::get_path_params(req);
     let user = &params["user"];
@@ -151,12 +133,7 @@ pub fn delete(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
     let cookies = req.get_cookies();
-    let username = if let (true, Some(name)) = util::check_login(ctx, &cookies) {
-        name
-    } else {
-        return Ok(res.redirect(Status::Forbidden, "/login",
-                               "You must be logged in for this operation"));
-    };
+    let username = check_login!(&cookies, res, ctx);
 
     let params = hayaku::get_path_params(req);
     let user = &params["user"];

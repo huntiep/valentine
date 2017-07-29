@@ -12,7 +12,7 @@ use hayaku::{self, Request, Response, ResDone, ResponseDone, Status};
 pub fn home(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    if let (true, _) = util::check_login(ctx, &req.get_cookies()) {
+    if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
         user::home(req, res, ctx)
     } else {
         let body = HomeTmpl { name: &ctx.name, username: None };
@@ -25,7 +25,7 @@ pub fn home(req: &mut Request, res: Response, ctx: &Context)
 pub fn user(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    if let (true, _) = util::check_login(ctx, &req.get_cookies()) {
+    if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
         return user::user(req, res, ctx);
     }
     let params = hayaku::get_path_params(req);

@@ -27,6 +27,7 @@ extern crate toml;
 mod cmd;
 mod db;
 mod git;
+#[macro_use] mod macros;
 mod routes;
 mod templates;
 mod types;

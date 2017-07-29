@@ -8,7 +8,7 @@ use hayaku::{self, Request, Response, ResDone, ResponseDone, Status};
 pub fn view(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    if let (true, _) = util::check_login(ctx, &req.get_cookies()) {
+    if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
         user::repo::view(req, res, ctx)
     } else {
         let params = hayaku::get_path_params(req);
