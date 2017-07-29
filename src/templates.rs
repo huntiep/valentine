@@ -77,7 +77,7 @@ pub struct HomeTmpl<'a, 'b> {
 }
 
 #[derive(BartDisplay)]
-#[template = "templates/user.html"]
+#[template = "templates/user/view.html"]
 pub struct User<'a> {
     pub name: &'a str,
     pub auth: bool,
@@ -87,10 +87,12 @@ pub struct User<'a> {
 
 #[derive(BartDisplay)]
 #[template = "templates/user/settings.html"]
-pub struct UserSettings {
+pub struct UserSettings<'a> {
+    pub name: &'a str,
     pub username: String,
     pub email: String,
     pub keys: Vec<SshKey>,
+    pub auth: bool,
 }
 
 #[derive(BartDisplay)]

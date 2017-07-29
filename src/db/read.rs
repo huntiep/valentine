@@ -96,7 +96,7 @@ pub fn repo(pool: &Pool, username: &str, reponame: &str) -> Result<Option<Repo>>
     }
 }
 
-pub fn settings(pool: &Pool, username: &str) -> Result<UserSettings> {
+pub fn settings<'a>(pool: &Pool, username: &str) -> Result<UserSettings<'a>> {
     let owner = user_id(pool, username)?;
 
     let conn = pool.get()?;
@@ -108,9 +108,11 @@ pub fn settings(pool: &Pool, username: &str) -> Result<UserSettings> {
         .load::<SshKey>(&*conn)?;
 
     Ok(UserSettings {
+        name: "",
         username: username.to_string(),
         email: email,
         keys: keys,
+        auth: true,
     })
 }
 

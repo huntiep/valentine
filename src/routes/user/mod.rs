@@ -110,7 +110,8 @@ pub fn settings(req: &mut Request, res: Response, ctx: &Context)
     let cookies = req.get_cookies();
     let username = check_login!(&cookies, res, ctx);
 
-    let settings = try_res!(res, db::read::settings(&ctx.db_pool, username));
+    let mut settings = try_res!(res, db::read::settings(&ctx.db_pool, username));
+    settings.name = &ctx.name;
     let tmpl = Template::new(ctx, Some("Settings"), None, settings);
     Ok(res.fmt_body(tmpl))
 }
