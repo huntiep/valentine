@@ -116,6 +116,13 @@ impl Commit {
     }
 }
 
+#[derive(Explode)]
+pub enum RepoSrc {
+    File(String),
+    Dir { items: Vec<RepoItem>, readme: Option<String> },
+    Error,
+}
+
 #[derive(Queryable)]
 pub struct SshKey {
     pub id: i32,

@@ -62,6 +62,7 @@ pub fn run(config: Config, config_path: PathBuf) {
     // TODO: use regex to assert that `repo` ends with .git
     router.get("/{user}/{repo}/info/refs", Arc::new(git_routes::pull_handshake));
     router.post("/{user}/{repo}/git-upload-pack", Arc::new(git_routes::pull));
+    router.get("/{user}/{repo}/tree/{branch}/{*filepath}", Arc::new(repo::src));
 
     // User
     router.get("/signup", Arc::new(user::signup));

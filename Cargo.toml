@@ -39,5 +39,9 @@ version = "0.14.0"
 features = ["postgres"]
 version = "0.14.0"
 
+[dependencies.explode]
+git = "https://git.hunterpraska.com/hunter/explode"
+#path = "../explode"
+
 [dependencies.hayaku]
 git = "https://git.hunterpraska.com/hayaku/hayaku"

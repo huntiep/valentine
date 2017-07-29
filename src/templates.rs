@@ -119,3 +119,13 @@ pub struct RepoLogTmpl<'a, 'b> {
     pub repo: Repo,
     pub log: Vec<Commit>,
 }
+
+#[derive(BartDisplay)]
+#[template = "templates/repo/src.html"]
+pub struct RepoSrcTmpl<'a, 'b, 'c> {
+    pub name: &'a str,
+    pub username: &'b str,
+    pub repo: Repo,
+    pub filename: &'c str,
+    pub src: RepoSrc,
+}

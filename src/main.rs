@@ -5,6 +5,7 @@ extern crate chrono;
 #[macro_use] extern crate clap;
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_codegen;
+#[macro_use] extern crate explode;
 extern crate git2;
 #[macro_use] extern crate hayaku;
 #[macro_use] extern crate log;
