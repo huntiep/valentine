@@ -103,52 +103,12 @@ pub fn logout(req: &mut Request, mut res: Response, ctx: &Context)
     Ok(res.redirect(Status::Found, "/", "Logout successful"))
 }
 
-// GET /
-pub fn home(req: &mut Request, res: Response, ctx: &Context)
-    -> ResponseDone<Error>
-{
-    let cookies = req.get_cookies();
-    let username = util::retrieve_username(&cookies);
-    if username.is_none() {
-        return Ok(res.redirect(Status::Forbidden, "/login", "Error"));
-    }
-    let username = username.unwrap();
-    info!("read cookie");
-
-    let body = HomeTmpl { name: &ctx.name, username: Some(username) };
-    let tmpl = Template::new(ctx, Some(username), None, body);
-    Ok(res.fmt_body(tmpl))
-}
-
-// GET /{user}
-pub fn user(req: &mut Request, res: Response, ctx: &Context)
-    -> ResponseDone<Error>
-{
-    let params = hayaku::get_path_params(req);
-    let username = &params["user"];
-
-    let pool = &ctx.db_pool;
-    if let Some(mut user) = try_res!(res, db::read::user(pool, username)) {
-        user.auth = true;
-        user.name = &ctx.name;
-        let tmpl = Template::new(ctx, Some(username), None, user);
-        Ok(res.fmt_body(tmpl))
-    } else {
-        not_found(req, res, ctx)
-    }
-}
-
 // GET /settings
 pub fn settings(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
     let cookies = req.get_cookies();
-    let username = if let Some(name) = util::check_login(ctx, &cookies) {
-        name
-    } else {
-        return Ok(res.redirect(Status::Forbidden, "/login",
-                               "You must be logged in for this operation"));
-    };
+    let username = check_login!(&cookies, res, ctx);
 
     let settings = try_res!(res, db::read::settings(&ctx.db_pool, username));
     let tmpl = Template::new(ctx, Some("Settings"), None, settings);

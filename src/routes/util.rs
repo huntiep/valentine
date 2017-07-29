@@ -36,8 +36,3 @@ pub fn login(username: String, cookies: &mut CookieJar, ctx: &Context) {
         .finish();
     cookies.add(cookie);
 }
-
-pub fn retrieve_username(cookies: &CookieJar) -> Option<&str> {
-    let cookie = try_opt!(cookies.get("dotcom_user"));
-    Some(cookie.value())
-}

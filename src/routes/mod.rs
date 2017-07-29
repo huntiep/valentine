@@ -12,29 +12,27 @@ use hayaku::{self, Request, Response, ResDone, ResponseDone, Status};
 pub fn home(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
-        user::home(req, res, ctx)
-    } else {
-        let body = HomeTmpl { name: &ctx.name, username: None };
-        let tmpl = Template::new(ctx, None, None, body);
-        Ok(res.fmt_body(tmpl))
-    }
+    let cookies = &req.get_cookies();
+    let username = util::check_login(ctx, &cookies);
+    let body = HomeTmpl { name: &ctx.name, username: username };
+    let tmpl = Template::new(ctx, username, None, body);
+    Ok(res.fmt_body(tmpl))
 }
 
 // GET /{user}
 pub fn user(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
-    if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
-        return user::user(req, res, ctx);
-    }
+    let cookies = req.get_cookies();
+    let username = util::check_login(ctx, &cookies);
     let params = hayaku::get_path_params(req);
-    let username = &params["user"];
+    let user = &params["user"];
 
     let pool = &ctx.db_pool;
-    if let Some(mut user) = try_res!(res, db::read::user(pool, username)) {
-        user.name = &ctx.name;
-        let tmpl = Template::new(ctx, Some(username), None, user);
+    if let Some(mut body) = try_res!(res, db::read::user(pool, user)) {
+        body.name = &ctx.name;
+        body.auth = username.is_some();
+        let tmpl = Template::new(ctx, Some(user), None, body);
         Ok(res.fmt_body(tmpl))
     } else {
         not_found(req, res, ctx)

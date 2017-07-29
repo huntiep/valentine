@@ -5,29 +5,6 @@ use super::{not_found, util};
 
 use hayaku::{self, Request, Response, ResponseDone, Status};
 
-// GET /{user}/{repo}
-pub fn view(req: &mut Request, res: Response, ctx: &Context)
-    -> ResponseDone<Error>
-{
-    let params = hayaku::get_path_params(req);
-    let username = &params["user"];
-    let reponame = &params["repo"];
-
-    let pool = &ctx.db_pool;
-    if !try_res!(res, db::read::user_exists(pool, username)) {
-        return not_found(req, res, ctx);
-    }
-
-    let repo = if let Some(repo) = try_res!(res, db::read::repo(pool, username, reponame)) {
-        repo
-    } else {
-        return not_found(req, res, ctx);
-    };
-    let repo_git = try_res!(res, git::read(ctx, username, repo));
-    let tmpl = Template::new(ctx, Some(username), None, repo_git);
-    Ok(res.fmt_body(tmpl))
-}
-
 // GET /repo/new
 pub fn new(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
@@ -75,6 +52,7 @@ pub fn settings(req: &mut Request, res: Response, ctx: &Context)
     let user = &params["user"];
     let reponame = &params["repo"];
 
+    // TODO: we probably want a different check here
     if username != user {
         return Ok(res.redirect(Status::BadRequest, &format!("/{}/{}", user, reponame),
                                "You must own a repo to delete it"));
@@ -93,7 +71,7 @@ pub fn settings(req: &mut Request, res: Response, ctx: &Context)
     Ok(res.fmt_body(tmpl))
 }
 
-// GET /{user}/{repo}/settings/name
+// POST /{user}/{repo}/settings/name
 pub fn settings_name(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
@@ -104,6 +82,7 @@ pub fn settings_name(req: &mut Request, res: Response, ctx: &Context)
     let user = &params["user"];
     let reponame = &params["repo"];
 
+    // TODO: we probably want a different check here
     if username != user {
         return Ok(res.redirect(Status::BadRequest, &format!("/{}/{}", user, reponame),
                                "You must own a repo to delete it"));
@@ -129,6 +108,8 @@ pub fn settings_name(req: &mut Request, res: Response, ctx: &Context)
 }
 
 // GET /{user}/{repo}/delete
+// TODO: consider making this a post request, taking the name of the repo and
+// then checking that the given name matches this repo's name as a safety
 pub fn delete(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
@@ -139,6 +120,7 @@ pub fn delete(req: &mut Request, res: Response, ctx: &Context)
     let user = &params["user"];
     let reponame = &params["repo"];
 
+    // TODO: we probably want a different check here
     if username != user {
         return Ok(res.redirect(Status::BadRequest, &format!("/{}/{}", user, reponame),
                                "You must own a repo to delete it"));
