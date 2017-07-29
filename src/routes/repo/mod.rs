@@ -1,3 +1,5 @@
+pub mod issues;
+
 use {Context, Error, db, git};
 use templates::*;
 use super::{not_found, user, util};
