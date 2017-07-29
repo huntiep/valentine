@@ -76,7 +76,7 @@ pub fn run(config: Config, config_path: PathBuf) {
     router.post("/repo/new", Arc::new(user::repo::new_post));
     router.get("/{user}/{repo}/settings", Arc::new(user::repo::settings));
     router.post("/{user}/{repo}/settings/name", Arc::new(user::repo::settings_name));
-    router.get("/{user}/{repo}/delete", Arc::new(user::repo::delete));
+    router.post("/{user}/{repo}/delete", Arc::new(user::repo::delete));
 
     // repo issue tracker
     router.get("/{user}/{repo}/issues", Arc::new(repo::issues::home));

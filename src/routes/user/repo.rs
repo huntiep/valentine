@@ -107,9 +107,7 @@ pub fn settings_name(req: &mut Request, res: Response, ctx: &Context)
                     "Repo name changed"))
 }
 
-// GET /{user}/{repo}/delete
-// TODO: consider making this a post request, taking the name of the repo and
-// then checking that the given name matches this repo's name as a safety
+// POST /{user}/{repo}/delete
 pub fn delete(req: &mut Request, res: Response, ctx: &Context)
     -> ResponseDone<Error>
 {
@@ -124,6 +122,18 @@ pub fn delete(req: &mut Request, res: Response, ctx: &Context)
     if username != user {
         return Ok(res.redirect(Status::BadRequest, &format!("/{}/{}", user, reponame),
                                "You must own a repo to delete it"));
+    }
+
+    if let Some(name) = req.form_value("delete") {
+        if &name != reponame {
+            return Ok(res.redirect(Status::BadRequest,
+                                   &format!("/{}/{}/settings", user, reponame),
+                                   "Incorrect name entered"));
+        }
+    } else {
+        return Ok(res.redirect(Status::BadRequest,
+                               &format!("/{}/{}/settings", user, reponame),
+                               "You must enter the name of this repo to delete it"));
     }
 
     let pool = &ctx.db_pool;

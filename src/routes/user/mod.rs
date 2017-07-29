@@ -131,14 +131,6 @@ pub fn add_ssh_key(req: &mut Request, res: Response, ctx: &Context)
         return Ok(res.redirect(Status::Forbidden, "/settings", "Invalid data"));
     };
     // TODO validate key
-    /*if thrussh::parse_public_key_base64(ssh_key).is_err() {
-        // TODO
-        let settings = "";
-        let msg = "Invalid ssh key!";
-        let tmpl = Template::new(ctx, Some("Settings"), Some(msg), settings);
-        res.status(Status::BadRequest);
-        return Ok(res.fmt_body(tmpl));
-    }*/
     let key = try_res!(res, db::create::public_key(pool, &ssh_key));
     try_res!(res, git::add_ssh_key(ctx, &key));
 
