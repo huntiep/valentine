@@ -133,20 +133,20 @@ pub struct RepoSrcTmpl<'a, 'b, 'c> {
 
 #[derive(BartDisplay)]
 #[template = "templates/repo/issues.html"]
-pub struct IssuesTmpl<'a, 'b, 'c> {
+pub struct IssuesTmpl<'a, 'b> {
     pub name: &'a str,
     pub username: &'b str,
-    pub reponame: &'c str,
+    pub repo: Repo,
     pub issues: Vec<Issue>,
     pub auth: bool,
 }
 
 #[derive(BartDisplay)]
 #[template = "templates/repo/issue.html"]
-pub struct IssueTmpl<'a, 'b, 'c> {
+pub struct IssueTmpl<'a, 'b> {
     pub name: &'a str,
     pub username: &'b str,
-    pub reponame: &'c str,
+    pub repo: Repo,
     pub thread: Vec<Issue>,
     pub auth: bool,
 }

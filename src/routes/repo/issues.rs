@@ -13,7 +13,14 @@ pub fn home(req: &mut Request, res: Response, ctx: &Context)
     let username = &params["user"];
     let reponame = &params["repo"];
 
-    let issues = try_res!(res, db::read::issues(&ctx.db_pool, username, reponame));
+    let pool = &ctx.db_pool;
+    let repo = if let Some(repo) = try_res!(res, db::read::repo(pool, username, reponame)) {
+        repo
+    } else {
+        return not_found(req, res, ctx);
+    };
+
+    let issues = try_res!(res, db::read::issues(pool, username, reponame));
     if issues.is_none() {
         return not_found(req, res, ctx);
     }
@@ -24,7 +31,7 @@ pub fn home(req: &mut Request, res: Response, ctx: &Context)
     let body = IssuesTmpl {
         name: &ctx.name,
         username: username,
-        reponame: reponame,
+        repo: repo,
         issues: issues,
         auth: auth,
     };
@@ -97,7 +104,14 @@ pub fn view(req: &mut Request, res: Response, ctx: &Context)
     let reponame = &params["repo"];
     let thread = parse_param!(req, res, ctx, params, "thread", i64);
 
-    let thread = try_res!(res, db::read::issue(&ctx.db_pool, username, reponame, thread));
+    let pool = &ctx.db_pool;
+    let repo = if let Some(repo) = try_res!(res, db::read::repo(pool, username, reponame)) {
+        repo
+    } else {
+        return not_found(req, res, ctx);
+    };
+
+    let thread = try_res!(res, db::read::issue(pool, username, reponame, thread));
     if thread.is_none() {
         return not_found(req, res, ctx);
     }
@@ -108,7 +122,7 @@ pub fn view(req: &mut Request, res: Response, ctx: &Context)
     let body = IssueTmpl {
         name: &ctx.name,
         username: username,
-        reponame: reponame,
+        repo: repo,
         thread: thread,
         auth: auth,
     };
