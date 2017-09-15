@@ -55,28 +55,31 @@ pub fn run(config: Config, config_path: PathBuf) {
     let mut router = Router::new();
     router.set_not_found_handler(Arc::new(not_found));
     router.set_internal_error_handler(Arc::new(internal_error));
-    router.get("/", Arc::new(home));
-    router.get("/{user}", Arc::new(user));
-    router.get("/{user}/{repo}", Arc::new(repo::view));
-    router.get("/{user}/{repo}/log", Arc::new(repo::log));
-    // TODO: use regex to assert that `repo` ends with .git
-    router.get("/{user}/{repo}/info/refs", Arc::new(git_routes::pull_handshake));
-    router.post("/{user}/{repo}/git-upload-pack", Arc::new(git_routes::pull));
-    router.get("/{user}/{repo}/tree/{branch}/{*filepath}", Arc::new(repo::src));
+    router!{
+        router,
+        get "/" => home,
+        get "/{user}" => user,
+        get "/{user}/{repo}" => repo::view,
+        get "/{user}/{repo}/log" => repo::log,
+        // TODO: use regex to assert that `repo` ends with .git
+        get "/{user}/{repo}/info/refs" => git_routes::pull_handshake,
+        post "/{user}/{repo}/git-upload-pack" => git_routes::pull,
+        get "/{user}/{repo}/tree/{branch}/{*filepath}" => repo::src,
 
-    // User
-    router.get("/signup", Arc::new(user::signup));
-    router.post("/signup", Arc::new(user::signup_post));
-    router.get("/login", Arc::new(user::login));
-    router.post("/login", Arc::new(user::login_post));
-    router.get("/logout", Arc::new(user::logout));
-    router.get("/settings", Arc::new(user::settings));
-    router.post("/settings/add-ssh-key", Arc::new(user::add_ssh_key));
-    router.get("/repo/new", Arc::new(user::repo::new));
-    router.post("/repo/new", Arc::new(user::repo::new_post));
-    router.get("/{user}/{repo}/settings", Arc::new(user::repo::settings));
-    router.post("/{user}/{repo}/settings/name", Arc::new(user::repo::settings_name));
-    router.post("/{user}/{repo}/delete", Arc::new(user::repo::delete));
+        // User
+        get "/signup" => user::signup,
+        post "/signup" => user::signup_post,
+        get "/login" => user::login,
+        post "/login" => user::login_post,
+        get "/logout" => user::logout,
+        get "/settings" => user::settings,
+        post "/settings/add-ssh-key" => user::add_ssh_key,
+        get "/repo/new" => user::repo::new,
+        post "/repo/new" => user::repo::new_post,
+        get "/{user}/{repo}/settings" => user::repo::settings,
+        post "/{user}/{repo}/settings/name" => user::repo::settings_name,
+        post "/{user}/{repo}/settings/delete" => user::repo::delete,
+    }
 
     let addr = config.addr.unwrap_or_else(|| "127.0.0.1:3000".parse().unwrap());
     info!("running server at {}", addr);
