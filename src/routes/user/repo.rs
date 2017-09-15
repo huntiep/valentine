@@ -23,17 +23,17 @@ route!{new_post, req, res, ctx, {
     let repo = if let Some(repo) = Repo::new(req, user_id) {
         repo
     } else {
-        return Ok(res.redirect(Status::BAD_REQUEST, "/repo/new", "Invalid input"));
+        redirect!(res, ctx, "repo/new", "Invalid input");
     };
 
     if db::read::repo_exists(pool, username, &repo.name)? {
-        return Ok(res.redirect(Status::BAD_REQUEST, "/repo/new", "That repo already exists"));
+        redirect!(res, ctx, "repo/new", "That repo already exists");
     }
     db::create::repo(pool, &repo)?;
 
     git::init(ctx, username, repo.name.clone())?;
 
-    Ok(res.redirect(Status::FOUND, &format!("/{}/{}", username, repo.name), "Repo created"))
+    redirect!(res, ctx, format!("{}/{}", username, repo.name), "Repo created");
 }}
 
 // GET /{user}/{repo}/settings
@@ -46,8 +46,7 @@ route!{settings, req, res, ctx, {
 
     // TODO: we probably want a different check here
     if username != user {
-        return Ok(res.redirect(Status::BAD_REQUEST, &format!("/{}/{}", user, reponame),
-                               "You must own a repo to delete it"));
+        redirect!(res, ctx, format!("{}/{}", user, reponame), "You must own a repo to delete it");
     }
 
 
@@ -72,27 +71,22 @@ route!{settings_name, req, res, ctx, {
 
     // TODO: we probably want a different check here
     if username != user {
-        return Ok(res.redirect(Status::BAD_REQUEST, &format!("/{}/{}", user, reponame),
-                               "You must own a repo to delete it"));
+        redirect!(res, ctx, format!("{}/{}", user, reponame), "You must own a repo to delete it");
     }
 
     let pool = &ctx.db_pool;
     if !db::read::repo_exists(pool, username, &reponame)? {
-        return Ok(res.redirect(Status::BAD_REQUEST, &format!("/{}/{}", user, reponame),
-                               "Repo does not exist"));
+        redirect!(res, ctx, format!("{}/{}", user, reponame), "Repo does not exist");
     }
 
     let new_name = if let Some(name) = req.form_value("name") {
         name
     } else {
-        return Ok(res.redirect(Status::BAD_REQUEST, &format!("/{}/{}", user, reponame),
-                               "Invalid data"));
+        redirect!(res, ctx, format!("{}/{}", user, reponame), "Invalid  data");
     };
 
     db::update::repo_name(pool, username, &reponame, &new_name)?;
-    Ok(res.redirect(Status::FOUND,
-                    &format!("/{}/{}", username, new_name),
-                    "Repo name changed"))
+    redirect!(res, ctx, format!("{}/{}", username, new_name), "Repo name changed");
 }}
 
 // POST /{user}/{repo}/delete
@@ -105,24 +99,20 @@ route!{delete, req, res, ctx, {
 
     // TODO: we probably want a different check here
     if username != user {
-        return Ok(res.redirect(Status::BAD_REQUEST, &format!("/{}/{}", user, reponame),
-                               "You must own a repo to delete it"));
+        redirect!(res, ctx, format!("{}/{}", user, reponame), "You must own a repo to delete it");
     }
 
     if let Some(name) = req.form_value("delete") {
         if name != reponame {
-            return Ok(res.redirect(Status::BAD_REQUEST,
-                                   &format!("/{}/{}/settings", user, reponame),
-                                   "Incorrect name entered"));
+        redirect!(res, ctx, format!("{}/{}/settings", user, reponame), "Incorrect name entered");
         }
     } else {
-        return Ok(res.redirect(Status::BAD_REQUEST,
-                               &format!("/{}/{}/settings", user, reponame),
-                               "You must enter the name of this repo to delete it"));
+        redirect!(res, ctx, format!("{}/{}/settings", user, reponame),
+                  "You must enter the name of this repo to delete it");
     }
 
     let pool = &ctx.db_pool;
     db::delete::repo(pool, username, &reponame)?;
     git::delete(ctx, username, &reponame)?;
-    Ok(res.redirect(Status::FOUND, &format!("/{}", username), "Repo deleted"))
+    redirect!(res, ctx, format!("{}", username), "Repo deleted");
 }}

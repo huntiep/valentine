@@ -1,7 +1,6 @@
 pub mod repo;
 
 use {db, git};
-use templates::*;
 use types::*;
 use super::{not_found, util};
 
@@ -12,7 +11,7 @@ use time;
 // GET /signup
 route!{signup, req, res, ctx, {
     if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
-        Ok(res.redirect(Status::BAD_REQUEST, "/", "You already have an account"))
+        redirect!(res, ctx, "", "You already have an account");
     } else {
         let body = include_str!("../../../templates/user/signup.html");
         tmpl!(res, ctx, Some("Signup"), None, body);
@@ -22,12 +21,12 @@ route!{signup, req, res, ctx, {
 // POST /signup
 route!{signup_post, req, res, ctx, {
     if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
-        return Ok(res.redirect(Status::BAD_REQUEST, "/", "You already have an account"));
+        redirect!(res, ctx, "", "You already have an account");
     }
 
     let new_user = NewUser::new(req);
     if new_user.is_none() {
-        return Ok(res.redirect(Status::BAD_REQUEST, "/signup", "Signup failed"));
+        redirect!(res, ctx, "signup", "Signup failed");
     }
     let new_user = new_user.unwrap();
 
@@ -35,13 +34,13 @@ route!{signup_post, req, res, ctx, {
     db::create::user(pool, &new_user)?;
     git::create_user(ctx, &new_user.username)?;
     util::login(new_user.username, &mut res.cookies(), ctx);
-    Ok(res.redirect(Status::FOUND, "/", "Signup sucessfull"))
+    redirect!(res, ctx, "", "Signup successful");
 }}
 
 // GET /login
 route!{login, req, res, ctx, {
     if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
-        Ok(res.redirect(Status::BAD_REQUEST, "/", "You are already logged in"))
+        redirect!(res, ctx, "", "You are already logged in");
     } else {
         let body = include_str!("../../../templates/user/login.html");
         tmpl!(res, ctx, Some("Login"), None, body);
@@ -51,23 +50,23 @@ route!{login, req, res, ctx, {
 // POST /login
 route!{login_post, req, res, ctx, {
     if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
-        return Ok(res.redirect(Status::BAD_REQUEST, "/", "You are already logged in"));
+        redirect!(res, ctx, "", "You are already logged in");
     }
 
     let login = Login::new(req);
     if login.is_none() {
-        return Ok(res.redirect(Status::BAD_REQUEST, "/login", "Login failed"));
+        redirect!(res, ctx, "login", "Login failed");
     }
     let login = login.unwrap();
 
     let pool = &ctx.db_pool;
     let login_check = db::read::check_login(pool, &login)?;
     if !login_check {
-        return Ok(res.redirect(Status::BAD_REQUEST, "/login", "Login failed"));
+        redirect!(res, ctx, "login", "Login failed");
     }
 
     util::login(login.username, &mut res.cookies(), ctx);
-    Ok(res.redirect(Status::FOUND, "/", "Login successful"))
+    redirect!(res, ctx, "", "Login successful");
 }}
 
 // GET /logout
@@ -88,7 +87,7 @@ route!{logout, req, res, ctx, {
             .finish();
         cookies.add(del_cookie);
     }
-    Ok(res.redirect(Status::FOUND, "/", "Logout successful"))
+    redirect!(res, ctx, "", "Logout successful");
 }}
 
 // GET /settings
@@ -111,13 +110,13 @@ route!{add_ssh_key, req, res, ctx, {
     let ssh_key = if let Some(key) = NewSshKey::new(req, user_id) {
         key
     } else {
-        return Ok(res.redirect(Status::FORBIDDEN, "/settings", "Invalid data"));
+        redirect!(res, ctx, "settings", "Invalid data");
     };
     // TODO validate key
     let key = db::create::public_key(pool, &ssh_key)?;
     git::add_ssh_key(ctx, &key)?;
 
-    Ok(res.redirect(Status::OK, "/settings", "SSH key added"))
+    redirect!(res, ctx, "settings", "SSH key added");
 }}
 
 // TODO

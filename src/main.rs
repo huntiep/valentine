@@ -76,6 +76,7 @@ pub type UserName = String;
 
 pub struct Context {
     pub db_pool: db::Pool,
+    // TODO: Use this in templates
     pub mount: String,
     pub logins: Arc<Mutex<HashMap<SessionKey, UserName>>>,
     pub name: String,
