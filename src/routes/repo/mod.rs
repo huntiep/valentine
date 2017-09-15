@@ -1,5 +1,3 @@
-//pub mod issues;
-
 use {db, git};
 use templates::*;
 use super::{not_found, util};

@@ -1,8 +1,7 @@
 use {db, git};
 use super::not_found;
 
-use hayaku::Status;
-use hayaku::header::{self, HeaderValue};
+use hayaku::{header, Status};
 
 // GET /{user}/{repo}/info/refs
 route!{pull_handshake, req, res, ctx, {

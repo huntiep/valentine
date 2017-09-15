@@ -39,16 +39,3 @@ table! {
         issue_id -> BigInt,
     }
 }
-
-table! {
-    issues (repo, id) {
-        repo -> BigInt,
-        id -> BigInt,
-        parent -> BigInt,
-        name -> Nullable<VarChar>,
-        subject -> Nullable<VarChar>,
-        content -> Text,
-        created -> Timestamp,
-        thread -> Bool,
-    }
-}

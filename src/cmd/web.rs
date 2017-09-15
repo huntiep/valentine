@@ -78,16 +78,6 @@ pub fn run(config: Config, config_path: PathBuf) {
     router.post("/{user}/{repo}/settings/name", Arc::new(user::repo::settings_name));
     router.post("/{user}/{repo}/delete", Arc::new(user::repo::delete));
 
-    // repo issue tracker
-    /*
-    router.get("/{user}/{repo}/issues", Arc::new(repo::issues::home));
-    router.post("/{user}/{repo}/issues", Arc::new(repo::issues::new));
-    router.get("/{user}/{repo}/issues/delete/{thread}", Arc::new(repo::issues::delete_thread));
-    router.get("/{user}/{repo}/issues/{thread}", Arc::new(repo::issues::view));
-    router.post("/{user}/{repo}/issues/{thread}", Arc::new(repo::issues::reply));
-    router.get("/{user}/{repo}/issues/{thread}/delete/{reply}", Arc::new(repo::issues::delete_post));
-    */
-
     let addr = config.addr.unwrap_or_else(|| "127.0.0.1:3000".parse().unwrap());
     info!("running server at {}", addr);
     Http::new(router, ctx).listen_and_serve(addr);
