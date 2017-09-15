@@ -6,52 +6,43 @@ mod util;
 use {Context, Error, db};
 use templates::*;
 
-use hayaku::{self, Request, Response, ResDone, ResponseDone, Status};
+use hayaku::{Request, Response, Status};
 
 // GET /
-pub fn home(req: &mut Request, res: Response, ctx: &Context)
-    -> ResponseDone<Error>
-{
+route!{home, req, res, ctx, {
     let cookies = &req.get_cookies();
     let username = util::check_login(ctx, &cookies);
     let body = HomeTmpl { name: &ctx.name, username: username };
     let tmpl = Template::new(ctx, username, None, body);
     Ok(res.fmt_body(tmpl))
-}
+}}
 
 // GET /{user}
-pub fn user(req: &mut Request, res: Response, ctx: &Context)
-    -> ResponseDone<Error>
-{
+route!{user, req, res, ctx, {
     let cookies = req.get_cookies();
     let username = util::check_login(ctx, &cookies);
-    let params = hayaku::get_path_params(req);
-    let user = &params["user"];
+    let user = req.get_param("user");
 
     let pool = &ctx.db_pool;
-    if let Some(mut body) = try_res!(res, db::read::user(pool, user)) {
+    if let Some(mut body) = db::read::user(pool, &user)? {
         body.name = &ctx.name;
         body.auth = username.is_some();
-        let tmpl = Template::new(ctx, Some(user), None, body);
+        let tmpl = Template::new(ctx, Some(&user), None, body);
         Ok(res.fmt_body(tmpl))
     } else {
         not_found(req, res, ctx)
     }
-}
+}}
 
-pub fn not_found(_req: &mut Request, mut res: Response, ctx: &Context)
-    -> ResponseDone<Error>
-{
-    res.status(Status::NotFound);
+route!{not_found, req, res, ctx, {
+    res.status(Status::NOT_FOUND);
     let body = include_str!("../../templates/404.html");
     let tmpl = Template::new(ctx, Some("404"), None, body);
     Ok(res.fmt_body(tmpl))
-}
+}}
 
-pub fn internal_error(_req: &mut Request, mut res: Response, ctx: &Context, err: &Error)
-    -> ResDone
-{
-    res.status(Status::InternalServerError);
+pub fn internal_error(_req: &mut Request, res: &mut Response, ctx: &Context, err: &Error) {
+    res.status(Status::INTERNAL_SERVER_ERROR);
 
     match *err {
         _ => {

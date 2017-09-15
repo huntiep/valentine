@@ -19,8 +19,6 @@ table! {
     }
 }
 
-numeric_expr!(users::num_repos);
-
 table! {
     public_keys {
         id -> Integer,
@@ -41,8 +39,6 @@ table! {
         issue_id -> BigInt,
     }
 }
-
-numeric_expr!(repos::issue_id);
 
 table! {
     issues (repo, id) {

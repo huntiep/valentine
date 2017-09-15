@@ -1,10 +1,34 @@
+macro_rules! ok {
+    ( $expr:expr ) => {
+        $expr;
+        return Ok(());
+    };
+}
+
+macro_rules! route {
+    ( $name:ident, $req:ident, $res:ident, $ctx:ident, $body:expr) => {
+        #[allow(unused_mut, unused_variables)]
+        pub fn $name($req: &mut ::hayaku::Request, $res: &mut ::hayaku::Response, $ctx: &::Context)
+            -> ::Result<()>
+        {
+            $body
+        }
+    };
+}
+
+macro_rules! redirect {
+    ( $res:ident, $ctx:ident, $path:expr, $msg:expr) => {
+        ok!($res.redirect(Status::FOUND, &format!("{}{}", $ctx.mount, $path), $msg));
+    };
+}
+
 macro_rules! check_login {
     ( $cookies:expr, $res:expr, $ctx:expr ) => {
         {
             if let Some(name) = util::check_login($ctx, $cookies) {
                 name
             } else {
-                return Ok($res.redirect(Status::Forbidden, "/login", "You must be logged in for this"));
+                return Ok($res.redirect(Status::FORBIDDEN, "/login", "You must be logged in for this"));
             }
         }
     };
@@ -18,5 +42,17 @@ macro_rules! parse_param {
                 Err(_) => return super::not_found($req, $res, $ctx),
             }
         }
+    };
+}
+
+macro_rules! tmpl {
+    ( $res:ident, $ctx:ident, $name:expr, $body:expr ) => {
+        ok!($res.fmt_body(::templates::Template::new($ctx, $name, $body)));
+    };
+}
+
+macro_rules! hval {
+    ($val:expr) => {
+        ::hayaku::header::HeaderValue::from_static($val)
     };
 }

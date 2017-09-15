@@ -32,7 +32,7 @@ pub fn pull(ctx: &Context, username: &str, repo_name: &str, body: &[u8]) -> Resu
         .spawn()?;
 
     {
-        let mut stdin = command.stdin.as_mut().unwrap();
+        let stdin = command.stdin.as_mut().unwrap();
         stdin.write_all(body)?;
     }
     let output = command.wait_with_output()?;

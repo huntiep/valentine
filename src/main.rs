@@ -45,28 +45,28 @@ use std::sync::{Arc, Mutex};
 pub type Result<T> = ::std::result::Result<T, Error>;
 
 quick_error! {
-    #[derive(Debug, Clone)]
+    #[derive(Debug)]
     pub enum Error {
-        Base64(err: &'static str) {
-            from(_e: ::base64::DecodeError) -> ("base64 error")
+        Base64(err: ::base64::DecodeError) {
+            from()
         }
-        Bcrypt(err: &'static str) {
-            from(_e: ::bcrypt::BcryptError) -> ("bcrypt error")
+        Bcrypt(err: ::bcrypt::BcryptError) {
+            from()
         }
-        Chrono(err: &'static str) {
-            from(_e: ::chrono::ParseError) -> ("chrono error")
+        Chrono(err: ::chrono::ParseError) {
+            from()
         }
-        Git(err: &'static str) {
-            from(_e: ::git2::Error) -> ("git error")
+        Git(err: ::git2::Error) {
+            from()
         }
-        Io(err: &'static str) {
-            from(_e: ::std::io::Error) -> ("io error")
+        Io(err: ::std::io::Error) {
+            from()
         }
-        Diesel(err: &'static str) {
-            from(_e: ::diesel::result::Error) -> ("diesel error")
+        Diesel(err: ::diesel::result::Error) {
+            from()
         }
-        R2D2(err: &'static str) {
-            from(_e: ::r2d2::GetTimeout) -> ("r2d2 error")
+        R2D2(err: ::r2d2::GetTimeout) {
+            from()
         }
     }
 }
@@ -74,7 +74,6 @@ quick_error! {
 pub type SessionKey = String;
 pub type UserName = String;
 
-#[derive(Clone)]
 pub struct Context {
     pub db_pool: db::Pool,
     pub logins: Arc<Mutex<HashMap<SessionKey, UserName>>>,
@@ -85,7 +84,7 @@ pub struct Context {
     pub config_path: PathBuf,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Config {
     pub repo_dir: PathBuf,
     pub ssh_dir: Option<PathBuf>,
