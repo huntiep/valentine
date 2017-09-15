@@ -15,8 +15,7 @@ route!{signup, req, res, ctx, {
         Ok(res.redirect(Status::BAD_REQUEST, "/", "You already have an account"))
     } else {
         let body = include_str!("../../../templates/user/signup.html");
-        let tmpl = Template::new(ctx, Some("Signup"), None, body);
-        Ok(res.fmt_body(tmpl))
+        tmpl!(res, ctx, Some("Signup"), None, body);
     }
 }}
 
@@ -45,8 +44,7 @@ route!{login, req, res, ctx, {
         Ok(res.redirect(Status::BAD_REQUEST, "/", "You are already logged in"))
     } else {
         let body = include_str!("../../../templates/user/login.html");
-        let tmpl = Template::new(ctx, Some("Login"), None, body);
-        Ok(res.fmt_body(tmpl))
+        tmpl!(res, ctx, Some("Login"), None, body);
     }
 }}
 
@@ -100,8 +98,7 @@ route!{settings, req, res, ctx, {
 
     let mut settings = db::read::settings(&ctx.db_pool, username)?;
     settings.name = &ctx.name;
-    let tmpl = Template::new(ctx, Some("Settings"), None, settings);
-    Ok(res.fmt_body(tmpl))
+    tmpl!(res, ctx, Some("Settings"), None, settings);
 }}
 
 // POST /settings/add-ssh-key

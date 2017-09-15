@@ -46,8 +46,8 @@ macro_rules! parse_param {
 }
 
 macro_rules! tmpl {
-    ( $res:ident, $ctx:ident, $name:expr, $body:expr ) => {
-        ok!($res.fmt_body(::templates::Template::new($ctx, $name, $body)));
+    ( $res:ident, $ctx:ident, $name:expr, $err:expr, $body:expr ) => {
+        ok!($res.fmt_body(::templates::Template::new($ctx, $name, $err, $body)));
     };
 }
 

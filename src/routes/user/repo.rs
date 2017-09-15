@@ -10,8 +10,7 @@ route!{new, req, res, ctx, {
     check_login!(&req.get_cookies(), res, ctx);
 
     let body = include_str!("../../../templates/user/repo_new.html");
-    let tmpl = Template::new(ctx, Some("Create a New Repository"), None, body);
-    Ok(res.fmt_body(tmpl))
+    tmpl!(res, ctx, Some("Create a New Repository"), None, body);
 }}
 
 // POST /repo/new
@@ -60,8 +59,7 @@ route!{settings, req, res, ctx, {
     };
 
     let body = RepoSettingsTmpl { name: &ctx.name, username: username, repo: repo };
-    let tmpl = Template::new(ctx, Some(username), None, body);
-    Ok(res.fmt_body(tmpl))
+    tmpl!(res, ctx, Some(username), None, body);
 }}
 
 // POST /{user}/{repo}/settings/name

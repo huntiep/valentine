@@ -38,8 +38,7 @@ route!{view, req, res, ctx, {
     }
 
     let repo_git = git::read(ctx, &username, repo)?;
-    let tmpl = Template::new(ctx, Some(&reponame), None, repo_git);
-    Ok(res.fmt_body(tmpl))
+    tmpl!(res, ctx, Some(&reponame), None, repo_git);
 }}
 
 // GET /{user}/{repo}/tree/{branch}/{filepath}
@@ -73,8 +72,7 @@ route!{src, req, res, ctx, {
         filename: &filepath,
         src: src.unwrap(),
     };
-    let tmpl = Template::new(ctx, Some(&reponame), None, body);
-    Ok(res.fmt_body(tmpl))
+    tmpl!(res, ctx, Some(&reponame), None, body);
 }}
 
 // GET /{user}/{repo}/log
@@ -100,6 +98,5 @@ route!{log, req, res, ctx, {
         repo: repo,
         log: log
     };
-    let tmpl = Template::new(ctx, Some(&reponame), None, body);
-    Ok(res.fmt_body(tmpl))
+    tmpl!(res, ctx, Some(&reponame), None, body);
 }}

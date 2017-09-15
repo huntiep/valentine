@@ -13,8 +13,7 @@ route!{home, req, res, ctx, {
     let cookies = &req.get_cookies();
     let username = util::check_login(ctx, &cookies);
     let body = HomeTmpl { name: &ctx.name, username: username };
-    let tmpl = Template::new(ctx, username, None, body);
-    Ok(res.fmt_body(tmpl))
+    tmpl!(res, ctx, username, None, body);
 }}
 
 // GET /{user}
@@ -27,8 +26,7 @@ route!{user, req, res, ctx, {
     if let Some(mut body) = db::read::user(pool, &user)? {
         body.name = &ctx.name;
         body.auth = username.is_some();
-        let tmpl = Template::new(ctx, Some(&user), None, body);
-        Ok(res.fmt_body(tmpl))
+        tmpl!(res, ctx, Some(&user), None, body);
     } else {
         not_found(req, res, ctx)
     }
@@ -37,8 +35,7 @@ route!{user, req, res, ctx, {
 route!{not_found, req, res, ctx, {
     res.status(Status::NOT_FOUND);
     let body = include_str!("../../templates/404.html");
-    let tmpl = Template::new(ctx, Some("404"), None, body);
-    Ok(res.fmt_body(tmpl))
+    tmpl!(res, ctx, Some("404"), None, body);
 }}
 
 pub fn internal_error(_req: &mut Request, res: &mut Response, ctx: &Context, err: &Error) {
@@ -48,7 +45,7 @@ pub fn internal_error(_req: &mut Request, res: &mut Response, ctx: &Context, err
         _ => {
             let body = include_str!("../../templates/internal_error.html");
             let tmpl = Template::new(ctx, Some("500"), None, body);
-            res.fmt_body(tmpl)
+            res.fmt_body(tmpl);
         }
     }
 }
