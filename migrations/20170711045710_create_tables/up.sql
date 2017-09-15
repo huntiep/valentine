@@ -24,15 +24,3 @@ CREATE TABLE IF NOT EXISTS repos (
     issue_id BIGINT NOT NULL DEFAULT 0,
     unique (name, owner)
 );
-
-CREATE TABLE IF NOT EXISTS issues (
-    repo BIGINT REFERENCES repos (id) ON DELETE CASCADE,
-    id BIGINT NOT NULL,
-    parent BIGINT NOT NULL,
-    name VARCHAR,
-    subject VARCHAR,
-    content TEXT NOT NULL,
-    created TIMESTAMP NOT NULL,
-    thread BOOLEAN NOT NULL,
-    PRIMARY KEY (repo, id)
-);
