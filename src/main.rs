@@ -76,6 +76,7 @@ pub type UserName = String;
 
 pub struct Context {
     pub db_pool: db::Pool,
+    pub mount: String,
     pub logins: Arc<Mutex<HashMap<SessionKey, UserName>>>,
     pub name: String,
     pub repo_dir: PathBuf,
@@ -89,6 +90,7 @@ pub struct Config {
     pub repo_dir: PathBuf,
     pub ssh_dir: Option<PathBuf>,
     pub db_url: String,
+    pub mount: Option<String>,
     pub log_path: Option<PathBuf>,
     pub name: Option<String>,
     pub addr: Option<SocketAddr>,

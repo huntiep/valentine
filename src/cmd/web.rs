@@ -42,8 +42,18 @@ pub fn run(config: Config, config_path: PathBuf) {
         home.push(".ssh");
         home
     });
+
+    let mount = match config.mount {
+        Some(m) => if m.ends_with('/') {
+            m
+        } else {
+            m + "/"
+        },
+        None => "/".to_string(),
+    };
     let ctx = Context {
         db_pool: pool,
+        mount: mount,
         logins: Arc::new(Mutex::new(HashMap::new())),
         name: config.name.unwrap_or_else(|| String::from("Valentine")),
         repo_dir: config.repo_dir,
@@ -52,7 +62,7 @@ pub fn run(config: Config, config_path: PathBuf) {
         config_path: config_path,
     };
 
-    let mut router = Router::new();
+    let mut router = Router::mount(ctx.mount.clone());
     router.set_not_found_handler(Arc::new(not_found));
     router.set_internal_error_handler(Arc::new(internal_error));
     router!{
