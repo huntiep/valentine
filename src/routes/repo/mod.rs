@@ -41,11 +41,11 @@ route!{view, req, res, ctx, {
     tmpl!(res, ctx, Some(&reponame), None, repo_git);
 }}
 
-// GET /{user}/{repo}/tree/{branch}/{filepath}
+// GET /{user}/{repo}/tree/{name}/{*filepath}
 route!{src, req, res, ctx, {
     let username = req.get_param("user");
     let reponame = req.get_param("repo");
-    let branch = req.get_param("branch");
+    let name = req.get_param("name");
     let filepath = req.get_param("filepath");
 
     let pool = &ctx.db_pool;
@@ -59,7 +59,7 @@ route!{src, req, res, ctx, {
         repo_private!(reponame, req, res, ctx);
     }
 
-    let src = git::read_src(ctx, &username, &repo, &branch, &filepath)?;
+    let src = git::read_src(ctx, &username, &repo, &name, &filepath)?;
     if src.is_none() {
         return not_found(req, res, ctx);
     }
@@ -75,10 +75,11 @@ route!{src, req, res, ctx, {
     tmpl!(res, ctx, Some(&reponame), None, body);
 }}
 
-// GET /{user}/{repo}/log
+// GET /{user}/{repo}/commits/{branch}
 route!{log, req, res, ctx, {
     let username = req.get_param("user");
     let reponame = req.get_param("repo");
+    let branch = req.get_param("branch");
 
     let pool = &ctx.db_pool;
     let repo = if let Some(repo) = db::read::repo(pool, &username, &reponame)? {
@@ -91,7 +92,12 @@ route!{log, req, res, ctx, {
         repo_private!(reponame, req, res, ctx);
     }
 
-    let log = git::log(ctx, &username, &reponame)?;
+    let log = if let Some(log) = git::log(ctx, &username, &reponame, &branch)? {
+        log
+    } else {
+        return not_found(req, res, ctx);
+    };
+
     let body = RepoLogTmpl {
         name: &ctx.name,
         username: &username,
@@ -99,4 +105,30 @@ route!{log, req, res, ctx, {
         log: log
     };
     tmpl!(res, ctx, Some(&reponame), None, body);
+}}
+
+// GET /{user}/{repo}/commit/{commit}
+route!{commit, req, res, ctx, {
+    let username = req.get_param("user");
+    let reponame = req.get_param("repo");
+    let commit = req.get_param("commit");
+    Ok(())
+}}
+
+// GET /{user}/{repo}/blob/{commit}/{*filepath}
+route!{blob, req, res, ctx, {
+    let username = req.get_param("user");
+    let reponame = req.get_param("repo");
+    let commit = req.get_param("commit");
+    let file = req.get_param("filepath");
+    Ok(())
+}}
+
+// GET /{user}/{repo}/raw/{commit}/{*filepath}
+route!{raw, req, res, ctx, {
+    let username = req.get_param("user");
+    let reponame = req.get_param("repo");
+    let commit = req.get_param("commit");
+    let file = req.get_param("filepath");
+    Ok(())
 }}

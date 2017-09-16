@@ -70,11 +70,20 @@ pub fn run(config: Config, config_path: PathBuf) {
         get "/" => home,
         get "/{user}" => user,
         get "/{user}/{repo}" => repo::view,
-        get "/{user}/{repo}/log" => repo::log,
+        //get "/{user}/{repo}/log" => repo::log,
+        // TODO: Make sure this supports tags as well
+        get "/{user}/{repo}/tree/{name}/{*filepath}" => repo::src,
+        // TODO: add support for viewing different branches
+        get "/{user}/{repo}/commits/{branch}" => repo::log,
+        get "/{user}/{repo}/commit/{commit}" => repo::commit,
+        get "/{user}/{repo}/blob/{commit}/{*filepath}" => repo::blob,
+        // TODO: Github allows `id` to be a branch name or the commit hash
+        get "/{user}/{repo}/raw/{commit}/{*filepath}" => repo::raw,
+
+        // Git pull
         // TODO: use regex to assert that `repo` ends with .git
         get "/{user}/{repo}/info/refs" => git_routes::pull_handshake,
         post "/{user}/{repo}/git-upload-pack" => git_routes::pull,
-        get "/{user}/{repo}/tree/{branch}/{*filepath}" => repo::src,
 
         // User
         get "/signup" => user::signup,
@@ -84,6 +93,7 @@ pub fn run(config: Config, config_path: PathBuf) {
         get "/logout" => user::logout,
         get "/settings" => user::settings,
         post "/settings/add-ssh-key" => user::add_ssh_key,
+        post "/settings/delete-ssh-key" => user::delete_ssh_key,
         get "/repo/new" => user::repo::new,
         post "/repo/new" => user::repo::new_post,
         get "/{user}/{repo}/settings" => user::repo::settings,

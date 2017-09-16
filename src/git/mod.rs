@@ -179,7 +179,7 @@ fn parse_readme(readme: &str) -> String {
 pub fn read_src<'a, 'b>(ctx: &'a Context,
                         username: &'b str,
                         repo_info: &Repo,
-                        branch: &str,
+                        name: &str,
                         file: &str)
     -> Result<Option<RepoSrc>>
 {
@@ -190,7 +190,7 @@ pub fn read_src<'a, 'b>(ctx: &'a Context,
 
     let path = ctx.repo_dir.join(username).join(repo_name);
     let repo = Repository::open(path)?;
-    let branch = match repo.find_branch(branch, git2::BranchType::Local) {
+    let branch = match repo.find_branch(name, git2::BranchType::Local) {
         Ok(b) => b,
         Err(e) => if e.code() == git2::ErrorCode::NotFound {
             return Ok(None);
@@ -234,7 +234,9 @@ pub fn read_src<'a, 'b>(ctx: &'a Context,
     }
 }
 
-pub fn log<P: AsRef<Path>>(ctx: &Context, username: P, repo_name: &str) -> Result<Vec<Commit>> {
+pub fn log<P: AsRef<Path>>(ctx: &Context, username: P, repo_name: &str, branch: &str)
+    -> Result<Option<Vec<Commit>>>
+{
     let mut repo_name = repo_name.to_string();
     if !repo_name.ends_with(".git") {
         repo_name += ".git";
@@ -242,15 +244,28 @@ pub fn log<P: AsRef<Path>>(ctx: &Context, username: P, repo_name: &str) -> Resul
 
     let path = ctx.repo_dir.join(username).join(repo_name);
     let repo = Repository::open(path)?;
+    let branch = match repo.find_branch(branch, git2::BranchType::Local) {
+        Ok(b) => b,
+        Err(e) => if e.code() == git2::ErrorCode::NotFound {
+            return Ok(None);
+        } else {
+            return Err(::Error::from(e));
+        },
+    };
+
+    let oid = match branch.into_reference().target() {
+        Some(o) => o,
+        _ => return Ok(None),
+    };
 
     let mut log = Vec::new();
     let mut revwalk = repo.revwalk()?;
-    revwalk.push_head()?;
+    revwalk.push(oid)?;
     for id in revwalk {
         let id = id?;
         let commit = repo.find_commit(id)?;
         let item = Commit::new(commit)?;
         log.push(item);
     }
-    Ok(log)
+    Ok(Some(log))
 }
