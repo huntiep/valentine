@@ -101,6 +101,7 @@ pub struct RepoTmpl<'a, 'b> {
     pub name: &'a str,
     pub username: &'b str,
     pub repo: Repo,
+    pub commit: &'b str,
     pub items: Vec<RepoItem>,
     pub readme: Option<String>,
     pub empty: bool,

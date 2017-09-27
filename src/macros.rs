@@ -56,3 +56,15 @@ macro_rules! hval {
         ::hayaku::header::HeaderValue::from_static($val)
     };
 }
+
+macro_rules! catch_git {
+    ($res:expr, $err:pat, $ret:expr) => {
+        match $res {
+            Ok(t) => t,
+            Err(e) => match e.code() {
+                $err => return Ok($ret),
+                _ => return Err(::Error::from(e))
+            },
+        }
+    };
+}

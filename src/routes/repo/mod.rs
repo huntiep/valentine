@@ -20,7 +20,6 @@ macro_rules! repo_private {
     };
 }
 
-
 // GET /{user}/{repo}
 route!{view, req, res, ctx, {
     let username = req.get_param("user");
@@ -107,14 +106,33 @@ route!{log, req, res, ctx, {
     tmpl!(res, ctx, Some(&reponame), None, body);
 }}
 
+// TODO
 // GET /{user}/{repo}/commit/{commit}
 route!{commit, req, res, ctx, {
     let username = req.get_param("user");
     let reponame = req.get_param("repo");
     let commit = req.get_param("commit");
-    Ok(())
+
+    let pool = &ctx.db_pool;
+    let repo = if let Some(repo) = db::read::repo(pool, &username, &reponame)? {
+        repo
+    } else {
+        return not_found(req, res, ctx);
+    };
+
+    if repo.private {
+        repo_private!(reponame, req, res, ctx);
+    }
+
+
+    let body = git::commit(ctx, &username, repo, &commit)?;
+    if body.is_none() {
+        return not_found(req, res, ctx);
+    }
+    tmpl!(res, ctx, Some(&reponame), None, body.unwrap());
 }}
 
+// TODO
 // GET /{user}/{repo}/blob/{commit}/{*filepath}
 route!{blob, req, res, ctx, {
     let username = req.get_param("user");
@@ -124,6 +142,7 @@ route!{blob, req, res, ctx, {
     Ok(())
 }}
 
+// TODO
 // GET /{user}/{repo}/raw/{commit}/{*filepath}
 route!{raw, req, res, ctx, {
     let username = req.get_param("user");

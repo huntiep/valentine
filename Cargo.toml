@@ -47,3 +47,6 @@ git = "https://git.hunterpraska.com/hunter/explode"
 
 [dependencies.hayaku]
 git = "https://git.hunterpraska.com/hayaku/hayaku"
+
+[profile.dev]
+codegen-units=32

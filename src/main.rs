@@ -24,10 +24,10 @@ extern crate slog_term;
 extern crate time;
 extern crate toml;
 
+#[macro_use] mod macros;
 mod cmd;
 mod db;
 mod git;
-#[macro_use] mod macros;
 mod routes;
 mod templates;
 mod types;

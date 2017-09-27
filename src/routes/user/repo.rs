@@ -31,7 +31,7 @@ route!{new_post, req, res, ctx, {
     }
     db::create::repo(pool, &repo)?;
 
-    git::init(ctx, username, repo.name.clone())?;
+    git::init(ctx, username, &repo.name)?;
 
     redirect!(res, ctx, format!("{}/{}", username, repo.name), "Repo created");
 }}
