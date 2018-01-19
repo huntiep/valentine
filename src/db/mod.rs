@@ -1,12 +1,11 @@
-use {diesel, r2d2};
-use r2d2_diesel::ConnectionManager;
+use diesel::{self, r2d2};
 
 pub mod create;
 pub mod delete;
 pub mod read;
 pub mod update;
 
-pub type Pool = r2d2::Pool<ConnectionManager<diesel::pg::PgConnection>>;
+pub type Pool = r2d2::Pool<r2d2::ConnectionManager<diesel::pg::PgConnection>>;
 
 table! {
     users {

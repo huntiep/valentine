@@ -106,7 +106,6 @@ route!{log, req, res, ctx, {
     tmpl!(res, ctx, Some(&reponame), None, body);
 }}
 
-// TODO
 // GET /{user}/{repo}/commit/{commit}
 route!{commit, req, res, ctx, {
     let username = req.get_param("user");

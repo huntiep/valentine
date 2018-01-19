@@ -1,10 +1,8 @@
 use {Config, Context};
 use routes::*;
 
-use diesel;
+use diesel::r2d2::{self, ConnectionManager};
 use hayaku::{Http, Router};
-use r2d2;
-use r2d2_diesel::ConnectionManager;
 
 use std::{env, fs};
 use std::collections::HashMap;
@@ -15,9 +13,8 @@ pub fn run(config: Config, config_path: PathBuf) {
     info!("Starting up server");
 
     // Create db connection pool
-    let r2d2_config = r2d2::Config::default();
-    let manager = ConnectionManager::<diesel::pg::PgConnection>::new(config.db_url);
-    let pool = r2d2::Pool::new(r2d2_config, manager).expect("Failed to create pool");
+    let manager = ConnectionManager::new(config.db_url);
+    let pool = r2d2::Pool::new(manager).expect("Failed to create pool");
 
     {
         // Run migrations

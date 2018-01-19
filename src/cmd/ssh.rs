@@ -2,9 +2,7 @@ use {db, Config, Result};
 use git::AccessMode;
 
 use clap::ArgMatches;
-use diesel;
-use r2d2;
-use r2d2_diesel::ConnectionManager;
+use diesel::r2d2::{self, ConnectionManager};
 
 use std::{env, process};
 
@@ -43,9 +41,8 @@ fn _run(config: Config, matches: &ArgMatches) -> Result<()> {
     };
 
     // Create db connection pool
-    let r2d2_config = r2d2::Config::default();
-    let manager = ConnectionManager::<diesel::pg::PgConnection>::new(config.db_url);
-    let pool = r2d2::Pool::new(r2d2_config, manager).expect("Failed to create pool");
+    let manager = ConnectionManager::new(config.db_url);
+    let pool = r2d2::Pool::new(manager).expect("Failed to create pool");
 
     if !db::read::user_exists(&pool, username)? {
         fail("Repository owner does not exist", None);

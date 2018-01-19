@@ -4,23 +4,18 @@ extern crate bcrypt;
 extern crate chrono;
 #[macro_use] extern crate clap;
 #[macro_use] extern crate diesel;
-#[macro_use] extern crate diesel_codegen;
+#[macro_use] extern crate diesel_migrations;
+extern crate env_logger;
 #[macro_use] extern crate explode;
 extern crate git2;
 #[macro_use] extern crate hayaku;
 #[macro_use] extern crate log;
 extern crate pulldown_cmark;
 #[macro_use] extern crate quick_error;
-extern crate r2d2;
-extern crate r2d2_diesel;
 extern crate rand;
 #[macro_use] extern crate serde_derive;
 extern crate serde_json;
 extern crate sha2;
-#[macro_use(o, kv)] extern crate slog;
-extern crate slog_scope;
-extern crate slog_stdlog;
-extern crate slog_term;
 extern crate time;
 extern crate toml;
 
@@ -33,7 +28,6 @@ mod templates;
 mod types;
 
 use clap::{App, Arg, SubCommand};
-use slog::Drain;
 
 use std::collections::HashMap;
 use std::fs;
@@ -65,7 +59,7 @@ quick_error! {
         Diesel(err: ::diesel::result::Error) {
             from()
         }
-        R2D2(err: ::r2d2::GetTimeout) {
+        R2D2(err: ::diesel::r2d2::PoolError) {
             from()
         }
     }
@@ -92,7 +86,6 @@ pub struct Config {
     pub ssh_dir: Option<PathBuf>,
     pub db_url: String,
     pub mount: Option<String>,
-    pub log_path: Option<PathBuf>,
     pub name: Option<String>,
     pub addr: Option<SocketAddr>,
     // TODO
@@ -100,6 +93,8 @@ pub struct Config {
 }
 
 fn main() {
+    env_logger::init();
+
     let matches = App::new(crate_name!())
         .version(crate_version!())
         .author(crate_authors!())
@@ -132,22 +127,6 @@ fn main() {
     let mut file = fs::File::open(config_path).expect("Unable to open config file");
     file.read_to_string(&mut buf).expect("Unable to read config file");
     let config: Config = toml::from_str(&buf).expect("Invalid config file");
-
-    let log_path = config.log_path.clone().unwrap_or_else(|| PathBuf::from("val.log"));
-    // Start the logger
-    let file = fs::OpenOptions::new()
-        .create(true)
-        .write(true)
-        .truncate(true)
-        .open(log_path)
-        .expect("unable to open log file");
-
-    let decorator = slog_term::PlainSyncDecorator::new(file);
-    let drain = slog_term::FullFormat::new(decorator).build().fuse();
-    let logger = slog::Logger::root(drain, o!());
-    let _guard = slog_scope::set_global_logger(logger);
-    slog_stdlog::init().unwrap();
-
 
     if let Some(matches) = matches.subcommand_matches("backup") {
         let file = matches.value_of("FILE").unwrap();

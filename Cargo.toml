@@ -9,13 +9,12 @@ bart_derive = "0.1.4"
 base64 = "0.9.0"
 bcrypt = "0.1.5"
 clap = "2.29.2"
+diesel_migrations = "1.1.0"
 env_logger = "0.5.2"
 git2 = "0.6.11"
 log = "0.4.1"
 pulldown-cmark = "0.1.0"
 quick-error = "1.2.1"
-r2d2 = "0.8.2"
-r2d2-diesel = "1.0.0"
 rand = "0.4.2"
 serde = "1.0.27"
 serde_derive = "1.0.27"
@@ -32,6 +31,7 @@ version = "0.4.0"
 features = [
     "postgres",
     "chrono",
+    "r2d2",
 ]
 version = "1.1.1"
 
