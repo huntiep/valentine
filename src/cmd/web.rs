@@ -4,7 +4,7 @@ use routes::*;
 use diesel::r2d2::{self, ConnectionManager};
 use hayaku::{Http, Router};
 
-use std::{env, fs};
+use std::{env, fs, process};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
@@ -30,7 +30,8 @@ pub fn run(config: Config, config_path: PathBuf) {
         if !path.exists() {
             fs::create_dir(path).unwrap();
         } else if !path.is_dir() {
-            panic!("unable to create repository folder, file already exists!");
+            println!("unable to create repository folder, file already exists!");
+            process::exit(1);
         }
     }
 

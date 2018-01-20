@@ -35,10 +35,6 @@ features = [
 ]
 version = "1.1.1"
 
-[dependencies.diesel_codegen]
-features = ["postgres"]
-version = "0.16.0"
-
 [dependencies.explode]
 git = "https://git.hunterpraska.com/hunter/explode"
 
