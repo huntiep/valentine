@@ -41,6 +41,10 @@ pub fn run(config: Config, config_path: PathBuf) {
         home
     });
 
+    if !ssh_dir.exists() {
+        fs::create_dir_all(&ssh_dir).unwrap();
+    }
+
     let mount = match config.mount {
         Some(m) => if m.ends_with('/') {
             m
