@@ -39,7 +39,7 @@ route!{view, req, res, ctx, {
     let repo_git = git::read(ctx, &username, repo)?;
 
     let cookies = &req.get_cookies();
-    let username = util::check_login(ctx, &cookies);
+    let username = util::check_login(ctx, cookies);
     let navbar = Navbar::new(ctx, username);
 
     tmpl!(res, ctx, Some(&reponame), Some(navbar), None, repo_git);
@@ -78,7 +78,7 @@ route!{src, req, res, ctx, {
     };
 
     let cookies = &req.get_cookies();
-    let username = util::check_login(ctx, &cookies);
+    let username = util::check_login(ctx, cookies);
     let navbar = Navbar::new(ctx, username);
 
     tmpl!(res, ctx, Some(&reponame), Some(navbar), None, body);
@@ -115,7 +115,7 @@ route!{log, req, res, ctx, {
     };
 
     let cookies = &req.get_cookies();
-    let username = util::check_login(ctx, &cookies);
+    let username = util::check_login(ctx, cookies);
     let navbar = Navbar::new(ctx, username);
 
     tmpl!(res, ctx, Some(&reponame), Some(navbar), None, body);
@@ -145,7 +145,7 @@ route!{commit, req, res, ctx, {
     }
 
     let cookies = &req.get_cookies();
-    let username = util::check_login(ctx, &cookies);
+    let username = util::check_login(ctx, cookies);
     let navbar = Navbar::new(ctx, username);
 
     tmpl!(res, ctx, Some(&reponame), Some(navbar), None, body.unwrap());

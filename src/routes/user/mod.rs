@@ -12,8 +12,8 @@ use time;
 // GET /signup
 route!{signup, req, res, ctx, {
     if !ctx.signup {
-        return not_found(req, res, ctx);
-    } else if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
+        not_found(req, res, ctx)
+    } else if util::check_login(ctx, &req.get_cookies()).is_some() {
         redirect!(res, ctx, "", "You already have an account");
     } else {
         let navbar = Navbar::new(ctx, None);
@@ -26,7 +26,7 @@ route!{signup, req, res, ctx, {
 route!{signup_post, req, res, ctx, {
     if !ctx.signup {
         return not_found(req, res, ctx);
-    } else if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
+    } else if util::check_login(ctx, &req.get_cookies()).is_some() {
         redirect!(res, ctx, "", "You already have an account");
     }
 
@@ -45,7 +45,7 @@ route!{signup_post, req, res, ctx, {
 
 // GET /login
 route!{login, req, res, ctx, {
-    if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
+    if util::check_login(ctx, &req.get_cookies()).is_some() {
         redirect!(res, ctx, "", "You are already logged in");
     } else {
         let navbar = Navbar::new(ctx, None);
@@ -56,7 +56,7 @@ route!{login, req, res, ctx, {
 
 // POST /login
 route!{login_post, req, res, ctx, {
-    if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
+    if util::check_login(ctx, &req.get_cookies()).is_some() {
         redirect!(res, ctx, "", "You are already logged in");
     }
 

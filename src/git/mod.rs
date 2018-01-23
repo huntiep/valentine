@@ -130,7 +130,7 @@ pub fn read_src<'a, 'b>(ctx: &'a Context,
             } else {
                 return Ok(Some(RepoSrc::Error));
             };
-            let (items, readme) = read_tree(&repo, &e, true)?;
+            let (items, readme) = read_tree(&repo, e, true)?;
             Ok(Some(RepoSrc::Dir { items, readme }))
         }
         Some(ObjectType::Blob) => {
@@ -139,10 +139,9 @@ pub fn read_src<'a, 'b>(ctx: &'a Context,
                 None => Ok(Some(RepoSrc::Error)),
             }
         }
-        Some(ObjectType::Any) => return Ok(Some(RepoSrc::Error)),
-        Some(ObjectType::Commit) => return Ok(Some(RepoSrc::Error)),
-        Some(ObjectType::Tag) => return Ok(Some(RepoSrc::Error)),
-        None => return Ok(None),
+        Some(ObjectType::Any) | Some(ObjectType::Commit) | Some(ObjectType::Tag) =>
+            Ok(Some(RepoSrc::Error)),
+        None => Ok(None),
     }
 }
 
@@ -166,7 +165,7 @@ pub fn log(ctx: &Context, username: &str, reponame: &str, branch: &str)
     for id in revwalk {
         let id = id?;
         let commit = repo.find_commit(id)?;
-        let item = Commit::new(commit)?;
+        let item = Commit::new(&commit)?;
         log.push(item);
     }
     Ok(Some(log))

@@ -7,7 +7,6 @@ use pulldown_cmark;
 
 use std::path::PathBuf;
 
-#[inline(always)]
 pub fn build_repo_path(ctx: &Context, username: &str, reponame: &str) -> PathBuf {
     let mut reponame = reponame.to_string();
     if !reponame.ends_with(".git") {

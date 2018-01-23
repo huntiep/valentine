@@ -116,14 +116,14 @@ pub struct Commit {
 }
 
 impl Commit {
-    pub fn new(mut commit: ::git2::Commit) -> Result<Self> {
+    pub fn new(commit: &::git2::Commit) -> Result<Self> {
         let message = commit.summary().unwrap_or("Invalid commit message").to_string();
         let author = commit.author();
         let author_name = author.name().unwrap_or("Invalid author name").to_string();
         let author_time = author.when();
         let mut time = ::chrono::format::Parsed::new();
         time.set_timestamp(author_time.seconds())?;
-        time.set_offset(author_time.offset_minutes() as i64 * 60)?;
+        time.set_offset(i64::from(author_time.offset_minutes()) * 60)?;
         let time = time.to_datetime()?.to_string();
         Ok(Commit {
             author: author_name,

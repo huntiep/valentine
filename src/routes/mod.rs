@@ -11,7 +11,7 @@ use hayaku::{Request, Response, Status};
 // GET /
 route!{home, req, res, ctx, {
     let cookies = &req.get_cookies();
-    let username = util::check_login(ctx, &cookies);
+    let username = util::check_login(ctx, cookies);
     let navbar = Navbar::new(ctx, username);
     let body = HomeTmpl { name: &ctx.name, username: username };
     tmpl!(res, ctx, username, Some(navbar), None, body);
