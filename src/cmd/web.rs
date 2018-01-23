@@ -58,6 +58,7 @@ pub fn run(config: Config, config_path: PathBuf) {
         mount: mount,
         logins: Arc::new(Mutex::new(HashMap::new())),
         name: config.name.unwrap_or_else(|| String::from("Valentine")),
+        signup: config.signup.unwrap_or(false),
         repo_dir: config.repo_dir,
         ssh_dir: ssh_dir,
         bin_path: env::current_exe().unwrap(),

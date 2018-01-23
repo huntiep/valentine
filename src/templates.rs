@@ -38,9 +38,10 @@ impl<'a> TemplateError<'a> {
 pub struct TemplateFoot;
 
 #[derive(BartDisplay)]
-#[template_string = "{{{head}}}{{#error}}{{{.}}}{{/error}}{{{body}}}{{{foot}}}"]
+#[template_string = "{{{head}}}{{#navbar}}{{{.}}}{{/navbar}}{{#error}}{{{.}}}{{/error}}{{{body}}}{{{foot}}}"]
 pub struct Template<'a, 'b, 'c, T: Display> {
     head: TemplateHead<'a, 'b>,
+    navbar: Option<Navbar<'a, 'b>>,
     error: Option<TemplateError<'c>>,
     body: T,
     foot: TemplateFoot,
@@ -49,6 +50,7 @@ pub struct Template<'a, 'b, 'c, T: Display> {
 impl<'a, 'b, 'c, T: Display> Template<'a, 'b, 'c, T> {
     pub fn new(ctx: &'a Context,
                title: Option<&'b str>,
+               navbar: Option<Navbar<'a, 'b>>,
                error: Option<&'c str>,
                body: T)
         -> Self
@@ -62,11 +64,21 @@ impl<'a, 'b, 'c, T: Display> Template<'a, 'b, 'c, T> {
 
         Template {
             head: head,
+            navbar: navbar,
             error: error,
             body: body,
             foot: TemplateFoot,
         }
     }
+}
+
+#[derive(BartDisplay)]
+#[template = "templates/navbar.html"]
+pub struct Navbar<'a, 'b> {
+    pub name: &'a str,
+    pub auth: bool,
+    pub signup: bool,
+    pub username: Option<&'b str>,
 }
 
 #[derive(BartDisplay)]

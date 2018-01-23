@@ -37,7 +37,7 @@ route!{view, req, res, ctx, {
     }
 
     let repo_git = git::read(ctx, &username, repo)?;
-    tmpl!(res, ctx, Some(&reponame), None, repo_git);
+    tmpl!(res, ctx, Some(&reponame), None, None, repo_git);
 }}
 
 // GET /{user}/{repo}/tree/{name}/{*filepath}
@@ -71,7 +71,7 @@ route!{src, req, res, ctx, {
         filename: &filepath,
         src: src.unwrap(),
     };
-    tmpl!(res, ctx, Some(&reponame), None, body);
+    tmpl!(res, ctx, Some(&reponame), None, None, body);
 }}
 
 // GET /{user}/{repo}/commits/{branch}
@@ -103,7 +103,7 @@ route!{log, req, res, ctx, {
         repo: repo,
         log: log
     };
-    tmpl!(res, ctx, Some(&reponame), None, body);
+    tmpl!(res, ctx, Some(&reponame), None, None, body);
 }}
 
 // GET /{user}/{repo}/commit/{commit}
@@ -128,7 +128,7 @@ route!{commit, req, res, ctx, {
     if body.is_none() {
         return not_found(req, res, ctx);
     }
-    tmpl!(res, ctx, Some(&reponame), None, body.unwrap());
+    tmpl!(res, ctx, Some(&reponame), None, None, body.unwrap());
 }}
 
 // TODO

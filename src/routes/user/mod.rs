@@ -14,7 +14,7 @@ route!{signup, req, res, ctx, {
         redirect!(res, ctx, "", "You already have an account");
     } else {
         let body = include_str!("../../../templates/user/signup.html");
-        tmpl!(res, ctx, Some("Signup"), None, body);
+        tmpl!(res, ctx, Some("Signup"), None, None, body);
     }
 }}
 
@@ -43,7 +43,7 @@ route!{login, req, res, ctx, {
         redirect!(res, ctx, "", "You are already logged in");
     } else {
         let body = include_str!("../../../templates/user/login.html");
-        tmpl!(res, ctx, Some("Login"), None, body);
+        tmpl!(res, ctx, Some("Login"), None, None, body);
     }
 }}
 
@@ -97,7 +97,7 @@ route!{settings, req, res, ctx, {
 
     let mut settings = db::read::settings(&ctx.db_pool, username)?;
     settings.name = &ctx.name;
-    tmpl!(res, ctx, Some("Settings"), None, settings);
+    tmpl!(res, ctx, Some("Settings"), None, None, settings);
 }}
 
 // POST /settings/add-ssh-key

@@ -1,0 +1,10 @@
+<h1><a href="/">{{name}}</a></h1>
+{{#auth?}}
+<a href="/repo/new">Create Repository</a>
+<a href="/{{#username}}{{.}}{{/username}}">Profile</a>
+<a href="/settings">Settings</a>
+{{/auth}}
+{{^auth?}}
+<a href="/login">Login</a>
+{{#signup?}}<a href="/signup">Signup</a>{{/signup}}
+{{/auth}}
