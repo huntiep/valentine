@@ -76,9 +76,20 @@ impl<'a, 'b, 'c, T: Display> Template<'a, 'b, 'c, T> {
 #[template = "templates/navbar.html"]
 pub struct Navbar<'a, 'b> {
     pub name: &'a str,
-    pub auth: bool,
     pub signup: bool,
+    pub auth: bool,
     pub username: Option<&'b str>,
+}
+
+impl<'a, 'b> Navbar<'a, 'b> {
+    pub fn new(ctx: &'a Context, auth: bool, username: Option<&'b str>) -> Self {
+        Navbar {
+            name: &ctx.name,
+            signup: ctx.signup,
+            auth: auth,
+            username: username,
+        }
+    }
 }
 
 #[derive(BartDisplay)]
@@ -90,9 +101,7 @@ pub struct HomeTmpl<'a, 'b> {
 
 #[derive(BartDisplay)]
 #[template = "templates/user/view.html"]
-pub struct User<'a> {
-    pub name: &'a str,
-    pub auth: bool,
+pub struct User {
     pub username: String,
     pub repos: Vec<Repo>,
 }
@@ -104,7 +113,6 @@ pub struct UserSettings<'a> {
     pub username: String,
     pub email: String,
     pub keys: Vec<SshKey>,
-    pub auth: bool,
 }
 
 #[derive(BartDisplay)]
