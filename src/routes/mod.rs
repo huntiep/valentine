@@ -12,7 +12,7 @@ use hayaku::{Request, Response, Status};
 route!{home, req, res, ctx, {
     let cookies = &req.get_cookies();
     let username = util::check_login(ctx, &cookies);
-    let navbar = Navbar::new(ctx, username.is_some(), username);
+    let navbar = Navbar::new(ctx, username);
     let body = HomeTmpl { name: &ctx.name, username: username };
     tmpl!(res, ctx, username, Some(navbar), None, body);
 }}
@@ -25,7 +25,7 @@ route!{user, req, res, ctx, {
 
     let pool = &ctx.db_pool;
     if let Some(mut body) = db::read::user(pool, &user)? {
-        let navbar = Navbar::new(ctx, username.is_some(), username);
+        let navbar = Navbar::new(ctx, username);
         tmpl!(res, ctx, Some(&user), Some(navbar), None, body);
     } else {
         not_found(req, res, ctx)

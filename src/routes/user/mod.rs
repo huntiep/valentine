@@ -1,6 +1,7 @@
 pub mod repo;
 
 use {db, git};
+use templates::*;
 use types::*;
 use super::{not_found, util};
 
@@ -10,17 +11,22 @@ use time;
 
 // GET /signup
 route!{signup, req, res, ctx, {
-    if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
+    if !ctx.signup {
+        return not_found(req, res, ctx);
+    } else if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
         redirect!(res, ctx, "", "You already have an account");
     } else {
+        let navbar = Navbar::new(ctx, None);
         let body = include_str!("../../../templates/user/signup.html");
-        tmpl!(res, ctx, Some("Signup"), None, None, body);
+        tmpl!(res, ctx, Some("Signup"), Some(navbar), None, body);
     }
 }}
 
 // POST /signup
 route!{signup_post, req, res, ctx, {
-    if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
+    if !ctx.signup {
+        return not_found(req, res, ctx);
+    } else if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
         redirect!(res, ctx, "", "You already have an account");
     }
 
@@ -42,8 +48,9 @@ route!{login, req, res, ctx, {
     if let Some(_) = util::check_login(ctx, &req.get_cookies()) {
         redirect!(res, ctx, "", "You are already logged in");
     } else {
+        let navbar = Navbar::new(ctx, None);
         let body = include_str!("../../../templates/user/login.html");
-        tmpl!(res, ctx, Some("Login"), None, None, body);
+        tmpl!(res, ctx, Some("Login"), Some(navbar), None, body);
     }
 }}
 
@@ -97,7 +104,8 @@ route!{settings, req, res, ctx, {
 
     let mut settings = db::read::settings(&ctx.db_pool, username)?;
     settings.name = &ctx.name;
-    tmpl!(res, ctx, Some("Settings"), None, None, settings);
+    let navbar = Navbar::new(ctx, Some(username));
+    tmpl!(res, ctx, Some("Settings"), Some(navbar), None, settings);
 }}
 
 // POST /settings/add-ssh-key

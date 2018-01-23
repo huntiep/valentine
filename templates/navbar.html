@@ -1,10 +1,10 @@
 <h1><a href="/">{{name}}</a></h1>
-{{#auth?}}
+{{#username.is_some()?}}
 <a href="/repo/new">Create Repository</a>
 <a href="/{{#username}}{{.}}{{/username}}">Profile</a>
 <a href="/settings">Settings</a>
-{{/auth}}
-{{^auth?}}
+{{/username.is_some()}}
+{{^username.is_some()?}}
 <a href="/login">Login</a>
 {{#signup?}}<a href="/signup">Signup</a>{{/signup}}
-{{/auth}}
+{{/username.is_some()}}

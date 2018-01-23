@@ -77,16 +77,14 @@ impl<'a, 'b, 'c, T: Display> Template<'a, 'b, 'c, T> {
 pub struct Navbar<'a, 'b> {
     pub name: &'a str,
     pub signup: bool,
-    pub auth: bool,
     pub username: Option<&'b str>,
 }
 
 impl<'a, 'b> Navbar<'a, 'b> {
-    pub fn new(ctx: &'a Context, auth: bool, username: Option<&'b str>) -> Self {
+    pub fn new(ctx: &'a Context, username: Option<&'b str>) -> Self {
         Navbar {
             name: &ctx.name,
             signup: ctx.signup,
-            auth: auth,
             username: username,
         }
     }

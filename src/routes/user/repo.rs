@@ -7,10 +7,12 @@ use hayaku::Status;
 
 // GET /repo/new
 route!{new, req, res, ctx, {
-    check_login!(&req.get_cookies(), res, ctx);
+    let cookies = req.get_cookies();
+    let username = check_login!(&cookies, res, ctx);
 
+    let navbar = Navbar::new(ctx, Some(username));
     let body = include_str!("../../../templates/user/repo_new.html");
-    tmpl!(res, ctx, Some("Create a New Repository"), None, None, body);
+    tmpl!(res, ctx, Some("Create a New Repository"), Some(navbar), None, body);
 }}
 
 // POST /repo/new
@@ -57,8 +59,9 @@ route!{settings, req, res, ctx, {
         return not_found(req, res, ctx);
     };
 
+    let navbar = Navbar::new(ctx, Some(username));
     let body = RepoSettingsTmpl { name: &ctx.name, username: username, repo: repo };
-    tmpl!(res, ctx, Some(username), None, None, body);
+    tmpl!(res, ctx, Some(username), Some(navbar), None, body);
 }}
 
 // POST /{user}/{repo}/settings/name
