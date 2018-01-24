@@ -1,0 +1,16 @@
+{{>header.html}}
+
+<div class="refs">
+    <h5>Branches</h5>
+    <ul>
+        {{#branches}}
+        <li><a href="refs/{{.name}}">{{.name}}</a></li>
+        {{/branches}}
+    </ul>
+    <h5>Tags</h5>
+    <ul>
+        {{#tags}}
+        <li><a href="refs/{{.name}}">{{.name}}</a></li>
+        {{/tags}}
+    </ul>
+</div>

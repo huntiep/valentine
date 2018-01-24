@@ -2,7 +2,7 @@ pub mod network;
 mod util;
 
 use {Context, Result};
-use templates::RepoTmpl;
+use templates::{RefsTmpl, RepoTmpl};
 use types::*;
 use self::util::*;
 
@@ -95,7 +95,7 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
     let tree = commit.tree()?;
     let (items, readme) = read_tree(&repo, &tree, true)?;
 
-    let branches_raw: Vec<_> = repo.branches(None)?.take(5).collect();
+    let branches_raw: Vec<_> = repo.branches(None)?.take(10).collect();
     let mut branches = Vec::new();
     for branch in branches_raw {
         if let Some(name) = branch?.0.name()? {
@@ -103,8 +103,10 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
         }
     }
 
+    let raw_tags = repo.tag_names(None)?;
+    let raw_tags = raw_tags.iter().take(10);
     let mut tags = Vec::new();
-    for tag in repo.tag_names(None)?.iter() {
+    for tag in raw_tags {
         if let Some(name) = tag {
             tags.push(Tag { name: name.to_string() });
         }
@@ -137,6 +139,32 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
         empty: false,
     };
     Ok(tmpl)
+}
+
+pub fn refs<'a>(ctx: &Context, username: &'a str, repo_info: Repo) -> Result<RefsTmpl<'a>> {
+    let path = build_repo_path(ctx, username, &repo_info.name);
+    let repo = Repository::open(path)?;
+    let branches_raw: Vec<_> = repo.branches(None)?.take(5).collect();
+    let mut branches = Vec::new();
+    for branch in branches_raw {
+        if let Some(name) = branch?.0.name()? {
+            branches.push(Branch { name: name.to_string() });
+        }
+    }
+
+    let mut tags = Vec::new();
+    for tag in repo.tag_names(None)?.iter() {
+        if let Some(name) = tag {
+            tags.push(Tag { name: name.to_string() });
+        }
+    }
+
+    Ok(RefsTmpl {
+        username: username,
+        repo: repo_info,
+        branches: branches,
+        tags: tags,
+    })
 }
 
 pub fn read_src<'a, 'b>(ctx: &'a Context,

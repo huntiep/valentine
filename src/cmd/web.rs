@@ -84,11 +84,14 @@ pub fn run(config: Config, config_path: PathBuf) {
         get "/" => home,
         get "/{user}" => user,
         get "/{user}/{repo}" => repo::view,
-        //get "/{user}/{repo}/log" => repo::log,
+        get "/{user}/{repo}/refs" => repo::refs_list,
+        get "/{user}/{repo}/refs/{id}" => repo::commit,
+        get "/{user}/{repo}/log" => repo::log_default,
+        // TODO: add support for viewing different branches
+        get "/{user}/{repo}/log/{name}" => repo::log,
+
         // TODO: Make sure this supports tags as well
         get "/{user}/{repo}/tree/{name}/{*filepath}" => repo::src,
-        // TODO: add support for viewing different branches
-        get "/{user}/{repo}/commits/{branch}" => repo::log,
         get "/{user}/{repo}/commit/{commit}" => repo::commit,
         get "/{user}/{repo}/blob/{commit}/{*filepath}" => repo::blob,
         // TODO: Github allows `id` to be a branch name or the commit hash

@@ -18,7 +18,7 @@ macro_rules! route {
 
 macro_rules! redirect {
     ( $res:ident, $ctx:ident, $path:expr, $msg:expr) => {
-        ok!($res.redirect(Status::FOUND, &format!("{}{}", $ctx.mount, $path), $msg));
+        ok!($res.redirect(::hayaku::Status::FOUND, &format!("{}{}", $ctx.mount, $path), $msg));
     };
 }
 
