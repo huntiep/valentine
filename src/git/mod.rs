@@ -76,9 +76,12 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
     if repo.is_empty()? {
         let tmpl = RepoTmpl {
             name: &ctx.name,
+            url: &ctx.url,
             username: username,
             repo: repo_info,
-            commit: "",
+            branches: Vec::new(),
+            tags: Vec::new(),
+            commits: Vec::new(),
             items: Vec::new(),
             readme: None,
             empty: true,
@@ -90,14 +93,45 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
     let oid = head.target().unwrap();
     let commit = repo.find_commit(oid)?;
     let tree = commit.tree()?;
-
     let (items, readme) = read_tree(&repo, &tree, true)?;
+
+    let branches_raw: Vec<_> = repo.branches(None)?.take(5).collect();
+    let mut branches = Vec::new();
+    for branch in branches_raw {
+        if let Some(name) = branch?.0.name()? {
+            branches.push(Branch { name: name.to_string() });
+        }
+    }
+
+    let mut tags = Vec::new();
+    for tag in repo.tag_names(None)?.iter() {
+        if let Some(name) = tag {
+            tags.push(Tag { name: name.to_string() });
+        }
+    }
+
+    let mut commits = Vec::new();
+    let mut revwalk = repo.revwalk()?;
+    revwalk.push(oid)?;
+    for _ in 0..5 {
+        if let Some(id) = revwalk.next() {
+            let id = id?;
+            let commit = repo.find_commit(id)?;
+            let item = Commit::new(&commit)?;
+            commits.push(item);
+        } else {
+            break;
+        }
+    }
 
     let tmpl = RepoTmpl {
         name: &ctx.name,
+        url: &ctx.url,
         username: username,
         repo: repo_info,
-        commit: "master",
+        branches: branches,
+        tags: tags,
+        commits: commits,
         items: items,
         readme: readme,
         empty: false,
@@ -179,11 +213,30 @@ pub fn commit<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo, comm
     let oid = git2::Oid::from_str(commit)?;
     let tree = catch_git!(repo.find_commit(oid), git2::ErrorCode::NotFound, None).tree()?;
     let (items, readme) = read_tree(&repo, &tree, true)?;
+
+    /*
+    let branches_raw: Vec<_> = repo.branches(None)?.take(5).collect();
+    let branches = Vec::new();
+    for branch in branches_raw {
+        if let Some(name) = branch?.0.name()? {
+            branches.push(Branch { name: name.to_string() });
+        } else {
+            continue;
+        }
+    }
+    */
+
     let tmpl = RepoTmpl {
         name: &ctx.name,
+        url: &ctx.url,
         username: username,
         repo: repo_info,
-        commit: commit,
+        branches: Vec::new(),
+        tags: Vec::new(),
+        commits: Vec::new(),
+        //branches: branches,
+        //tags: tags,
+        //commits: commits,
         items: items,
         readme: readme,
         empty: false,

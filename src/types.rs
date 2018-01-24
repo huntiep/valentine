@@ -109,7 +109,17 @@ pub struct RepoItem {
     pub obj_type: ::git2::ObjectType,
 }
 
+pub struct Branch {
+    pub name: String,
+}
+
+pub struct Tag {
+    pub name: String,
+}
+
 pub struct Commit {
+    pub id: String,
+    pub short_id: String,
     pub author: String,
     pub time: String,
     pub message: String,
@@ -126,6 +136,8 @@ impl Commit {
         time.set_offset(i64::from(author_time.offset_minutes()) * 60)?;
         let time = time.to_datetime()?.to_string();
         Ok(Commit {
+            id: commit.id().to_string(),
+            short_id: commit.id().to_string()[0..7].to_string(),
             author: author_name,
             time: time,
             message: message

@@ -53,11 +53,22 @@ pub fn run(config: Config, config_path: PathBuf) {
         },
         None => "/".to_string(),
     };
+
+    let url = match config.url {
+        Some(m) => if m.ends_with('/') {
+            m
+        } else {
+            m + "/"
+        },
+        None => "http://localhost/".to_string(),
+    };
+
     let ctx = Context {
         db_pool: pool,
         mount: mount,
         logins: Arc::new(Mutex::new(HashMap::new())),
         name: config.name.unwrap_or_else(|| String::from("Valentine")),
+        url: url,
         signup: config.signup.unwrap_or(false),
         repo_dir: config.repo_dir,
         ssh_dir: ssh_dir,

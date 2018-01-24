@@ -117,9 +117,12 @@ pub struct UserSettings<'a> {
 #[template = "templates/repo/view.html"]
 pub struct RepoTmpl<'a, 'b> {
     pub name: &'a str,
+    pub url: &'a str,
     pub username: &'b str,
     pub repo: Repo,
-    pub commit: &'b str,
+    pub branches: Vec<Branch>,
+    pub tags: Vec<Tag>,
+    pub commits: Vec<Commit>,
     pub items: Vec<RepoItem>,
     pub readme: Option<String>,
     pub empty: bool,
