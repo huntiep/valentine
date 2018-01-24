@@ -8,18 +8,22 @@
 </div>
 
 <div class="refs">
+    {{^branches.is_empty()?}}
     <h5>Branches</h5>
     <ul>
         {{#branches}}
         <li><a href="refs/{{.name}}">{{.name}}</a></li>
         {{/branches}}
     </ul>
+    {{/branches.is_empty()}}
+    {{^tags.is_empty()?}}
     <h5>Tags</h5>
     <ul>
         {{#tags}}
         <li><a href="refs/{{.name}}">{{.name}}</a></li>
         {{/tags}}
     </ul>
+    {{/tags.is_empty()}}
     <a href="refs">View All</a>
 </div>
 
