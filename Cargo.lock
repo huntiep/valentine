@@ -344,7 +344,7 @@ dependencies = [
 [[package]]
 name = "hayaku"
 version = "0.2.0"
-source = "git+https://git.hunterpraska.com/hayaku/hayaku#1275eefb28e48b5f89d2d0984aa74338ab90f3e1"
+source = "git+https://git.hunterpraska.com/hunter/hayaku#13d7f8b240450f6e1b3895d0e01ac888bd6516f0"
 dependencies = [
  "cookie 0.10.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.1.17 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1117,7 +1117,7 @@ dependencies = [
  "env_logger 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "explode 0.1.0 (git+https://git.hunterpraska.com/hunter/explode)",
  "git2 0.6.11 (registry+https://github.com/rust-lang/crates.io-index)",
- "hayaku 0.2.0 (git+https://git.hunterpraska.com/hayaku/hayaku)",
+ "hayaku 0.2.0 (git+https://git.hunterpraska.com/hunter/hayaku)",
  "log 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "pulldown-cmark 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "quick-error 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1236,7 +1236,7 @@ dependencies = [
 "checksum generic-array 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ef25c5683767570c2bbd7deba372926a55eaae9982d7726ee2a1050239d45b9d"
 "checksum getopts 0.2.15 (registry+https://github.com/rust-lang/crates.io-index)" = "65922871abd2f101a2eb0eaebadc66668e54a87ad9c3dd82520b5f86ede5eff9"
 "checksum git2 0.6.11 (registry+https://github.com/rust-lang/crates.io-index)" = "ee5b4bb7cd2a44e6e5ee3a26ba6a9ca10d4ce2771cdc3839bbc54b47b7d1be84"
-"checksum hayaku 0.2.0 (git+https://git.hunterpraska.com/hayaku/hayaku)" = "<none>"
+"checksum hayaku 0.2.0 (git+https://git.hunterpraska.com/hunter/hayaku)" = "<none>"
 "checksum http 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)" = "bf8217d8829cc05dedadc08b4bc0684e5e3fbba1126c5edc680af49053fa230c"
 "checksum httparse 1.2.4 (registry+https://github.com/rust-lang/crates.io-index)" = "c2f407128745b78abc95c0ffbe4e5d37427fdc0d45470710cfef8c44522a2e37"
 "checksum httpdate 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "aeba69f4ee421f9530076beb8257e35cf51f85c862b42e1ab90289d3da10ae00"

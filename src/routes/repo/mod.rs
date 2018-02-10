@@ -84,13 +84,14 @@ route!{src, req, res, ctx, {
     tmpl!(res, ctx, Some(&reponame), Some(navbar), None, body);
 }}
 
+// GET /{user}/{repo}/log
 route!{log_default, req, res, ctx, {
     let user = req.get_param("user");
     let repo = req.get_param("repo");
     redirect!(res, ctx, format!("{}/{}/log/HEAD", user, repo), "Viewing log from HEAD");
 }}
 
-// GET /{user}/{repo}/commits/{branch}
+// GET /{user}/{repo}/log/{name}
 route!{log, req, res, ctx, {
     let username = req.get_param("user");
     let reponame = req.get_param("repo");
@@ -152,11 +153,11 @@ route!{refs_list, req, res, ctx, {
     tmpl!(res, ctx, Some(&reponame), Some(navbar), None, body);
 }}
 
-// GET /{user}/{repo}/commit/{commit}
+// GET /{user}/{repo}/refs/{id}
 route!{commit, req, res, ctx, {
     let username = req.get_param("user");
     let reponame = req.get_param("repo");
-    let commit = req.get_param("commit");
+    let id = req.get_param("id");
 
     let pool = &ctx.db_pool;
     let repo = if let Some(repo) = db::read::repo(pool, &username, &reponame)? {
@@ -169,7 +170,7 @@ route!{commit, req, res, ctx, {
         repo_private!(reponame, req, res, ctx);
     }
 
-    let body = git::commit(ctx, &username, repo, &commit)?;
+    let body = git::commit(ctx, &username, repo, &id)?;
     if body.is_none() {
         return not_found(req, res, ctx);
     }
