@@ -87,7 +87,6 @@ pub fn run(config: Config, config_path: PathBuf) {
         get "/{user}/{repo}/refs" => repo::refs_list,
         get "/{user}/{repo}/refs/{id}" => repo::commit,
         get "/{user}/{repo}/log" => repo::log_default,
-        // TODO: add support for viewing different branches
         get "/{user}/{repo}/log/{name}" => repo::log,
 
         // TODO: Make sure this supports tags as well

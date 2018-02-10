@@ -207,16 +207,29 @@ pub fn read_src<'a, 'b>(ctx: &'a Context,
     }
 }
 
-pub fn log(ctx: &Context, username: &str, reponame: &str, branch: &str)
+pub fn log(ctx: &Context, username: &str, reponame: &str, name: &str)
     -> Result<Option<Vec<Commit>>>
 {
     let path = build_repo_path(ctx, username, reponame);
     let repo = Repository::open(path)?;
-    let branch = catch_git!(repo.find_branch(branch, git2::BranchType::Local),
-                        git2::ErrorCode::NotFound,
-                        None);
+    // HEAD must be handled specially
+    let reference = if name == "HEAD" {
+        repo.head()?
+    } else {
+        // Refs are of the form refs/{heads|tags}/{name}. This glob supports
+        // searching both branches and tags. There may be more types of refs
+        // that this also supports, not sure.
+        let mut refs = repo.references_glob(&format!("*/{}", name))?;
+        let mut refs = refs.names();
+        let name = if let Some(name) = refs.next() {
+            name?
+        } else {
+            return Ok(None);
+        };
+        repo.find_reference(name)?
+    };
 
-    let oid = match branch.into_reference().target() {
+    let oid = match reference.target() {
         Some(o) => o,
         _ => return Ok(None),
     };

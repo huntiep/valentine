@@ -94,7 +94,7 @@ route!{log_default, req, res, ctx, {
 route!{log, req, res, ctx, {
     let username = req.get_param("user");
     let reponame = req.get_param("repo");
-    let branch = req.get_param("branch");
+    let name = req.get_param("name");
 
     let pool = &ctx.db_pool;
     let repo = if let Some(repo) = db::read::repo(pool, &username, &reponame)? {
@@ -107,7 +107,7 @@ route!{log, req, res, ctx, {
         repo_private!(reponame, req, res, ctx);
     }
 
-    let log = if let Some(log) = git::log(ctx, &username, &reponame, &branch)? {
+    let log = if let Some(log) = git::log(ctx, &username, &reponame, &name)? {
         log
     } else {
         return not_found(req, res, ctx);
