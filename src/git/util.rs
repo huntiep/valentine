@@ -73,3 +73,22 @@ pub fn read_file<'iter>(repo: &Repository, entry: &git2::TreeEntry<'iter>)
     }
     Ok(String::from_utf8(blob.content().to_vec()).ok())
 }
+
+pub fn get_ref<'a>(repo: &'a Repository, name: &str) -> Result<Option<git2::Reference<'a>>> {
+    // HEAD must be handled specially
+    if name == "HEAD" {
+        Ok(Some(repo.head()?))
+    } else {
+        // Refs are of the form refs/{heads|tags}/{name}. This glob supports
+        // searching both branches and tags. There may be more types of refs
+        // that this also supports, not sure.
+        let mut refs = repo.references_glob(&format!("*/{}", name))?;
+        let mut refs = refs.names();
+        let name = if let Some(name) = refs.next() {
+            name?
+        } else {
+            return Ok(None);
+        };
+        Ok(Some(repo.find_reference(name)?))
+    }
+}

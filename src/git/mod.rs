@@ -212,21 +212,9 @@ pub fn log(ctx: &Context, username: &str, reponame: &str, name: &str)
 {
     let path = build_repo_path(ctx, username, reponame);
     let repo = Repository::open(path)?;
-    // HEAD must be handled specially
-    let reference = if name == "HEAD" {
-        repo.head()?
-    } else {
-        // Refs are of the form refs/{heads|tags}/{name}. This glob supports
-        // searching both branches and tags. There may be more types of refs
-        // that this also supports, not sure.
-        let mut refs = repo.references_glob(&format!("*/{}", name))?;
-        let mut refs = refs.names();
-        let name = if let Some(name) = refs.next() {
-            name?
-        } else {
-            return Ok(None);
-        };
-        repo.find_reference(name)?
+    let reference = match get_ref(&repo, name)? {
+        Some(r) => r,
+        _ => return Ok(None),
     };
 
     let oid = match reference.target() {
@@ -251,8 +239,16 @@ pub fn commit<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo, id: 
 {
     let path = build_repo_path(ctx, username, &repo_info.name);
     let repo = Repository::open(path)?;
-    let oid = git2::Oid::from_str(id)?;
-    let raw_commit = catch_git!(repo.find_commit(oid), git2::ErrorCode::NotFound, None);
+    let raw_commit = if let Ok(oid) = git2::Oid::from_str(id) {
+        repo.find_commit(oid)?
+    } else {
+        let reference = match get_ref(&repo, id)? {
+            Some(r) => r,
+            _ => return Ok(None),
+        };
+        reference.peel_to_commit()?
+    };
+
     let commit = Commit::new(&raw_commit)?;
     let tree = raw_commit.tree()?;
     let (items, readme) = read_tree(&repo, &tree, true)?;
