@@ -122,12 +122,14 @@ pub struct Commit {
     pub short_id: String,
     pub author: String,
     pub time: String,
+    pub short_message: String,
     pub message: String,
 }
 
 impl Commit {
     pub fn new(commit: &::git2::Commit) -> Result<Self> {
-        let message = commit.summary().unwrap_or("Invalid commit message").to_string();
+        let short_message = commit.summary().unwrap_or("Invalid commit message").to_string();
+        let message = commit.message().unwrap_or("Invalid commit message").to_string();
         let author = commit.author();
         let author_name = author.name().unwrap_or("Invalid author name").to_string();
         let author_time = author.when();
@@ -140,6 +142,7 @@ impl Commit {
             short_id: commit.id().to_string()[0..7].to_string(),
             author: author_name,
             time: time,
+            short_message: short_message,
             message: message
         })
     }

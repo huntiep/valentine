@@ -30,7 +30,7 @@
 <div class="commits">
     <ul>
         {{#commits}}
-        <li><a href="refs/{{.id}}">{{.short_id}}</a> {{.message}} by {{.author}} {{.time}}</li>
+        <li><a href="refs/{{.id}}">{{.short_id}}</a> {{.short_message}} by {{.author}} {{.time}}</li>
         {{/commits}}
     </ul>
     <a href="log">View Log</a>

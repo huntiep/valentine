@@ -1,0 +1,22 @@
+{{>header.html}}
+<h4>{{repo.description}}</h4>
+
+<div class="commit-info">
+    <p><b>commit</b> {{commit.id}}</p><br>
+    <p><b>author</b> {{commit.author}}</p><br>
+    <p><b>time</b> {{commit.time}}</p><br>
+</div>
+
+<div class="commit-message">
+    <p>{{commit.message}}</p>
+</div>
+
+<ul>
+    {{#items}}
+    <li>{{.name}} {{.obj_type.str()}}</li>
+    {{/items}}
+</ul>
+
+{{#readme}}
+<p>{{{.}}}</p>
+{{/readme}}

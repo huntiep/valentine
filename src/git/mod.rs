@@ -2,7 +2,7 @@ pub mod network;
 mod util;
 
 use {Context, Result};
-use templates::{RefsTmpl, RepoTmpl};
+use templates::{CommitTmpl, RefsTmpl, RepoTmpl};
 use types::*;
 use self::util::*;
 
@@ -246,41 +246,25 @@ pub fn log(ctx: &Context, username: &str, reponame: &str, name: &str)
     Ok(Some(log))
 }
 
-pub fn commit<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo, commit: &'b str)
-    -> Result<Option<RepoTmpl<'a, 'b>>>
+pub fn commit<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo, id: &'b str)
+    -> Result<Option<CommitTmpl<'a, 'b>>>
 {
     let path = build_repo_path(ctx, username, &repo_info.name);
     let repo = Repository::open(path)?;
-    let oid = git2::Oid::from_str(commit)?;
-    let tree = catch_git!(repo.find_commit(oid), git2::ErrorCode::NotFound, None).tree()?;
+    let oid = git2::Oid::from_str(id)?;
+    let raw_commit = catch_git!(repo.find_commit(oid), git2::ErrorCode::NotFound, None);
+    let commit = Commit::new(&raw_commit)?;
+    let tree = raw_commit.tree()?;
     let (items, readme) = read_tree(&repo, &tree, true)?;
 
-    /*
-    let branches_raw: Vec<_> = repo.branches(None)?.take(5).collect();
-    let branches = Vec::new();
-    for branch in branches_raw {
-        if let Some(name) = branch?.0.name()? {
-            branches.push(Branch { name: name.to_string() });
-        } else {
-            continue;
-        }
-    }
-    */
-
-    let tmpl = RepoTmpl {
+    let tmpl = CommitTmpl {
         name: &ctx.name,
         url: &ctx.url,
         username: username,
         repo: repo_info,
-        branches: Vec::new(),
-        tags: Vec::new(),
-        commits: Vec::new(),
-        //branches: branches,
-        //tags: tags,
-        //commits: commits,
+        commit: commit,
         items: items,
         readme: readme,
-        empty: false,
     };
     Ok(Some(tmpl))
 }
