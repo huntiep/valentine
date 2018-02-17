@@ -1,0 +1,48 @@
+.nav
+   display: flex
+   flex: none
+   align-items: center
+
+.nav h1
+  display: flex
+  flex: 1
+
+.menu
+  z-index: 1
+  display: flex
+  justify-content: flex-end
+  margin-right: 1%
+  width: 100%
+
+.menu span
+  display: inline-block;
+  margin-right: 4px;
+  margin-top: 4px;
+  border: 8px solid;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  height: 0px
+
+.menu input
+  position: absolute
+  cursor: pointer
+  opacity: 0
+  z-index: 2
+
+.menu input:checked ~ ul
+  display: unset
+
+.menu ul
+  position: absolute;
+  list-style-type: none
+  padding: 5px
+  background-color: #fff
+  border: 1px solid
+  border-radius: 5px
+  display: none
+  margin-top: 1.5%
+
+.menu ul li
+  margin-top: 10px
+  margin-bottom: 10px

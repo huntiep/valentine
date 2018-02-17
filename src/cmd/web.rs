@@ -81,6 +81,7 @@ pub fn run(config: Config, config_path: PathBuf) {
     let mut router = Router::mount(ctx.mount.clone());
     router.set_not_found_handler(Arc::new(not_found));
     router.set_internal_error_handler(Arc::new(internal_error));
+    router.static_file_handle("/resources", "resources");
     router!{
         router,
         get "/" => home,

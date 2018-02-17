@@ -7,6 +7,7 @@ use std::fmt::Display;
 #[template = "templates/head.html"]
 pub struct TemplateHead<'a, 'b> {
     pub name: &'a str,
+    pub mount: &'a str,
     pub title: Option<&'b str>,
 }
 
@@ -14,6 +15,7 @@ impl<'a, 'b> TemplateHead<'a, 'b> {
     pub fn new(ctx: &'a Context, title: Option<&'b str>) -> Self {
         TemplateHead {
             name: &ctx.name,
+            mount: &ctx.mount,
             title: title,
         }
     }
