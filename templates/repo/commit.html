@@ -4,23 +4,23 @@
     <h4>{{repo.description}}</h4>
 
     <div class="commit-info">
-        <p><b>commit</b> {{commit.id}}</p><br>
-        <p><b>author</b> {{commit.author}}</p><br>
-        <p><b>time</b> {{commit.time}}</p><br>
+        <p><b>commit</b> {{commit.id}}</p>
+        <p><b>author</b> {{commit.author}}</p>
+        <p><b>time</b> {{commit.time}}</p>
     </div>
 
     <div class="commit-message">
-        <p>{{commit.message}}</p>
+        <pre>{{commit.message}}</pre>
     </div>
 
-    <ul>
+    <ul class="tree-items">
         {{#items}}
-        <li>{{.name}} {{.obj_type.str()}}</li>
+        <li class="{{.obj_type.str()}}"><a href="{{mount}}{{username}}/{{repo.name}}/refs/{{refname}}/{{.name}}">{{.name}}</a></li>
         {{/items}}
     </ul>
 
     {{#readme}}
-    <p>{{{.}}}</p>
+    <div class="md">{{{.}}}</div>
     {{/readme}}
 </div>
 </div>

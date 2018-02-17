@@ -272,6 +272,7 @@ pub fn commit<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo, id: 
         mount: &ctx.mount,
         username: username,
         repo: repo_info,
+        refname: id,
         commit: commit,
         items: items,
         readme: readme,

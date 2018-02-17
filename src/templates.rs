@@ -136,6 +136,7 @@ pub struct CommitTmpl<'a, 'b> {
     pub mount: &'a str,
     pub username: &'b str,
     pub repo: Repo,
+    pub refname: &'b str,
     pub commit: Commit,
     pub items: Vec<RepoItem>,
     pub readme: Option<String>,
