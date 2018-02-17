@@ -223,19 +223,23 @@ pub fn read_src<'a, 'b>(ctx: &'a Context,
     }
 }
 
-pub fn log(ctx: &Context, username: &str, reponame: &str, name: &str)
+pub fn log(ctx: &Context, username: &str, reponame: &str, id: &str)
     -> Result<Option<Vec<Commit>>>
 {
     let path = build_repo_path(ctx, username, reponame);
     let repo = Repository::open(path)?;
-    let reference = match get_ref(&repo, name)? {
-        Some(r) => r,
-        _ => return Ok(None),
-    };
+    let oid = if let Ok(oid) = git2::Oid::from_str(id) {
+        oid
+    } else {
+        let reference = match get_ref(&repo, id)? {
+            Some(r) => r,
+            _ => return Ok(None),
+        };
 
-    let oid = match reference.target() {
-        Some(o) => o,
-        _ => return Ok(None),
+        match reference.target() {
+            Some(o) => o,
+            _ => return Ok(None),
+        }
     };
 
     let mut log = Vec::new();

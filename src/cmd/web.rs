@@ -88,7 +88,7 @@ pub fn run(config: Config, config_path: PathBuf) {
         get "/{user}" => user,
         get "/{user}/{repo}" => repo::view,
         get "/{user}/{repo}/log" => repo::log_default,
-        get "/{user}/{repo}/log/{name}" => repo::log,
+        get "/{user}/{repo}/log/{id}" => repo::log,
         get "/{user}/{repo}/refs" => repo::refs_list,
         get "/{user}/{repo}/refs/{id}" => repo::commit,
         get "/{user}/{repo}/refs/{id}/{*filepath}" => repo::src,

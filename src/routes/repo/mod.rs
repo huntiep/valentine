@@ -55,14 +55,14 @@ route!{log_default, req, res, ctx, {
     redirect!(res, ctx, format!("{}/{}/log/HEAD", user, repo), "Viewing log from HEAD");
 }}
 
-// GET /{user}/{repo}/log/{name}
+// GET /{user}/{repo}/log/{id}
 route!{log, req, res, ctx, {
     let username = req.get_param("user");
     let reponame = req.get_param("repo");
-    let name = req.get_param("name");
+    let id = req.get_param("id");
 
     let repo = read_repo!(username, reponame, req, res, ctx);
-    let log = if let Some(log) = git::log(ctx, &username, &reponame, &name)? {
+    let log = if let Some(log) = git::log(ctx, &username, &reponame, &id)? {
         log
     } else {
         return not_found(req, res, ctx);
