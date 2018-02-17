@@ -84,12 +84,12 @@ pub fn run(config: Config, config_path: PathBuf) {
         get "/" => home,
         get "/{user}" => user,
         get "/{user}/{repo}" => repo::view,
+        get "/{user}/{repo}/log" => repo::log_default,
+        get "/{user}/{repo}/log/{name}" => repo::log,
         get "/{user}/{repo}/refs" => repo::refs_list,
         get "/{user}/{repo}/refs/{id}" => repo::commit,
         get "/{user}/{repo}/refs/{id}/{*filepath}" => repo::src,
         get "/{user}/{repo}/refs/{id}/raw/{*filepath}" => repo::raw,
-        get "/{user}/{repo}/log" => repo::log_default,
-        get "/{user}/{repo}/log/{name}" => repo::log,
 
         // Git pull
         // TODO: use regex to assert that `repo` ends with .git

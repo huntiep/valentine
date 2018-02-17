@@ -48,45 +48,6 @@ route!{view, req, res, ctx, {
     tmpl!(res, ctx, Some(&reponame), Some(navbar), None, repo_git);
 }}
 
-// GET /{user}/{repo}/refs/{id}/{*filepath}
-route!{src, req, res, ctx, {
-    let username = req.get_param("user");
-    let reponame = req.get_param("repo");
-    let id = req.get_param("id");
-    let filepath = req.get_param("filepath");
-
-    let pool = &ctx.db_pool;
-    let repo = if let Some(repo) = db::read::repo(pool, &username, &reponame)? {
-        repo
-    } else {
-        return not_found(req, res, ctx);
-    };
-
-    if repo.private {
-        repo_private!(reponame, req, res, ctx);
-    }
-
-    let src = git::read_src(ctx, &username, &repo, &id, &filepath)?;
-    if src.is_none() {
-        return not_found(req, res, ctx);
-    }
-
-    let body = RepoSrcTmpl {
-        name: &ctx.name,
-        username: &username,
-        repo: repo,
-        // TODO: maybe something else?
-        filename: &filepath,
-        src: src.unwrap(),
-    };
-
-    let cookies = &req.get_cookies();
-    let username = util::check_login(ctx, cookies);
-    let navbar = Navbar::new(ctx, username);
-
-    tmpl!(res, ctx, Some(&reponame), Some(navbar), None, body);
-}}
-
 // GET /{user}/{repo}/log
 route!{log_default, req, res, ctx, {
     let user = req.get_param("user");
@@ -183,6 +144,45 @@ route!{commit, req, res, ctx, {
     let navbar = Navbar::new(ctx, username);
 
     tmpl!(res, ctx, Some(&reponame), Some(navbar), None, body.unwrap());
+}}
+
+// GET /{user}/{repo}/refs/{id}/{*filepath}
+route!{src, req, res, ctx, {
+    let username = req.get_param("user");
+    let reponame = req.get_param("repo");
+    let id = req.get_param("id");
+    let filepath = req.get_param("filepath");
+
+    let pool = &ctx.db_pool;
+    let repo = if let Some(repo) = db::read::repo(pool, &username, &reponame)? {
+        repo
+    } else {
+        return not_found(req, res, ctx);
+    };
+
+    if repo.private {
+        repo_private!(reponame, req, res, ctx);
+    }
+
+    let src = git::read_src(ctx, &username, &repo, &id, &filepath)?;
+    if src.is_none() {
+        return not_found(req, res, ctx);
+    }
+
+    let body = RepoSrcTmpl {
+        name: &ctx.name,
+        username: &username,
+        repo: repo,
+        // TODO: maybe something else?
+        filename: &filepath,
+        src: src.unwrap(),
+    };
+
+    let cookies = &req.get_cookies();
+    let username = util::check_login(ctx, cookies);
+    let navbar = Navbar::new(ctx, username);
+
+    tmpl!(res, ctx, Some(&reponame), Some(navbar), None, body);
 }}
 
 // GET /{user}/{repo}/refs/{id}/raw/{*filepath}
