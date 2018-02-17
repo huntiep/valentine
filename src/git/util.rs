@@ -92,3 +92,15 @@ pub fn get_ref<'a>(repo: &'a Repository, name: &str) -> Result<Option<git2::Refe
         Ok(Some(repo.find_reference(name)?))
     }
 }
+
+pub fn get_commit<'a>(repo: &'a Repository, id: &str) -> Result<Option<git2::Commit<'a>>> {
+    if let Ok(oid) = git2::Oid::from_str(id) {
+        Ok(Some(catch_git!(repo.find_commit(oid), git2::ErrorCode::NotFound, None)))
+    } else {
+        let reference = match get_ref(&repo, id)? {
+            Some(r) => r,
+            _ => return Ok(None),
+        };
+        Ok(Some(reference.peel_to_commit()?))
+    }
+}

@@ -45,11 +45,11 @@ route!{view, req, res, ctx, {
     tmpl!(res, ctx, Some(&reponame), Some(navbar), None, repo_git);
 }}
 
-// GET /{user}/{repo}/tree/{name}/{*filepath}
+// GET /{user}/{repo}/refs/{id}/{*filepath}
 route!{src, req, res, ctx, {
     let username = req.get_param("user");
     let reponame = req.get_param("repo");
-    let name = req.get_param("name");
+    let id = req.get_param("id");
     let filepath = req.get_param("filepath");
 
     let pool = &ctx.db_pool;
@@ -63,7 +63,7 @@ route!{src, req, res, ctx, {
         repo_private!(reponame, req, res, ctx);
     }
 
-    let src = git::read_src(ctx, &username, &repo, &name, &filepath)?;
+    let src = git::read_src(ctx, &username, &repo, &id, &filepath)?;
     if src.is_none() {
         return not_found(req, res, ctx);
     }
@@ -183,12 +183,14 @@ route!{commit, req, res, ctx, {
 }}
 
 // TODO
-// GET /{user}/{repo}/blob/{commit}/{*filepath}
+// GET /{user}/{repo}/refs/{id}/{*filepath}
 route!{blob, req, res, ctx, {
     let username = req.get_param("user");
     let reponame = req.get_param("repo");
-    let commit = req.get_param("commit");
+    let id = req.get_param("id");
     let file = req.get_param("filepath");
+
+    //let src = git::read_src(ctx, &username, &repo, &id
     Ok(())
 }}
 

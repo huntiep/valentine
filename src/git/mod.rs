@@ -170,17 +170,17 @@ pub fn refs<'a>(ctx: &Context, username: &'a str, repo_info: Repo) -> Result<Ref
 pub fn read_src<'a, 'b>(ctx: &'a Context,
                         username: &'b str,
                         repo_info: &Repo,
-                        name: &str,
+                        id: &str,
                         file: &str)
     -> Result<Option<RepoSrc>>
 {
     let path = build_repo_path(ctx, username, &repo_info.name);
     let repo = Repository::open(path)?;
-    let branch = catch_git!(repo.find_branch(name, git2::BranchType::Local),
-                        git2::ErrorCode::NotFound,
-                        None);
-    let oid = branch.get().target().unwrap();
-    let commit = repo.find_commit(oid)?;
+
+    let commit = match get_commit(&repo, id)? {
+        Some(r) => r,
+        _ => return Ok(None),
+    };
     let tree = commit.tree()?;
     let entry = catch_git!(tree.get_path(Path::new(file)), git2::ErrorCode::NotFound, None);
 
@@ -239,14 +239,9 @@ pub fn commit<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo, id: 
 {
     let path = build_repo_path(ctx, username, &repo_info.name);
     let repo = Repository::open(path)?;
-    let raw_commit = if let Ok(oid) = git2::Oid::from_str(id) {
-        repo.find_commit(oid)?
-    } else {
-        let reference = match get_ref(&repo, id)? {
-            Some(r) => r,
-            _ => return Ok(None),
-        };
-        reference.peel_to_commit()?
+    let raw_commit = match get_commit(&repo, id)? {
+        Some(r) => r,
+        _ => return Ok(None),
     };
 
     let commit = Commit::new(&raw_commit)?;
