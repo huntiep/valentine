@@ -12,7 +12,9 @@
     </div>
     {{/username.is_some()}}
     {{^username.is_some()?}}
-    <a href="{{mount}}login">Login</a>
-    {{#signup?}}or <a href="{{mount}}signup">Signup</a>{{/signup}}
+    <p>
+        <a href="{{mount}}login">Login</a>
+        {{#signup?}}or <a href="{{mount}}signup">Signup</a>{{/signup}}
+    </p>
     {{/username.is_some()}}
 </nav>
