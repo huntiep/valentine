@@ -87,15 +87,9 @@ pub fn run(config: Config, config_path: PathBuf) {
         get "/{user}/{repo}/refs" => repo::refs_list,
         get "/{user}/{repo}/refs/{id}" => repo::commit,
         get "/{user}/{repo}/refs/{id}/{*filepath}" => repo::src,
+        get "/{user}/{repo}/refs/{id}/raw/{*filepath}" => repo::raw,
         get "/{user}/{repo}/log" => repo::log_default,
         get "/{user}/{repo}/log/{name}" => repo::log,
-
-        // TODO: Make sure this supports tags as well
-        get "/{user}/{repo}/tree/{name}/{*filepath}" => repo::src,
-        get "/{user}/{repo}/commit/{commit}" => repo::commit,
-        get "/{user}/{repo}/blob/{commit}/{*filepath}" => repo::blob,
-        // TODO: Github allows `id` to be a branch name or the commit hash
-        get "/{user}/{repo}/raw/{commit}/{*filepath}" => repo::raw,
 
         // Git pull
         // TODO: use regex to assert that `repo` ends with .git

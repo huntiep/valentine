@@ -107,7 +107,8 @@ route!{delete, req, res, ctx, {
 
     if let Some(name) = req.form_value("delete") {
         if name != reponame {
-        redirect!(res, ctx, format!("{}/{}/settings", user, reponame), "Incorrect name entered");
+            redirect!(res, ctx, format!("{}/{}/settings", user, reponame),
+                      "Incorrect name entered");
         }
     } else {
         redirect!(res, ctx, format!("{}/{}/settings", user, reponame),

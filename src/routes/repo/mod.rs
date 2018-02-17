@@ -1,5 +1,6 @@
 use {db, git};
 use templates::*;
+use types::RepoSrc;
 use super::{not_found, util};
 
 // Check if private repo `name` can be viewed by this request
@@ -182,24 +183,36 @@ route!{commit, req, res, ctx, {
     tmpl!(res, ctx, Some(&reponame), Some(navbar), None, body.unwrap());
 }}
 
-// TODO
-// GET /{user}/{repo}/refs/{id}/{*filepath}
-route!{blob, req, res, ctx, {
-    let username = req.get_param("user");
-    let reponame = req.get_param("repo");
-    let id = req.get_param("id");
-    let file = req.get_param("filepath");
-
-    //let src = git::read_src(ctx, &username, &repo, &id
-    Ok(())
-}}
-
-// TODO
-// GET /{user}/{repo}/raw/{commit}/{*filepath}
+// GET /{user}/{repo}/refs/{id}/raw/{*filepath}
 route!{raw, req, res, ctx, {
     let username = req.get_param("user");
     let reponame = req.get_param("repo");
-    let commit = req.get_param("commit");
-    let file = req.get_param("filepath");
-    Ok(())
+    let id = req.get_param("id");
+    let filepath = req.get_param("filepath");
+
+    let pool = &ctx.db_pool;
+    let repo = if let Some(repo) = db::read::repo(pool, &username, &reponame)? {
+        repo
+    } else {
+        return not_found(req, res, ctx);
+    };
+
+    if repo.private {
+        repo_private!(reponame, req, res, ctx);
+    }
+
+    let src = match git::read_src(ctx, &username, &repo, &id, &filepath)? {
+        Some(s) => s,
+        None => return not_found(req, res, ctx),
+    };
+
+    match src {
+        RepoSrc::Dir { .. } => {
+            redirect!(res, ctx,
+                      format!("{}/{}/refs/{}/{}", username, reponame, id, filepath),
+                      "Can't view raw directories");
+        }
+        RepoSrc::Error => return not_found(req, res, ctx),
+        RepoSrc::File(f) => { ok!(res.body(f)); }
+    }
 }}
