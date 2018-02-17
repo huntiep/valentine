@@ -1,4 +1,5 @@
-<div>
+<div class="content">
+    {{^keys.is_empty()?}}
     <h3>SSH keys</h3>
     <ul>
         {{#keys}}
@@ -8,11 +9,13 @@
         </li>
         {{/keys}}
     </ul>
+    {{/keys.is_empty()}}
+    <h3> Add a new SSH key</h3>
     <form method="POST" action="{{mount}}settings/add-ssh-key">
         <label for="name">Name</label><br>
-        <input name="name" type="text" /><br>
+        <input name="name" type="text" size="30" /><br>
         <label for="ssh_key">SSH Key</label><br>
-        <textarea name="ssh_key"></textarea><br>
+        <textarea name="ssh_key" cols="40" rows="20"></textarea><br>
         <button type="submit">Add SSH Key</button>
     </form>
 </div>

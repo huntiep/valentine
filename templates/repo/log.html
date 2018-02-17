@@ -1,9 +1,11 @@
-{{>header.html}}
+<div class="content">
+    {{>header.html}}
 
-<p>{{log.len()}} commits<p>
-<ul>
-    <li>Message | Author | Time</li>
-    {{#log}}
-    <li>{{.short_message}} | {{.author}} | {{.time}}</li>
-    {{/log}}
-</ul>
+    <p>{{log.len()}} commits<p>
+    <ul>
+        <li>Message | Author | Time</li>
+        {{#log}}
+        <li>{{.short_message}} | {{.author}} | {{.time}}</li>
+        {{/log}}
+    </ul>
+</div>

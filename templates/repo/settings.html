@@ -1,15 +1,17 @@
-{{>header.html}}
+<div class="content">
+    {{>header.html}}
 
-<h3>Change Repository Name</h3>
-<form method="POST" action="{{mount}}{{username}}/{{repo.name}}/settings/name">
-    <label for="name">Repository Name</label>
-    <input name="name" type="text" value="{{repo.name}}"/>
-    <button type="submit">Change Repository Name</button>
-</form>
+    <h3>Change Repository Name</h3>
+    <form method="POST" action="{{mount}}{{username}}/{{repo.name}}/settings/name">
+        <label for="name">Repository Name</label>
+        <input name="name" type="text" value="{{repo.name}}" size="30"/>
+        <button type="submit">Change Repository Name</button>
+    </form>
 
-<h3>Delete Repository</h5>
-<form method="POST" action="{{mount}}{{username}}/{{repo.name}}/delete">
-    <label for="delete">Enter Repository Name to Delete</label>
-    <input name="delete" type="text"/>
-    <button type="submit">Delete Repository</button>
-</form>
+    <h3>Delete Repository</h5>
+    <form method="POST" action="{{mount}}{{username}}/{{repo.name}}/delete">
+        <label for="delete">Enter Repository Name to Delete</label>
+        <input name="delete" type="text" size="30" />
+        <button type="submit">Delete Repository</button>
+    </form>
+</div>

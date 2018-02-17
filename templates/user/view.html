@@ -1,7 +1,9 @@
-<h3>{{username}}</h3>
-<ul>
-    {{#repos}}
-    <li><h5><a href="{{mount}}{{username}}/{{.name}}">{{.name}}</a></h5><br>
-        <p>{{.description}}</p></li>
-    {{/repos}}
-<ul>
+<div class="content">
+    <h3>{{username}}</h3>
+    <ul>
+        {{#repos}}
+        <li><h5><a href="{{mount}}{{username}}/{{.name}}">{{.name}}</a></h5><br>
+            <p>{{.description}}</p></li>
+        {{/repos}}
+    <ul>
+</div>

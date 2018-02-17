@@ -1,22 +1,24 @@
-{{>header.html}}
+<div class="content">
+    {{>header.html}}
 
-<h5>{{filename}}</h5>
+    <h5>{{filename}}</h5>
 
-{{#src.explode().}}
-{{#.File}}
-<pre>{{.0}}</pre>
-{{/.File}}
-{{#.Dir}}
-<ul>
-    {{#.items}}
-    <li>{{.name}} {{.obj_type.str()}}</li>
-    {{/.items}}
-</ul>
-{{#.readme}}
-<p>{{{.}}}</p>
-{{/.readme}}
-{{/.Dir}}
-{{#.Error}}
-<p>This entry can't be viewed online.</p>
-{{/.Error}}
-{{/src.explode()}}
+    {{#src.explode().}}
+    {{#.File}}
+    <pre>{{.0}}</pre>
+    {{/.File}}
+    {{#.Dir}}
+    <ul>
+        {{#.items}}
+        <li>{{.name}} {{.obj_type.str()}}</li>
+        {{/.items}}
+    </ul>
+    {{#.readme}}
+    <p>{{{.}}}</p>
+    {{/.readme}}
+    {{/.Dir}}
+    {{#.Error}}
+    <p>This entry can't be viewed online.</p>
+    {{/.Error}}
+    {{/src.explode()}}
+</div>
