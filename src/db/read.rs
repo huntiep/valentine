@@ -1,4 +1,4 @@
-use {Error, Result};
+use {Context, Error, Result};
 use templates::*;
 use types::*;
 use super::{Pool, public_keys, repos, users};
@@ -63,7 +63,9 @@ pub fn repo_is_private(pool: &Pool, username: &str, reponame: &str) -> Result<bo
         Err(e) => Err(Error::from(e)),
     }
 }
-pub fn user(pool: &Pool, username: &str) -> Result<Option<User>> {
+pub fn user<'a, 'b>(pool: &Pool, username: &'b str, ctx: &'a Context)
+    -> Result<Option<User<'a, 'b>>>
+{
     let owner = user_id(pool, username)?;
 
     let conn = pool.get()?;
@@ -72,7 +74,8 @@ pub fn user(pool: &Pool, username: &str) -> Result<Option<User>> {
         .load::<Repo>(&*conn)?;
 
     Ok(Some(User {
-        username: username.to_string(),
+        mount: &ctx.mount,
+        username: username,
         repos: repos,
     }))
 
@@ -94,7 +97,9 @@ pub fn repo(pool: &Pool, username: &str, reponame: &str) -> Result<Option<Repo>>
     }
 }
 
-pub fn settings<'a>(pool: &Pool, username: &str) -> Result<UserSettings<'a>> {
+pub fn settings<'a, 'b>(pool: &Pool, username: &'b str, ctx: &'a Context)
+    -> Result<UserSettings<'a, 'b>>
+{
     let owner = user_id(pool, username)?;
 
     let conn = pool.get()?;
@@ -106,8 +111,8 @@ pub fn settings<'a>(pool: &Pool, username: &str) -> Result<UserSettings<'a>> {
         .load::<SshKey>(&*conn)?;
 
     Ok(UserSettings {
-        name: "",
-        username: username.to_string(),
+        mount: &ctx.mount,
+        username: username,
         email: email,
         keys: keys,
         //auth: true,

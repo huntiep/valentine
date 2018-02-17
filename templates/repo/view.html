@@ -4,7 +4,7 @@
 
 <div class="clone">
     <p>Clone this repo</p>
-    <code>git clone {{url}}{{username}}/{{repo.name}}</code>
+    <code>git clone {{url}}{{mount}}{{username}}/{{repo.name}}</code>
 </div>
 
 <div class="refs">
@@ -12,7 +12,7 @@
     <h5>Branches</h5>
     <ul>
         {{#branches}}
-        <li><a href="refs/{{.name}}">{{.name}}</a></li>
+        <li><a href="{{mount}}{{username}}/{{repo.name}}/refs/{{.name}}">{{.name}}</a></li>
         {{/branches}}
     </ul>
     {{/branches.is_empty()}}
@@ -20,20 +20,20 @@
     <h5>Tags</h5>
     <ul>
         {{#tags}}
-        <li><a href="refs/{{.name}}">{{.name}}</a></li>
+        <li><a href="{{mount}}{{username}}/{{repo.name}}/refs/{{.name}}">{{.name}}</a></li>
         {{/tags}}
     </ul>
     {{/tags.is_empty()}}
-    <a href="refs">View All</a>
+    <a href="{{mount}}{{username}}/{{repo.name}}/refs">View All</a>
 </div>
 
 <div class="commits">
     <ul>
         {{#commits}}
-        <li><a href="refs/{{.id}}">{{.short_id}}</a> {{.short_message}} by {{.author}} {{.time}}</li>
+        <li><a href="{{mount}}{{username}}/{{repo.name}}/refs/{{.id}}">{{.short_id}}</a> {{.short_message}} by {{.author}} {{.time}}</li>
         {{/commits}}
     </ul>
-    <a href="log">View Log</a>
+    <a href="{{mount}}{{username}}/{{repo.name}}/log">View Log</a>
 </div>
 
 {{#readme}}

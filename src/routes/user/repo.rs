@@ -60,7 +60,7 @@ route!{settings, req, res, ctx, {
     };
 
     let navbar = Navbar::new(ctx, Some(username));
-    let body = RepoSettingsTmpl { name: &ctx.name, username: username, repo: repo };
+    let body = RepoSettingsTmpl { mount: &ctx.mount, username: username, repo: repo };
     tmpl!(res, ctx, Some(username), Some(navbar), None, body);
 }}
 

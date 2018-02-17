@@ -75,14 +75,13 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
     let repo = Repository::open(path)?;
     if repo.is_empty()? {
         let tmpl = RepoTmpl {
-            name: &ctx.name,
             url: &ctx.url,
+            mount: &ctx.mount,
             username: username,
             repo: repo_info,
             branches: Vec::new(),
             tags: Vec::new(),
             commits: Vec::new(),
-            items: Vec::new(),
             readme: None,
             empty: true,
         };
@@ -93,7 +92,7 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
     let oid = head.target().unwrap();
     let commit = repo.find_commit(oid)?;
     let tree = commit.tree()?;
-    let (items, readme) = read_tree(&repo, &tree, true)?;
+    let readme = read_readme(&repo, &tree)?;
 
     let branches_raw: Vec<_> = repo.branches(None)?.take(10).collect();
     let mut branches = Vec::new();
@@ -127,21 +126,22 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
     }
 
     let tmpl = RepoTmpl {
-        name: &ctx.name,
         url: &ctx.url,
+        mount: &ctx.mount,
         username: username,
         repo: repo_info,
         branches: branches,
         tags: tags,
         commits: commits,
-        items: items,
         readme: readme,
         empty: false,
     };
     Ok(tmpl)
 }
 
-pub fn refs<'a>(ctx: &Context, username: &'a str, repo_info: Repo) -> Result<RefsTmpl<'a>> {
+pub fn refs<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
+    -> Result<RefsTmpl<'a, 'b>>
+{
     let path = build_repo_path(ctx, username, &repo_info.name);
     let repo = Repository::open(path)?;
     let branches_raw: Vec<_> = repo.branches(None)?.take(5).collect();
@@ -160,6 +160,7 @@ pub fn refs<'a>(ctx: &Context, username: &'a str, repo_info: Repo) -> Result<Ref
     }
 
     Ok(RefsTmpl {
+        mount: &ctx.mount,
         username: username,
         repo: repo_info,
         branches: branches,
@@ -192,7 +193,7 @@ pub fn read_src<'a, 'b>(ctx: &'a Context,
             } else {
                 return Ok(Some(RepoSrc::Error));
             };
-            let (items, readme) = read_tree(&repo, e, true)?;
+            let (items, readme) = read_tree(&repo, e)?;
             Ok(Some(RepoSrc::Dir { items, readme }))
         }
         Some(ObjectType::Blob) => {
@@ -246,11 +247,10 @@ pub fn commit<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo, id: 
 
     let commit = Commit::new(&raw_commit)?;
     let tree = raw_commit.tree()?;
-    let (items, readme) = read_tree(&repo, &tree, true)?;
+    let (items, readme) = read_tree(&repo, &tree)?;
 
     let tmpl = CommitTmpl {
-        name: &ctx.name,
-        url: &ctx.url,
+        mount: &ctx.mount,
         username: username,
         repo: repo_info,
         commit: commit,

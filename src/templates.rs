@@ -76,6 +76,7 @@ impl<'a, 'b, 'c, T: Display> Template<'a, 'b, 'c, T> {
 #[template = "templates/navbar.html"]
 pub struct Navbar<'a, 'b> {
     pub name: &'a str,
+    pub mount: &'a str,
     pub signup: bool,
     pub username: Option<&'b str>,
 }
@@ -84,6 +85,7 @@ impl<'a, 'b> Navbar<'a, 'b> {
     pub fn new(ctx: &'a Context, username: Option<&'b str>) -> Self {
         Navbar {
             name: &ctx.name,
+            mount: &ctx.mount,
             signup: ctx.signup,
             username: username,
         }
@@ -92,23 +94,21 @@ impl<'a, 'b> Navbar<'a, 'b> {
 
 #[derive(BartDisplay)]
 #[template = "templates/home.html"]
-pub struct HomeTmpl<'a, 'b> {
-    pub name: &'a str,
-    pub username: Option<&'b str>,
-}
+pub struct HomeTmpl;
 
 #[derive(BartDisplay)]
 #[template = "templates/user/view.html"]
-pub struct User {
-    pub username: String,
+pub struct User<'a, 'b> {
+    pub mount: &'a str,
+    pub username: &'b str,
     pub repos: Vec<Repo>,
 }
 
 #[derive(BartDisplay)]
 #[template = "templates/user/settings.html"]
-pub struct UserSettings<'a> {
-    pub name: &'a str,
-    pub username: String,
+pub struct UserSettings<'a, 'b> {
+    pub mount: &'a str,
+    pub username: &'b str,
     pub email: String,
     pub keys: Vec<SshKey>,
 }
@@ -116,14 +116,13 @@ pub struct UserSettings<'a> {
 #[derive(BartDisplay)]
 #[template = "templates/repo/view.html"]
 pub struct RepoTmpl<'a, 'b> {
-    pub name: &'a str,
     pub url: &'a str,
+    pub mount: &'a str,
     pub username: &'b str,
     pub repo: Repo,
     pub branches: Vec<Branch>,
     pub tags: Vec<Tag>,
     pub commits: Vec<Commit>,
-    pub items: Vec<RepoItem>,
     pub readme: Option<String>,
     pub empty: bool,
 }
@@ -131,8 +130,7 @@ pub struct RepoTmpl<'a, 'b> {
 #[derive(BartDisplay)]
 #[template = "templates/repo/commit.html"]
 pub struct CommitTmpl<'a, 'b> {
-    pub name: &'a str,
-    pub url: &'a str,
+    pub mount: &'a str,
     pub username: &'b str,
     pub repo: Repo,
     pub commit: Commit,
@@ -143,15 +141,16 @@ pub struct CommitTmpl<'a, 'b> {
 #[derive(BartDisplay)]
 #[template = "templates/repo/settings.html"]
 pub struct RepoSettingsTmpl<'a, 'b> {
-    pub name: &'a str,
+    pub mount: &'a str,
     pub username: &'b str,
     pub repo: Repo,
 }
 
 #[derive(BartDisplay)]
 #[template = "templates/repo/refs.html"]
-pub struct RefsTmpl<'a> {
-    pub username: &'a str,
+pub struct RefsTmpl<'a, 'b> {
+    pub mount: &'a str,
+    pub username: &'b str,
     pub repo: Repo,
     pub branches: Vec<Branch>,
     pub tags: Vec<Tag>,
@@ -161,7 +160,7 @@ pub struct RefsTmpl<'a> {
 #[derive(BartDisplay)]
 #[template = "templates/repo/log.html"]
 pub struct RepoLogTmpl<'a, 'b> {
-    pub name: &'a str,
+    pub mount: &'a str,
     pub username: &'b str,
     pub repo: Repo,
     pub log: Vec<Commit>,
@@ -170,7 +169,7 @@ pub struct RepoLogTmpl<'a, 'b> {
 #[derive(BartDisplay)]
 #[template = "templates/repo/src.html"]
 pub struct RepoSrcTmpl<'a, 'b, 'c> {
-    pub name: &'a str,
+    pub mount: &'a str,
     pub username: &'b str,
     pub repo: Repo,
     pub filename: &'c str,

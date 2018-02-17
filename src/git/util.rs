@@ -16,15 +16,24 @@ pub fn build_repo_path(ctx: &Context, username: &str, reponame: &str) -> PathBuf
     ctx.repo_dir.join(username).join(reponame)
 }
 
-fn parse_readme(readme: &str) -> String {
-    let content = escape_html(readme);
-    content.lines().fold(String::with_capacity(content.len()),
-                         |acc, line| acc + line + "<br>")
+pub fn read_readme<'repo>(repo: &Repository, tree: &git2::Tree<'repo>) -> Result<Option<String>> {
+    for entry in tree.iter() {
+        let name = entry.name().unwrap_or("Invalid filename").to_string();
+        let kind = entry.kind().unwrap_or(ObjectType::Any);
+        let name_lower = name.to_lowercase();
+
+        if name_lower.starts_with("readme") && kind == ObjectType::Blob {
+            match handle_readme(repo, entry, name_lower)? {
+                Some(r) => return Ok(Some(r)),
+                _ => {},
+            }
+        }
+    }
+
+    Ok(None)
 }
 
-pub fn read_tree<'repo>(repo: &Repository,
-                        tree: &git2::Tree<'repo>,
-                        handle_readme: bool)
+pub fn read_tree<'repo>(repo: &Repository, tree: &git2::Tree<'repo>)
     -> Result<(Vec<RepoItem>, Option<String>)>
 {
     let mut items = Vec::with_capacity(tree.len());
@@ -34,20 +43,12 @@ pub fn read_tree<'repo>(repo: &Repository,
         let kind = entry.kind().unwrap_or(ObjectType::Any);
         let name_lower = name.to_lowercase();
 
-        if handle_readme && readme.is_none() && name_lower.starts_with("readme") &&
+        if readme.is_none() && name_lower.starts_with("readme") &&
             kind == ObjectType::Blob
         {
-            let content = match read_file(repo, &entry)? {
-                Some(c) => c,
-                None => break,
-            };
-            if name_lower.ends_with(".md") || name_lower.ends_with(".markdown") {
-                let events = pulldown_cmark::Parser::new(&content);
-                let mut buf = String::new();
-                pulldown_cmark::html::push_html(&mut buf, events);
-                readme = Some(buf);
-            } else {
-                readme = Some(parse_readme(&content));
+            match handle_readme(repo, entry, name_lower)? {
+                Some(r) => readme = Some(r),
+                _ => {},
             }
         }
 
@@ -58,6 +59,29 @@ pub fn read_tree<'repo>(repo: &Repository,
         items.push(item);
     }
     Ok((items, readme))
+}
+
+fn handle_readme(repo: &Repository, entry: git2::TreeEntry, name_lower: String)
+    -> Result<Option<String>>
+{
+    let content = match read_file(repo, &entry)? {
+        Some(c) => c,
+        None => return Ok(None),
+    };
+    if name_lower.ends_with(".md") || name_lower.ends_with(".markdown") {
+        let events = pulldown_cmark::Parser::new(&content);
+        let mut buf = String::new();
+        pulldown_cmark::html::push_html(&mut buf, events);
+        return Ok(Some(buf));
+    } else {
+        return Ok(Some(parse_readme(&content)));
+    }
+}
+
+fn parse_readme(readme: &str) -> String {
+    let content = escape_html(readme);
+    content.lines().fold(String::with_capacity(content.len()),
+                         |acc, line| acc + line + "<br>")
 }
 
 pub fn read_file<'iter>(repo: &Repository, entry: &git2::TreeEntry<'iter>)

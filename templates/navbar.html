@@ -1,10 +1,10 @@
-<h1><a href="/">{{name}}</a></h1>
+<h1><a href="{{mount}}">{{name}}</a></h1>
 {{#username.is_some()?}}
-<a href="/repo/new">Create Repository</a>
-<a href="/{{#username}}{{.}}{{/username}}">Profile</a>
-<a href="/settings">Settings</a>
+<a href="{{mount}}repo/new">Create Repository</a>
+<a href="{{mount}}{{#username}}{{.}}{{/username}}">Profile</a>
+<a href="{{mount}}settings">Settings</a>
 {{/username.is_some()}}
 {{^username.is_some()?}}
-<a href="/login">Login</a>
-{{#signup?}}<a href="/signup">Signup</a>{{/signup}}
+<a href="{{mount}}login">Login</a>
+{{#signup?}}<a href="{{mount}}signup">Signup</a>{{/signup}}
 {{/username.is_some()}}

@@ -55,12 +55,13 @@ pub fn run(config: Config, config_path: PathBuf) {
     };
 
     let url = match config.url {
-        Some(m) => if m.ends_with('/') {
+        Some(mut m) => if m.ends_with('/') {
+            m.pop();
             m
         } else {
-            m + "/"
+            m
         },
-        None => "http://localhost/".to_string(),
+        None => "http://localhost".to_string(),
     };
 
     let ctx = Context {

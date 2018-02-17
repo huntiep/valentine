@@ -102,8 +102,7 @@ route!{settings, req, res, ctx, {
     let cookies = req.get_cookies();
     let username = check_login!(&cookies, res, ctx);
 
-    let mut settings = db::read::settings(&ctx.db_pool, username)?;
-    settings.name = &ctx.name;
+    let mut settings = db::read::settings(&ctx.db_pool, username, ctx)?;
     let navbar = Navbar::new(ctx, Some(username));
     tmpl!(res, ctx, Some("Settings"), Some(navbar), None, settings);
 }}

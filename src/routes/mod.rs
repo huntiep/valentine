@@ -13,8 +13,7 @@ route!{home, req, res, ctx, {
     let cookies = &req.get_cookies();
     let username = util::check_login(ctx, cookies);
     let navbar = Navbar::new(ctx, username);
-    let body = HomeTmpl { name: &ctx.name, username: username };
-    tmpl!(res, ctx, username, Some(navbar), None, body);
+    tmpl!(res, ctx, username, Some(navbar), None, HomeTmpl);
 }}
 
 // GET /{user}
@@ -24,7 +23,7 @@ route!{user, req, res, ctx, {
     let user = req.get_param("user");
 
     let pool = &ctx.db_pool;
-    if let Some(mut body) = db::read::user(pool, &user)? {
+    if let Some(mut body) = db::read::user(pool, &user, &ctx)? {
         let navbar = Navbar::new(ctx, username);
         tmpl!(res, ctx, Some(&user), Some(navbar), None, body);
     } else {

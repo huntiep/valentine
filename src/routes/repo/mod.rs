@@ -79,7 +79,7 @@ route!{log, req, res, ctx, {
     };
 
     let body = RepoLogTmpl {
-        name: &ctx.name,
+        mount: &ctx.mount,
         username: &username,
         repo: repo,
         log: log
@@ -170,7 +170,7 @@ route!{src, req, res, ctx, {
     }
 
     let body = RepoSrcTmpl {
-        name: &ctx.name,
+        mount: &ctx.mount,
         username: &username,
         repo: repo,
         // TODO: maybe something else?

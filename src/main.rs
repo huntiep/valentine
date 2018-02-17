@@ -70,7 +70,6 @@ pub type UserName = String;
 
 pub struct Context {
     pub db_pool: db::Pool,
-    // TODO: Use this in templates
     pub mount: String,
     pub logins: Arc<Mutex<HashMap<SessionKey, UserName>>>,
     pub name: String,
@@ -92,8 +91,6 @@ pub struct Config {
     pub url: Option<String>,
     pub signup: Option<bool>,
     pub addr: Option<SocketAddr>,
-    // TODO
-    pub allow_registration: Option<bool>,
 }
 
 fn main() {
