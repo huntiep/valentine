@@ -5,8 +5,11 @@ A Git server aimed at small - medium sized projects that want to self-host.
 ### Install
 ```bash
 createdb valentine
-adduser git && su git
-cd ~
+adduser git
+cp -r valentine /home/git
+su git
+cd ~/valentine
+./valentine web
 ```
 
 ### TODO
