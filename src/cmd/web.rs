@@ -106,7 +106,7 @@ pub fn run(config: Config, config_path: PathBuf) {
         get "/logout" => user::logout,
         get "/settings" => user::settings,
         post "/settings/add-ssh-key" => user::add_ssh_key,
-        post "/settings/delete-ssh-key" => user::delete_ssh_key,
+        get r"/settings/delete-ssh-key/{id:\d+}" => user::delete_ssh_key,
         get "/repo/new" => user::repo::new,
         post "/repo/new" => user::repo::new_post,
         get "/{user}/{repo}/settings" => user::repo::settings,

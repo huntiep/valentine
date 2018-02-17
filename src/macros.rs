@@ -35,11 +35,11 @@ macro_rules! check_login {
 }
 
 macro_rules! parse_param {
-    ( $req:ident, $res:ident, $ctx:ident, $params:ident, $name:expr, $t:ty) => {
+    ( $req:ident, $res:ident, $ctx:ident, $name:expr, $t:ty) => {
         {
-            match $params[$name].parse::<$t>() {
+            match $req.get_param($name).parse::<$t>() {
                 Ok(p) => p,
-                Err(_) => return super::not_found($req, $res, $ctx),
+                Err(_) => return ::routes::not_found($req, $res, $ctx),
             }
         }
     };

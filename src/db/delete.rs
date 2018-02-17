@@ -1,5 +1,5 @@
 use Result;
-use super::{read, repos, users, Pool};
+use super::{public_keys, read, repos, users, Pool};
 
 use diesel;
 use diesel::prelude::*;
@@ -23,5 +23,11 @@ pub fn repo(pool: &Pool, username: &str, repo_name: &str) -> Result<()> {
     diesel::update(users::table.find(owner))
         .set(users::num_repos.eq(users::num_repos - 1))
         .execute(&*conn)?;
+    Ok(())
+}
+
+pub fn public_key(pool: &Pool, id: i32) -> Result<()> {
+    let conn = pool.get()?;
+    diesel::delete(public_keys::table.find(id)).execute(&*conn)?;
     Ok(())
 }

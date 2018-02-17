@@ -3,7 +3,7 @@
     <ul>
         {{#keys}}
         <li>
-            <b>{{.name}}</b><br>
+            <b>{{.name}}</b> <a href="{{mount}}settings/delete-ssh-key/{{.id}}">Delete Key</a><br>
             Fingerprint: {{.fingerprint}}
         </li>
         {{/keys}}

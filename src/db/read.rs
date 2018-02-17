@@ -132,6 +132,16 @@ pub fn user_by_key_id(pool: &Pool, id: i32) -> Result<Option<i32>> {
     }
 }
 
+pub fn user_owns_key(pool: &Pool, username: &str, id: i32) -> Result<bool> {
+    let user = user_id(pool, username)?;
+    let owner = match user_by_key_id(pool, id)? {
+        Some(o) => o,
+        _ => return Ok(false),
+    };
+
+    Ok(owner == user)
+}
+
 pub fn user_owns_repo(pool: &Pool, owner: i32, reponame: &str) -> Result<bool> {
     let conn = pool.get()?;
 

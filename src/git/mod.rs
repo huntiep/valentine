@@ -9,7 +9,7 @@ use self::util::*;
 use git2::{self, ObjectType, Repository};
 
 use std::fs;
-use std::io::Write;
+use std::io::{Read, Write};
 use std::path::{Path};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -54,6 +54,20 @@ no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty {}",
                           ctx.bin_path.display(), ctx.config_path.display(),
                           ssh_key.id, ssh_key.content);
     Ok(file.write_all(key.as_bytes())?)
+}
+
+pub fn delete_ssh_key(ctx: &Context, id: i32) -> Result<()> {
+    let mut ssh_dir = ctx.ssh_dir.clone();
+    ssh_dir.push("authorized_keys");
+    let mut file = fs::File::open(&ssh_dir)?;
+    let mut buf = String::new();
+    file.read_to_string(&mut buf)?;
+    let buf = buf.lines().filter(|l| !l.contains(&format!("ssh key-{}", id))).collect::<String>();
+    let mut file = fs::OpenOptions::new()
+        .write(true)
+        .truncate(true)
+        .open(ssh_dir)?;
+    Ok(file.write_all(buf.as_bytes())?)
 }
 
 pub fn init(ctx: &Context, username: &str, reponame: &str) -> Result<()> {

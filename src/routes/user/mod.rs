@@ -126,7 +126,18 @@ route!{add_ssh_key, req, res, ctx, {
     redirect!(res, ctx, "settings", "SSH key added");
 }}
 
-// TODO
+// GET /settings/delete-ssh-key/{id}
 route!{delete_ssh_key, req, res, ctx, {
-    Ok(res.body(""))
+    let cookies = req.get_cookies();
+    let username = check_login!(&cookies, res, ctx);
+    let id = parse_param!(req, res, ctx, "id", i32);
+
+    let pool = &ctx.db_pool;
+    if db::read::user_owns_key(pool, username, id)? {
+        git::delete_ssh_key(ctx, id)?;
+        db::delete::public_key(pool, id)?;
+        redirect!(res, ctx, "settings", "Key deleted");
+    } else {
+        redirect!(res, ctx, "settings", "Key does not exist");
+    }
 }}
