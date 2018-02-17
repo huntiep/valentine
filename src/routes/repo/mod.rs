@@ -3,6 +3,8 @@ use templates::*;
 use types::RepoSrc;
 use super::{not_found, util};
 
+use hayaku::header;
+
 // Check if private repo `name` can be viewed by this request
 macro_rules! repo_private {
     ( $name:ident, $req:ident, $res:ident, $ctx:ident ) => {
@@ -208,6 +210,7 @@ route!{raw, req, res, ctx, {
 
     match src {
         RepoSrc::Dir { .. } => {
+            res.add_header(header::CONTENT_TYPE, hval!("text/plain; charset=utf-8"));
             redirect!(res, ctx,
                       format!("{}/{}/refs/{}/{}", username, reponame, id, filepath),
                       "Can't view raw directories");
