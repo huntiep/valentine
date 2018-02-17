@@ -4,9 +4,8 @@
 
     <p>{{log.len()}} commits<p>
     <ul>
-        <li>Message | Author | Time</li>
         {{#log}}
-        <li>{{.short_message}} | {{.author}} | {{.time}}</li>
+        <li><p><a href="{{mount}}{{username}}/{{repo.name}}/refs/{{.id}}">{{.short_id}}</a> {{.short_message}} by {{.author}} at {{.time}}</p></li>
         {{/log}}
     </ul>
 </div>
