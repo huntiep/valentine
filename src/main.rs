@@ -74,6 +74,7 @@ pub struct Context {
     pub logins: Arc<Mutex<HashMap<SessionKey, UserName>>>,
     pub name: String,
     pub url: String,
+    pub ssh: String,
     pub signup: bool,
     pub repo_dir: PathBuf,
     pub ssh_dir: PathBuf,
@@ -89,6 +90,7 @@ pub struct Config {
     pub mount: Option<String>,
     pub name: Option<String>,
     pub url: Option<String>,
+    pub ssh: String,
     pub signup: Option<bool>,
     pub addr: Option<SocketAddr>,
 }

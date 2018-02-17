@@ -1,2 +1,3 @@
 repo_dir = "/home/git/val-repos"
 db_url = "postgres://username:password@localhost/valentine"
+ssh = "git@localhost"

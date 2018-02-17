@@ -76,6 +76,7 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
     if repo.is_empty()? {
         let tmpl = RepoTmpl {
             url: &ctx.url,
+            ssh: &ctx.ssh,
             mount: &ctx.mount,
             username: username,
             repo: repo_info,
@@ -126,6 +127,7 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
 
     let tmpl = RepoTmpl {
         url: &ctx.url,
+        ssh: &ctx.ssh,
         mount: &ctx.mount,
         username: username,
         repo: repo_info,

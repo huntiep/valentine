@@ -41,5 +41,9 @@
 {{/readme}}
 {{/empty}}
 {{#empty?}}
-<h1>Empty repository TODO</h1>
+<h3>Quick setup</h3>
+<code>{{ssh}}:{{username}}/{{repo.name}}.git</code>
+<h3>Push an existing repository from the command line</h3>
+<pre>git remote add origin {{ssh}}:{{username}}/{{repo.name}}.git
+git push -u origin master</pre>
 {{/empty}}

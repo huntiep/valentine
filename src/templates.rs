@@ -117,6 +117,7 @@ pub struct UserSettings<'a, 'b> {
 #[template = "templates/repo/view.html"]
 pub struct RepoTmpl<'a, 'b> {
     pub url: &'a str,
+    pub ssh: &'a str,
     pub mount: &'a str,
     pub username: &'b str,
     pub repo: Repo,

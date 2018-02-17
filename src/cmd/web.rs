@@ -70,6 +70,7 @@ pub fn run(config: Config, config_path: PathBuf) {
         logins: Arc::new(Mutex::new(HashMap::new())),
         name: config.name.unwrap_or_else(|| String::from("Valentine")),
         url: url,
+        ssh: config.ssh,
         signup: config.signup.unwrap_or(false),
         repo_dir: config.repo_dir,
         ssh_dir: ssh_dir,
