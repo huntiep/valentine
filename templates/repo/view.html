@@ -1,51 +1,57 @@
+<div class="container">
 <div class="content">
     {{>header.html}}
-    {{^empty?}}
     <h4>{{repo.description}}</h4>
 
+    {{^empty?}}
     <div class="clone">
         <p>Clone this repo</p>
         <code>git clone {{url}}{{mount}}{{username}}/{{repo.name}}</code>
     </div>
 
-    <div class="refs">
-        {{^branches.is_empty()?}}
-        <h5>Branches</h5>
-        <ul>
-            {{#branches}}
-            <li><a href="{{mount}}{{username}}/{{repo.name}}/refs/{{.name}}">{{.name}}</a></li>
-            {{/branches}}
-        </ul>
-        {{/branches.is_empty()}}
-        {{^tags.is_empty()?}}
-        <h5>Tags</h5>
-        <ul>
-            {{#tags}}
-            <li><a href="{{mount}}{{username}}/{{repo.name}}/refs/{{.name}}">{{.name}}</a></li>
-            {{/tags}}
-        </ul>
-        {{/tags.is_empty()}}
-        <a href="{{mount}}{{username}}/{{repo.name}}/refs">View All</a>
-    </div>
+    <div class="repo-view-info">
+        <div class="refs">
+            {{^branches.is_empty()?}}
+            <h5>Branches</h5>
+            <ul>
+                {{#branches}}
+                <li><a href="{{mount}}{{username}}/{{repo.name}}/refs/{{.name}}">{{.name}}</a></li>
+                {{/branches}}
+            </ul>
+            {{/branches.is_empty()}}
+            {{^tags.is_empty()?}}
+            <h5>Tags</h5>
+            <ul>
+                {{#tags}}
+                <li><a href="{{mount}}{{username}}/{{repo.name}}/refs/{{.name}}">{{.name}}</a></li>
+                {{/tags}}
+            </ul>
+            {{/tags.is_empty()}}
+            <a href="{{mount}}{{username}}/{{repo.name}}/refs">View All</a>
+        </div>
 
-    <div class="commits">
-        <ul>
-            {{#commits}}
-            <li><a href="{{mount}}{{username}}/{{repo.name}}/refs/{{.id}}">{{.short_id}}</a> {{.short_message}} by {{.author}} {{.time}}</li>
-            {{/commits}}
-        </ul>
-        <a href="{{mount}}{{username}}/{{repo.name}}/log">View Log</a>
-    </div>
+        <div class="log">
+        <div class="commits">
+            <ul>
+                {{#commits}}
+                <li><p><a href="{{mount}}{{username}}/{{repo.name}}/refs/{{.id}}">{{.short_id}}</a> {{.short_message}} by {{.author}} at {{.time}}</p></li>
+                {{/commits}}
+            </ul>
+            <a href="{{mount}}{{username}}/{{repo.name}}/log">View Log</a>
+        </div>
 
-    {{#readme}}
-    <p>{{{.}}}</p>
-    {{/readme}}
+        {{#readme}}
+        <p>{{{.}}}</p>
+        {{/readme}}</div>
     {{/empty}}
     {{#empty?}}
-    <h3>Quick setup</h3>
-    <code>{{ssh}}:{{username}}/{{repo.name}}.git</code>
-    <h3>Push an existing repository from the command line</h3>
-    <pre>git remote add origin {{ssh}}:{{username}}/{{repo.name}}.git
-    git push -u origin master</pre>
+    <div class="repo-view-info">
+        <h3>Quick setup</h3>
+        <code>{{ssh}}:{{username}}/{{repo.name}}.git</code>
+        <h3>Push an existing repository from the command line</h3>
+        <pre>git remote add origin {{ssh}}:{{username}}/{{repo.name}}.git
+git push -u origin master</pre>
     {{/empty}}
+    </div>
+</div>
 </div>
