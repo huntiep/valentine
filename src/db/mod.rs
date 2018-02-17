@@ -35,6 +35,5 @@ table! {
         description -> VarChar,
         owner -> Integer,
         private -> Bool,
-        issue_id -> BigInt,
     }
 }

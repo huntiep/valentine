@@ -66,16 +66,6 @@ impl Login {
     }
 }
 
-#[derive(Queryable)]
-pub struct RepoFull {
-    pub id: i64,
-    pub name: String,
-    pub description: String,
-    pub owner: i32,
-    pub private: bool,
-    pub issue_id: i64,
-}
-
 #[derive(Insertable, Queryable)]
 #[table_name = "repos"]
 pub struct Repo {

@@ -21,6 +21,5 @@ CREATE TABLE IF NOT EXISTS repos (
     description VARCHAR NOT NULL,
     owner INTEGER REFERENCES users (id) ON DELETE CASCADE,
     private BOOLEAN NOT NULL,
-    issue_id BIGINT NOT NULL DEFAULT 0,
     unique (name, owner)
 );
