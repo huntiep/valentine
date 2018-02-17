@@ -41,10 +41,9 @@ route!{pull_handshake, req, res, ctx, {
     let prefix = format!("{:04x}{}0000", length, packet);
 
     let mut pack = git::network::info(ctx, &username, &repo)?;
-    // TODO: set cache headers
-    //res.add_header(headers::Expires("Fri, 01 Jan 1980 00:00:00 GMT"));
-    //res.add_header(headers::Pragma("no-cache"));
-    //res.add_header(headers::CacheControl("no-cache, max-age=0, must-revalidate"));
+    res.add_header(header::EXPIRES, hval!("Fri, 01 Jan 1980 00:00:00 GMT"));
+    res.add_header(header::PRAGMA, hval!("no-cache"));
+    res.add_header(header::CACHE_CONTROL, hval!("no-cache, max-age=0, must-revalidate"));
     res.add_header(header::CONTENT_TYPE, hval!("application/x-git-upload-pack-advertisement"));
 
     // Build body
@@ -60,7 +59,9 @@ route!{pull, req, res, ctx, {
     let repo = req.get_param("repo");
 
     let pack = git::network::pull(ctx, &username, &repo, req.body())?;
-    // TODO: set cache headers
+    res.add_header(header::EXPIRES, hval!("Fri, 01 Jan 1980 00:00:00 GMT"));
+    res.add_header(header::PRAGMA, hval!("no-cache"));
+    res.add_header(header::CACHE_CONTROL, hval!("no-cache, max-age=0, must-revalidate"));
     res.add_header(header::CONTENT_TYPE, hval!("application/x-git-upload-pack-result"));
     Ok(res.body(pack))
 }}

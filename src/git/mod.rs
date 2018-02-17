@@ -88,7 +88,6 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
         return Ok(tmpl);
     }
     let head = repo.head()?;
-    // TODO
     let oid = head.target().unwrap();
     let commit = repo.find_commit(oid)?;
     let tree = commit.tree()?;
