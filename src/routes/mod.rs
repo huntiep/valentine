@@ -22,8 +22,9 @@ route!{user, req, res, ctx, {
     let username = util::check_login(ctx, &cookies);
     let user = req.get_param("user");
 
+    let auth = if let Some(username) = username { username == user } else { false};
     let pool = &ctx.db_pool;
-    if let Some(mut body) = db::read::user(pool, &user, &ctx)? {
+    if let Some(mut body) = db::read::user(pool, &user, &ctx, auth)? {
         let navbar = Navbar::new(ctx, username);
         tmpl!(res, ctx, Some(&user), Some(navbar), None, body);
     } else {

@@ -63,15 +63,22 @@ pub fn repo_is_private(pool: &Pool, username: &str, reponame: &str) -> Result<bo
         Err(e) => Err(Error::from(e)),
     }
 }
-pub fn user<'a, 'b>(pool: &Pool, username: &'b str, ctx: &'a Context)
+pub fn user<'a, 'b>(pool: &Pool, username: &'b str, ctx: &'a Context, auth: bool)
     -> Result<Option<User<'a, 'b>>>
 {
     let owner = user_id(pool, username)?;
 
     let conn = pool.get()?;
-    let repos = repos::table.filter(repos::owner.eq(owner))
-        .select((repos::name, repos::description, repos::owner, repos::private))
-        .load::<Repo>(&*conn)?;
+    let repos = if !auth {
+        repos::table.filter(repos::owner.eq(owner))
+            .filter(repos::private.eq(false))
+            .select((repos::name, repos::description, repos::owner, repos::private))
+            .load::<Repo>(&*conn)?
+    } else {
+        repos::table.filter(repos::owner.eq(owner))
+            .select((repos::name, repos::description, repos::owner, repos::private))
+            .load::<Repo>(&*conn)?
+    };
 
     Ok(Some(User {
         mount: &ctx.mount,
