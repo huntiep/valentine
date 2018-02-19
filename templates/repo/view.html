@@ -40,9 +40,8 @@
             <a href="{{mount}}{{username}}/{{repo.name}}/log">View Log</a>
         </div>
 
-        {{#readme}}
-        <p>{{{.}}}</p>
-        {{/readme}}</div>
+        {{#readme}}<div class="md">{{{.}}}</div>{{/readme}}
+        </div>
     {{/empty}}
     {{#empty?}}
     <div class="empty-repo">
