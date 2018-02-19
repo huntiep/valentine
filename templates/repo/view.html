@@ -6,7 +6,7 @@
     {{^empty?}}
     <div class="clone">
         <p>Clone this repo</p>
-        <code>git clone {{url}}{{mount}}{{username}}/{{repo.name}}</code>
+        <input type="text" readonly="readonly" value="git clone {{url}}{{mount}}{{username}}/{{repo.name}}" />
     </div>
 
     <div class="repo-view-info">
@@ -45,9 +45,9 @@
         {{/readme}}</div>
     {{/empty}}
     {{#empty?}}
-    <div class="repo-view-info">
+    <div class="empty-repo">
         <h3>Quick setup</h3>
-        <code>{{ssh}}:{{username}}/{{repo.name}}.git</code>
+        <pre>{{ssh}}:{{username}}/{{repo.name}}.git</pre>
         <h3>Push an existing repository from the command line</h3>
         <pre>git remote add origin {{ssh}}:{{username}}/{{repo.name}}.git
 git push -u origin master</pre>
