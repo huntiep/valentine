@@ -1,11 +1,13 @@
 <div class="container">
 <div class="content">
-    <h3>{{username}}</h3>
+    <h3>{{username}}'s Git Repositories</h3>
     <ul>
         {{#repos}}
-        <li><h5><a href="{{mount}}{{username}}/{{.name}}">{{.name}}</a></h5><br>
-            <p>{{.description}}</p></li>
+        <li>
+            <h5><a href="{{mount}}{{username}}/{{.name}}">{{.name}}</a></h5>
+            <p>{{.description}}</p>
+        </li>
         {{/repos}}
-    <ul>
+    </ul>
 </div>
 </div>
