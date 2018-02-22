@@ -16,6 +16,16 @@ route!{home, req, res, ctx, {
     tmpl!(res, ctx, username, Some(navbar), None, HomeTmpl);
 }}
 
+// GET /explore
+route!{explore, req, res, ctx, {
+    let cookies = &req.get_cookies();
+    let username = util::check_login(ctx, cookies);
+    let navbar = Navbar::new(ctx, username);
+    let pool = &ctx.db_pool;
+    let users = db::read::users(pool, &ctx)?;
+    tmpl!(res, ctx, username, Some(navbar), None, users);
+}}
+
 // GET /{user}
 route!{user, req, res, ctx, {
     let cookies = req.get_cookies();

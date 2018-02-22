@@ -85,6 +85,7 @@ pub fn run(config: Config, config_path: PathBuf) {
     router!{
         router,
         get "/" => home,
+        get "/explore" => explore,
         get "/{user}" => user,
         get "/{user}/{repo}" => repo::view,
         get "/{user}/{repo}/log" => repo::log_default,

@@ -99,8 +99,15 @@ impl<'a, 'b> Navbar<'a, 'b> {
 pub struct HomeTmpl;
 
 #[derive(BartDisplay)]
+#[template = "templates/explore.html"]
+pub struct ExploreTmpl<'a> {
+    pub mount: &'a str,
+    pub users: Vec<User>,
+}
+
+#[derive(BartDisplay)]
 #[template = "templates/user/view.html"]
-pub struct User<'a, 'b> {
+pub struct UserTmpl<'a, 'b> {
     pub mount: &'a str,
     pub username: &'b str,
     pub repos: Vec<Repo>,

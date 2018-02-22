@@ -63,8 +63,9 @@ pub fn repo_is_private(pool: &Pool, username: &str, reponame: &str) -> Result<bo
         Err(e) => Err(Error::from(e)),
     }
 }
+
 pub fn user<'a, 'b>(pool: &Pool, username: &'b str, ctx: &'a Context, auth: bool)
-    -> Result<Option<User<'a, 'b>>>
+    -> Result<Option<UserTmpl<'a, 'b>>>
 {
     let owner = user_id(pool, username)?;
 
@@ -80,12 +81,21 @@ pub fn user<'a, 'b>(pool: &Pool, username: &'b str, ctx: &'a Context, auth: bool
             .load::<Repo>(&*conn)?
     };
 
-    Ok(Some(User {
+    Ok(Some(UserTmpl {
         mount: &ctx.mount,
         username: username,
         repos: repos,
     }))
 
+}
+
+pub fn users<'a>(pool: &Pool, ctx: &'a Context) -> Result<ExploreTmpl<'a>> {
+    let conn = pool.get()?;
+    let users = users::table.select((users::username, users::num_repos)).load::<User>(&*conn)?;
+    Ok(ExploreTmpl {
+        mount: &ctx.mount,
+        users: users,
+    })
 }
 
 pub fn repo(pool: &Pool, username: &str, reponame: &str) -> Result<Option<Repo>> {

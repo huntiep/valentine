@@ -22,7 +22,7 @@ macro_rules! form_values {
     };
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Queryable)]
 #[table_name = "users"]
 pub struct NewUser {
     pub username: String,
@@ -48,6 +48,12 @@ impl NewUser {
             num_repos: 0,
         })
     }
+}
+
+#[derive(Queryable)]
+pub struct User {
+    pub username: String,
+    pub num_repos: i64,
 }
 
 pub struct Login {

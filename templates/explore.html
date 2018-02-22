@@ -1,0 +1,9 @@
+<div class="container">
+<div class="content">
+    <ul>
+        {{#users}}
+        <li><a href="{{mount}}{{.username}}">{{.username}}</a> - {{.num_repos}} Repositories</li>
+        {{/users}}
+    </ul>
+</div>
+</div>
