@@ -91,10 +91,18 @@ pub fn user<'a, 'b>(pool: &Pool, username: &'b str, ctx: &'a Context, auth: bool
 
 pub fn users<'a>(pool: &Pool, ctx: &'a Context) -> Result<ExploreTmpl<'a>> {
     let conn = pool.get()?;
-    let users = users::table.select((users::username, users::num_repos)).load::<User>(&*conn)?;
+    let repos_raw = repos::table.filter(repos::private.eq(false))
+        .select((repos::name, repos::owner))
+        .load::<(String, i32)>(&*conn)?;
+    let mut repos = Vec::new();
+    for (name, owner) in repos_raw {
+        let owner = users::table.find(owner).select(users::username).get_result(&*conn)?;
+        repos.push((name, owner));
+    }
+
     Ok(ExploreTmpl {
         mount: &ctx.mount,
-        users: users,
+        repos: repos,
     })
 }
 

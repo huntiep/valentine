@@ -59,8 +59,11 @@ route!{log_default, req, res, ctx, {
 route!{log, req, res, ctx, {
     let username = req.get_param("user");
     let reponame = req.get_param("repo");
-    let id = req.get_param("id");
+    let mut id = req.get_param("id");
 
+    if let Some(s) = req.form_value("s") {
+        id = s;
+    }
     let repo = read_repo!(username, reponame, req, res, ctx);
     let log = if let Some(log) = git::log(ctx, &username, &reponame, &id)? {
         log
@@ -72,7 +75,9 @@ route!{log, req, res, ctx, {
         mount: &ctx.mount,
         username: &username,
         repo: repo,
-        log: log
+        id: req.get_param("id"),
+        log: log.0,
+        next: log.1,
     };
 
     let cookies = &req.get_cookies();

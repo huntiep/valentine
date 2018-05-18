@@ -1,9 +1,9 @@
 <div class="container">
 <div class="content">
     <ul>
-        {{#users}}
-        <li><a href="{{mount}}{{.username}}">{{.username}}</a> - {{.num_repos}} Repositories</li>
-        {{/users}}
+        {{#repos}}
+        <li><a href="{{mount}}{{.1}}">{{.1}}</a> / <a href="{{mount}}{{.1}}/{{.0}}">{{.0}}</a></li>
+        {{/repos}}
     </ul>
 </div>
 </div>

@@ -108,7 +108,7 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
     let tree = commit.tree()?;
     let readme = read_readme(&repo, &tree)?;
 
-    let branches_raw: Vec<_> = repo.branches(None)?.take(10).collect();
+    let branches_raw = repo.branches(None)?.take(10);
     let mut branches = Vec::new();
     for branch in branches_raw {
         if let Some(name) = branch?.0.name()? {
@@ -224,7 +224,7 @@ pub fn read_src<'a, 'b>(ctx: &'a Context,
 }
 
 pub fn log(ctx: &Context, username: &str, reponame: &str, id: &str)
-    -> Result<Option<Vec<Commit>>>
+    -> Result<Option<(Vec<Commit>, Option<String>)>>
 {
     let path = build_repo_path(ctx, username, reponame);
     let repo = Repository::open(path)?;
@@ -245,13 +245,23 @@ pub fn log(ctx: &Context, username: &str, reponame: &str, id: &str)
     let mut log = Vec::new();
     let mut revwalk = repo.revwalk()?;
     revwalk.push(oid)?;
-    for id in revwalk {
+    let mut i = 0;
+    while let Some(id) = revwalk.next() {
         let id = id?;
         let commit = repo.find_commit(id)?;
         let item = Commit::new(&commit)?;
         log.push(item);
+        i += 1;
+        if i == 50 {
+            break;
+        }
     }
-    Ok(Some(log))
+    let next_page = if let Some(id) = revwalk.next() {
+        Some(id?.to_string())
+    } else {
+        None
+    };
+    Ok(Some((log, next_page)))
 }
 
 pub fn commit<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo, id: &'b str)

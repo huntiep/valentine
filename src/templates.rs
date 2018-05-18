@@ -102,7 +102,7 @@ pub struct HomeTmpl;
 #[template = "templates/explore.html"]
 pub struct ExploreTmpl<'a> {
     pub mount: &'a str,
-    pub users: Vec<User>,
+    pub repos: Vec<(String, String)>,
 }
 
 #[derive(BartDisplay)]
@@ -174,7 +174,9 @@ pub struct RepoLogTmpl<'a, 'b> {
     pub mount: &'a str,
     pub username: &'b str,
     pub repo: Repo,
+    pub id: String,
     pub log: Vec<Commit>,
+    pub next: Option<String>,
 }
 
 #[derive(BartDisplay)]
