@@ -50,12 +50,6 @@ impl NewUser {
     }
 }
 
-#[derive(Queryable)]
-pub struct User {
-    pub username: String,
-    pub num_repos: i64,
-}
-
 pub struct Login {
     pub username: String,
     pub password: String,
