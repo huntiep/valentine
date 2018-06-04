@@ -68,7 +68,6 @@ fn _run(config: Config, matches: &ArgMatches) -> Result<()> {
         };
     }
 
-    eprintln!("{} {}", verb, repo_path);
     let command = process::Command::new(verb)
         .arg(repo_path)
         .current_dir(config.repo_dir)
