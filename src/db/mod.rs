@@ -35,5 +35,6 @@ table! {
         description -> VarChar,
         owner -> Integer,
         private -> Bool,
+        last_updated -> Timestamp,
     }
 }

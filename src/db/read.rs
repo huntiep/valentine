@@ -77,6 +77,7 @@ pub fn user<'a, 'b>(pool: &Pool, username: &'b str, ctx: &'a Context, auth: bool
             .load::<Repo>(&*conn)?
     } else {
         repos::table.filter(repos::owner.eq(owner))
+            .order(repos::last_updated.desc())
             .select((repos::name, repos::description, repos::owner, repos::private))
             .load::<Repo>(&*conn)?
     };
@@ -92,6 +93,7 @@ pub fn user<'a, 'b>(pool: &Pool, username: &'b str, ctx: &'a Context, auth: bool
 pub fn users<'a>(pool: &Pool, ctx: &'a Context) -> Result<ExploreTmpl<'a>> {
     let conn = pool.get()?;
     let repos_raw = repos::table.filter(repos::private.eq(false))
+        .order(repos::last_updated.desc())
         .select((repos::name, repos::owner))
         .load::<(String, i32)>(&*conn)?;
     let mut repos = Vec::new();

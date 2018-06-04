@@ -12,3 +12,13 @@ pub fn repo_name(pool: &Pool, username: &str, old_name: &str, new_name: &str) ->
         .execute(&*conn)?;
     Ok(())
 }
+
+pub fn repo(pool: &Pool, username: &str, reponame: &str) -> Result<()> {
+    let repo = super::read::repo_id(pool, username, reponame)?.unwrap();
+    let conn = pool.get()?;
+    let now = ::chrono::Utc::now().naive_utc();
+    diesel::update(repos::table.find(repo))
+        .set(repos::last_updated.eq(now))
+        .execute(&*conn)?;
+    Ok(())
+}

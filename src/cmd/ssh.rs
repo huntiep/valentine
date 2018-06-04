@@ -81,6 +81,9 @@ fn _run(config: Config, matches: &ArgMatches) -> Result<()> {
         fail("internal error 2", None);
     }
 
+    if requested_mode == AccessMode::Write {
+        db::update::repo(&pool, username, reponame)?;
+    }
     Ok(())
 }
 
