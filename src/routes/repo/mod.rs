@@ -19,7 +19,7 @@ macro_rules! read_repo {
             if repo.private {
                 let cookies = $req.get_cookies();
                 // Private repos can only be viewed by logged in users
-                if let Some(username) = util::check_login($ctx, &cookies) {
+                if let Some(username) = util::check_login($ctx, &cookies)? {
                     let owner = db::read::user_id(pool, username)?;
                     if !db::read::user_owns_repo(pool, owner, &$reponame)? {
                         return not_found($req, $res, $ctx);
@@ -42,7 +42,7 @@ route!{view, req, res, ctx, {
     let repo_git = git::read(ctx, &username, repo)?;
 
     let cookies = &req.get_cookies();
-    let username = util::check_login(ctx, cookies);
+    let username = util::check_login(ctx, cookies)?;
     let navbar = Navbar::new(ctx, username);
 
     tmpl!(res, ctx, Some(&reponame), Some(navbar), None, repo_git);
@@ -81,7 +81,7 @@ route!{log, req, res, ctx, {
     };
 
     let cookies = &req.get_cookies();
-    let username = util::check_login(ctx, cookies);
+    let username = util::check_login(ctx, cookies)?;
     let navbar = Navbar::new(ctx, username);
 
     tmpl!(res, ctx, Some(&reponame), Some(navbar), None, body);
@@ -96,7 +96,7 @@ route!{refs_list, req, res, ctx, {
     let body = git::refs(ctx, &username, repo)?;
 
     let cookies = &req.get_cookies();
-    let username = util::check_login(ctx, cookies);
+    let username = util::check_login(ctx, cookies)?;
     let navbar = Navbar::new(ctx, username);
 
     tmpl!(res, ctx, Some(&reponame), Some(navbar), None, body);
@@ -115,7 +115,7 @@ route!{commit, req, res, ctx, {
     }
 
     let cookies = &req.get_cookies();
-    let username = util::check_login(ctx, cookies);
+    let username = util::check_login(ctx, cookies)?;
     let navbar = Navbar::new(ctx, username);
 
     tmpl!(res, ctx, Some(&reponame), Some(navbar), None, body.unwrap());
@@ -144,7 +144,7 @@ route!{src, req, res, ctx, {
     };
 
     let cookies = &req.get_cookies();
-    let username = util::check_login(ctx, cookies);
+    let username = util::check_login(ctx, cookies)?;
     let navbar = Navbar::new(ctx, username);
 
     tmpl!(res, ctx, Some(&reponame), Some(navbar), None, body);

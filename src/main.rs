@@ -15,6 +15,7 @@ extern crate pulldown_cmark;
 extern crate rand;
 #[macro_use] extern crate serde_derive;
 extern crate serde_json;
+extern crate sessions;
 extern crate sha2;
 extern crate time;
 extern crate toml;
@@ -29,7 +30,6 @@ mod types;
 
 use clap::{App, Arg, SubCommand};
 
-use std::collections::HashMap;
 use std::fs;
 use std::io::Read;
 use std::net::SocketAddr;
@@ -62,16 +62,16 @@ quick_error! {
         R2D2(err: ::diesel::r2d2::PoolError) {
             from()
         }
+        Session(err: sessions::Error) {
+            from()
+        }
     }
 }
-
-pub type SessionKey = String;
-pub type UserName = String;
 
 pub struct Context {
     pub db_pool: db::Pool,
     pub mount: String,
-    pub logins: Arc<Mutex<HashMap<SessionKey, UserName>>>,
+    pub logins: Arc<Mutex<sessions::SessionSet>>,
     pub name: String,
     pub url: String,
     pub ssh: String,
@@ -86,6 +86,7 @@ pub struct Context {
 pub struct Config {
     pub repo_dir: PathBuf,
     pub ssh_dir: Option<PathBuf>,
+    pub sessions_dir: PathBuf,
     pub db_url: String,
     pub mount: Option<String>,
     pub name: Option<String>,

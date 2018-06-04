@@ -5,7 +5,6 @@ use diesel::r2d2::{self, ConnectionManager};
 use hayaku::{Http, Router};
 
 use std::{env, fs, process};
-use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
@@ -64,10 +63,16 @@ pub fn run(config: Config, config_path: PathBuf) {
         None => "http://localhost".to_string(),
     };
 
+    let sessions = if config.sessions_dir.exists() && config.sessions_dir.is_dir() {
+        ::sessions::SessionSet::load(config.sessions_dir).expect("failed to load sessions")
+    } else {
+        ::sessions::SessionSet::new(config.sessions_dir).expect("failed to create sessions")
+    };
+
     let ctx = Context {
         db_pool: pool,
         mount: mount,
-        logins: Arc::new(Mutex::new(HashMap::new())),
+        logins: Arc::new(Mutex::new(sessions)),
         name: config.name.unwrap_or_else(|| String::from("Valentine")),
         url: url,
         ssh: config.ssh,

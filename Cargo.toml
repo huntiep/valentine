@@ -40,3 +40,6 @@ git = "https://git.hunterpraska.com/hunter/explode"
 
 [dependencies.hayaku]
 git = "https://git.hunterpraska.com/hunter/hayaku"
+
+[dependencies.sessions]
+git = "https://git.hunterpraska.com/hunter/sessions"
