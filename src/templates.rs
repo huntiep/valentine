@@ -183,6 +183,7 @@ pub struct RepoLogTmpl<'a, 'b> {
 #[template = "templates/repo/src.html"]
 pub struct RepoSrcTmpl<'a, 'b, 'c> {
     pub mount: &'a str,
+    pub url: String,
     pub username: &'b str,
     pub repo: Repo,
     pub filename: &'c str,

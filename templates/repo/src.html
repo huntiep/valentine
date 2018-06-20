@@ -11,7 +11,7 @@
     {{#.Dir}}
     <ul>
         {{#.items}}
-        <li>{{.name}} {{.obj_type.str()}}</li>
+        <li><a href="{{mount}}{{url}}/{{.name}}">{{.name}}</a> {{.obj_type.str()}}</li>
         {{/.items}}
     </ul>
     {{#.readme}}

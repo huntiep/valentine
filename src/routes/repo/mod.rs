@@ -138,6 +138,7 @@ route!{src, req, res, ctx, {
         mount: &ctx.mount,
         username: &username,
         repo: repo,
+        url: format!("{}/{}/refs/{}/{}", username, reponame, id, filepath),
         // TODO: maybe something else?
         filename: &filepath,
         src: src.unwrap(),
