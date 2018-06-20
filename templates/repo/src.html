@@ -6,12 +6,13 @@
 
     {{#src.explode().}}
     {{#.File}}
+    <a href="{{mount}}{{url}}/raw/{{filename}}">Raw</a>
     <pre>{{.0}}</pre>
     {{/.File}}
     {{#.Dir}}
     <ul>
         {{#.items}}
-        <li><a href="{{mount}}{{url}}/{{.name}}">{{.name}}</a> {{.obj_type.str()}}</li>
+        <li><a href="{{mount}}{{url}}/{{filename}}/{{.name}}">{{.name}}</a> {{.obj_type.str()}}</li>
         {{/.items}}
     </ul>
     {{#.readme}}

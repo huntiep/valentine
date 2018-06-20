@@ -42,6 +42,7 @@ pub fn delete_user<P: AsRef<Path>>(ctx: &Context, path: P) -> Result<()> {
 }
 
 pub fn add_ssh_key(ctx: &Context, ssh_key: &SshKey) -> Result<()> {
+    // TODO check that ssh_key.content ends with newline
     let mut ssh_dir = ctx.ssh_dir.clone();
     ssh_dir.push("authorized_keys");
     let mut file = fs::OpenOptions::new()

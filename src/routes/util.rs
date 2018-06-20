@@ -18,7 +18,7 @@ pub fn check_login<'a>(ctx: &Context, cookies: &'a CookieJar) -> Result<Option<&
 }
 
 pub fn login(username: String, cookies: &mut CookieJar, ctx: &Context) -> Result<()> {
-    let key = ctx.logins.lock().unwrap().generate(Duration::days(30), username.clone())?;
+    let key = ctx.logins.lock().unwrap().generate(Duration::days(1), username.clone())?;
 
     let cookie = Cookie::build("session_key", key)
         .secure(false)
