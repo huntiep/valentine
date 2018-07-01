@@ -1,7 +1,9 @@
 <nav class="nav">
     <div>
-    <h1><a href="{{mount}}">{{name}}</a></h1>
-    {{^username.is_some()?}}<h3><a href="{{mount}}explore">Explore</a></h3>{{/username.is_some()}}
+    <div class="name">
+        <h1><a href="{{mount}}">{{name}}</a></h1>
+        {{^username.is_some()?}}<h3><a href="{{mount}}explore">Explore</a></h3>{{/username.is_some()}}
+    </div>
     {{#username.is_some()?}}
     <div class="menu">
         <input type="checkbox">
