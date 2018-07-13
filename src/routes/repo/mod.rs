@@ -166,12 +166,14 @@ route!{raw, req, res, ctx, {
 
     match src {
         RepoSrc::Dir { .. } => {
-            res.add_header(header::CONTENT_TYPE, hval!("text/plain; charset=utf-8"));
             redirect!(res, ctx,
                       format!("{}/{}/refs/{}/{}", username, reponame, id, filepath),
                       "Can't view raw directories");
         }
         RepoSrc::Error => return not_found(req, res, ctx),
-        RepoSrc::File(f) => { ok!(res.body(f)); }
+        RepoSrc::File(f) => {
+            res.add_header(header::CONTENT_TYPE, hval!("text/plain; charset=utf-8"));
+            ok!(res.body(f));
+        }
     }
 }}
