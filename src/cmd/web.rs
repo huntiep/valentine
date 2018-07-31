@@ -35,7 +35,7 @@ pub fn run(config: Config, config_path: PathBuf) {
     }
 
     let ssh_dir = config.ssh_dir.unwrap_or_else(|| {
-        let mut home = env::home_dir().unwrap();
+        let mut home = ::dirs::home_dir().unwrap();
         home.push(".ssh");
         home
     });
