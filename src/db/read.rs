@@ -73,6 +73,7 @@ pub fn user<'a, 'b>(pool: &Pool, username: &'b str, ctx: &'a Context, auth: bool
     let repos = if !auth {
         repos::table.filter(repos::owner.eq(owner))
             .filter(repos::private.eq(false))
+            .order(repos::last_updated.desc())
             .select((repos::name, repos::description, repos::owner, repos::private))
             .load::<Repo>(&*conn)?
     } else {

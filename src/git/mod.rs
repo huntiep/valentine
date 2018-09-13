@@ -214,7 +214,10 @@ pub fn read_src<'a, 'b>(ctx: &'a Context,
         }
         Some(ObjectType::Blob) => {
             match read_file(&repo, &entry)? {
-                Some(c) => Ok(Some(RepoSrc::File(c))),
+                Some(c) => {
+                    let f = c.lines().enumerate().map(|(i, s)| (i, s.to_string())).collect::<Vec<_>>();
+                    Ok(Some(RepoSrc::File(f)))
+                }
                 None => Ok(Some(RepoSrc::Error)),
             }
         }

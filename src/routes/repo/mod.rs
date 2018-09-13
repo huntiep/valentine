@@ -159,6 +159,7 @@ route!{raw, req, res, ctx, {
     let filepath = req.get_param("filepath");
 
     let repo = read_repo!(username, reponame, req, res, ctx);
+    // TODO: maybe just do read_file here
     let src = match git::read_src(ctx, &username, &repo, &id, &filepath)? {
         Some(s) => s,
         None => return not_found(req, res, ctx),
@@ -173,7 +174,8 @@ route!{raw, req, res, ctx, {
         RepoSrc::Error => return not_found(req, res, ctx),
         RepoSrc::File(f) => {
             res.add_header(header::CONTENT_TYPE, hval!("text/plain; charset=utf-8"));
-            ok!(res.body(f));
+            let body = f.iter().map(|(_, s)| s.as_str()).collect::<String>();
+            ok!(res.body(body));
         }
     }
 }}

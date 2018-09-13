@@ -7,7 +7,16 @@
     {{#src.explode().}}
     {{#.File}}
     <a href="{{mount}}{{url}}/raw/{{filename}}">Raw</a>
-    <pre>{{.0}}</pre>
+    <table>
+        <tbody>
+            {{#.0}}
+            <tr>
+                <td class="file-contents-line-number"><a href="#{{.0}}">{{.0}}</a></td>
+                <td class="file-contents-line" id="{{.0}}"><span>{{.1}}</span></td>
+            </tr>
+            {{/.0}}
+        </tbody>
+    </table>
     {{/.File}}
     {{#.Dir}}
     <ul>
