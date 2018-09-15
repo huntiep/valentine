@@ -1,8 +1,12 @@
 <div class="container">
 <div class="content">
-    {{>header.html}}
-
-    <h5>{{filename}}</h5>
+    <h2>
+        <a href="{{mount}}{{username}}">{{username}}</a>
+        / <a href="{{mount}}{{url}}">{{repo.name}}</a>
+        {{#path}}
+        / <a href="{{mount}}{{url}}{{.0}}">{{.1}}</a>
+        {{/path}}
+    </h2>
 
     {{#src.explode().}}
     {{#.File}}

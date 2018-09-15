@@ -186,6 +186,7 @@ pub struct RepoSrcTmpl<'a, 'b, 'c> {
     pub url: String,
     pub username: &'b str,
     pub repo: Repo,
+    pub path: Vec<(String, String)>,
     pub filename: &'c str,
     pub src: RepoSrc,
 }

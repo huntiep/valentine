@@ -126,7 +126,8 @@ route!{src, req, res, ctx, {
     let username = req.get_param("user");
     let reponame = req.get_param("repo");
     let id = req.get_param("id");
-    let filepath = req.get_param("filepath");
+    let mut filepath = req.get_param("filepath");
+    if filepath.ends_with('/') { filepath.pop(); }
 
     let repo = read_repo!(username, reponame, req, res, ctx);
     let src = git::read_src(ctx, &username, &repo, &id, &filepath)?;
@@ -134,11 +135,21 @@ route!{src, req, res, ctx, {
         return not_found(req, res, ctx);
     }
 
+    let p: Vec<_> = filepath.split('/').collect();
+    let mut path = Vec::new();
+    let mut url = String::new();
+    for part in p {
+        url.push('/');
+        url.push_str(part);
+        path.push((url.clone(), part.to_string()));
+    }
+
     let body = RepoSrcTmpl {
         mount: &ctx.mount,
         username: &username,
         repo: repo,
         url: format!("{}/{}/refs/{}", username, reponame, id),
+        path: path,
         // TODO: maybe something else?
         filename: &filepath,
         src: src.unwrap(),
