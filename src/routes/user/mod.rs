@@ -13,7 +13,7 @@ use time;
 route!{signup, req, res, ctx, {
     if !ctx.signup {
         not_found(req, res, ctx)
-    } else if util::check_login(ctx, &req.get_cookies())?.is_some() {
+    } else if util::check_login(ctx, &req.get_cookies()).is_some() {
         redirect!(res, ctx, "", "You already have an account");
     } else {
         let navbar = Navbar::new(ctx, None);
@@ -26,7 +26,7 @@ route!{signup, req, res, ctx, {
 route!{signup_post, req, res, ctx, {
     if !ctx.signup {
         return not_found(req, res, ctx);
-    } else if util::check_login(ctx, &req.get_cookies())?.is_some() {
+    } else if util::check_login(ctx, &req.get_cookies()).is_some() {
         redirect!(res, ctx, "", "You already have an account");
     }
 
@@ -39,13 +39,13 @@ route!{signup_post, req, res, ctx, {
     let pool = &ctx.db_pool;
     db::create::user(pool, &new_user)?;
     git::create_user(ctx, &new_user.username)?;
-    util::login(new_user.username, &mut res.cookies(), ctx)?;
+    util::login(new_user.username, &mut res.cookies(), ctx);
     redirect!(res, ctx, "", "Signup successful");
 }}
 
 // GET /login
 route!{login, req, res, ctx, {
-    if util::check_login(ctx, &req.get_cookies())?.is_some() {
+    if util::check_login(ctx, &req.get_cookies()).is_some() {
         redirect!(res, ctx, "", "You are already logged in");
     } else {
         let navbar = Navbar::new(ctx, None);
@@ -56,7 +56,7 @@ route!{login, req, res, ctx, {
 
 // POST /login
 route!{login_post, req, res, ctx, {
-    if util::check_login(ctx, &req.get_cookies())?.is_some() {
+    if util::check_login(ctx, &req.get_cookies()).is_some() {
         redirect!(res, ctx, "", "You are already logged in");
     }
 
@@ -72,7 +72,7 @@ route!{login_post, req, res, ctx, {
         redirect!(res, ctx, "login", "Login failed");
     }
 
-    util::login(login.username, &mut res.cookies(), ctx)?;
+    util::login(login.username, &mut res.cookies(), ctx);
     redirect!(res, ctx, "", "Login successful");
 }}
 
@@ -81,7 +81,7 @@ route!{logout, req, res, ctx, {
     let cookies = req.get_cookies();
     if let Some(cookie) = cookies.get("session_key") {
         let cookies = res.cookies();
-        ctx.logins.lock().unwrap().remove(cookie.value())?;
+        ctx.logins.lock().unwrap().remove(cookie.value());
         let del_cookie = Cookie::build("session_key", "")
             .max_age(Duration::seconds(0))
             .expires(time::empty_tm())

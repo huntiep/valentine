@@ -25,7 +25,7 @@ macro_rules! redirect {
 macro_rules! check_login {
     ( $cookies:expr, $res:expr, $ctx:expr ) => {
         {
-            if let Some(name) = util::check_login($ctx, $cookies)? {
+            if let Some(name) = util::check_login($ctx, $cookies) {
                 name
             } else {
                 return Ok($res.redirect(Status::FORBIDDEN, "/login", "You must be logged in for this"));

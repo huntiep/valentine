@@ -11,7 +11,7 @@ use hayaku::{Request, Response, Status};
 // GET /
 route!{home, req, res, ctx, {
     let cookies = &req.get_cookies();
-    let username = util::check_login(ctx, cookies)?;
+    let username = util::check_login(ctx, cookies);
     let navbar = Navbar::new(ctx, username);
     tmpl!(res, ctx, username, Some(navbar), None, HomeTmpl);
 }}
@@ -19,7 +19,7 @@ route!{home, req, res, ctx, {
 // GET /explore
 route!{explore, req, res, ctx, {
     let cookies = &req.get_cookies();
-    let username = util::check_login(ctx, cookies)?;
+    let username = util::check_login(ctx, cookies);
     let navbar = Navbar::new(ctx, username);
     let pool = &ctx.db_pool;
     let users = db::read::users(pool, &ctx)?;
@@ -29,7 +29,7 @@ route!{explore, req, res, ctx, {
 // GET /{user}
 route!{user, req, res, ctx, {
     let cookies = req.get_cookies();
-    let username = util::check_login(ctx, &cookies)?;
+    let username = util::check_login(ctx, &cookies);
     let user = req.get_param("user");
 
     let auth = if let Some(username) = username { username == user } else { false};
