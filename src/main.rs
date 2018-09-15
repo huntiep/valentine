@@ -10,6 +10,7 @@ extern crate env_logger;
 #[macro_use] extern crate explode;
 extern crate git2;
 #[macro_use] extern crate hayaku;
+extern crate humansize;
 #[macro_use] extern crate log;
 extern crate pulldown_cmark;
 #[macro_use] extern crate quick_error;

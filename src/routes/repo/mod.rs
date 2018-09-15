@@ -172,9 +172,9 @@ route!{raw, req, res, ctx, {
                       "Can't view raw directories");
         }
         RepoSrc::Error => return not_found(req, res, ctx),
-        RepoSrc::File(f) => {
+        RepoSrc::File{ file, size } => {
             res.add_header(header::CONTENT_TYPE, hval!("text/plain; charset=utf-8"));
-            let body = f.iter().map(|(_, s)| s.as_str()).collect::<String>();
+            let body = file.iter().map(|(_, s)| s.as_str()).collect::<String>();
             ok!(res.body(body));
         }
     }

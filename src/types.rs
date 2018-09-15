@@ -140,7 +140,7 @@ impl Commit {
 
 #[derive(Explode)]
 pub enum RepoSrc {
-    File(Vec<(usize, String)>),
+    File{ file: Vec<(usize, String)>, size: String },
     Dir { items: Vec<RepoItem>, readme: Option<String> },
     Error,
 }

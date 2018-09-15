@@ -6,17 +6,23 @@
 
     {{#src.explode().}}
     {{#.File}}
-    <a href="{{mount}}{{url}}/raw/{{filename}}">Raw</a>
-    <table>
-        <tbody>
-            {{#.0}}
-            <tr>
-                <td class="file-contents-line-number"><a href="#{{.0}}">{{.0}}</a></td>
-                <td class="file-contents-line" id="{{.0}}"><span>{{.1}}</span></td>
-            </tr>
-            {{/.0}}
-        </tbody>
-    </table>
+    <div class="file">
+        <div class="file-info">
+            <span class="file-info-line-count">{{.file.len()}} lines</span>
+            <span>{{.size}}</span>
+            <a href="{{mount}}{{url}}/raw/{{filename}}">Raw</a>
+        </div>
+        <table>
+            <tbody>
+                {{#.file}}
+                <tr>
+                    <td class="file-contents-line-number"><a href="#{{.0}}">{{.0}}</a></td>
+                    <td class="file-contents-line" id="{{.0}}"><span>{{.1}}</span></td>
+                </tr>
+                {{/.file}}
+            </tbody>
+        </table>
+    </div>
     {{/.File}}
     {{#.Dir}}
     <ul>

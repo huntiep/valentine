@@ -213,10 +213,15 @@ pub fn read_src<'a, 'b>(ctx: &'a Context,
             Ok(Some(RepoSrc::Dir { items, readme }))
         }
         Some(ObjectType::Blob) => {
+            use humansize::FileSize;
+            use humansize::file_size_opts::CONVENTIONAL;
             match read_file(&repo, &entry)? {
                 Some(c) => {
-                    let f = c.lines().enumerate().map(|(i, s)| (i, s.to_string())).collect::<Vec<_>>();
-                    Ok(Some(RepoSrc::File(f)))
+                    let size = c.len().file_size(CONVENTIONAL).unwrap();
+                    let file = c.lines().enumerate()
+                        .map(|(i, s)| (i+1, s.to_string()))
+                        .collect::<Vec<_>>();
+                    Ok(Some(RepoSrc::File { file, size }))
                 }
                 None => Ok(Some(RepoSrc::Error)),
             }
