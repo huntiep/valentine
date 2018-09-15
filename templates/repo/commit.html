@@ -16,9 +16,12 @@
         <pre>{{commit.message}}</pre>
     </div>
 
-    <ul class="tree-items">
+    <ul class="tree-items" style="border-bottom:1px solid">
         {{#items}}
-        <li class="{{.obj_type.str()}}"><a href="{{mount}}{{username}}/{{repo.name}}/refs/{{refname}}/{{.name}}">{{.name}}</a></li>
+        <li>
+            <img src="{{mount}}resources/{{.obj_type.str()}}.svg" />
+            <a href="{{mount}}{{username}}/{{repo.name}}/refs/{{refname}}/{{.name}}">{{.name}}</a>
+        </li>
         {{/items}}
     </ul>
 

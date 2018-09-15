@@ -45,3 +45,9 @@ cd ~/valentine
     - GitHub loads Firefox repo quite fast, but this might be because of beefier
     computers or more data stored in db
     - Firefox repo in Gogs (2016 build) takes 30-45 seconds to load the main view
+
+### License
+This projects is licensed under the AGPL.
+
+The SVGs in the images directory are under the CCA4.0 by FontAwesome. This license can be
+viewed at [https://fontawesome.com/license](https://fontawesome.com/license).

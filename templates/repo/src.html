@@ -29,9 +29,12 @@
     </div>
     {{/.File}}
     {{#.Dir}}
-    <ul>
+    <ul class="tree-items">
         {{#.items}}
-        <li><a href="{{mount}}{{url}}/{{filename}}/{{.name}}">{{.name}}</a> {{.obj_type.str()}}</li>
+        <li>
+            <img src="{{mount}}resources/{{.obj_type.str()}}.svg" />
+            <a href="{{mount}}{{url}}/{{filename}}/{{.name}}">{{.name}}</a>
+        </li>
         {{/.items}}
     </ul>
     {{#.readme}}

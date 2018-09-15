@@ -5,6 +5,7 @@ build: css
 
 css:
     @mkdir -p resources
+    @cp -r images/* resources
     @sassc -t compressed sass/style.sass resources/style.min.css
 
 run: build

@@ -227,7 +227,6 @@ pub fn read_src<'a, 'b>(ctx: &'a Context,
             }
         }
         Some(ObjectType::Commit) => {
-            println!("commit");
             Ok(Some(RepoSrc::Error))
         }
         Some(ObjectType::Any) | Some(ObjectType::Tag) => Ok(Some(RepoSrc::Error)),
