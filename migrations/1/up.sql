@@ -1,14 +1,14 @@
 CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY,
     username VARCHAR NOT NULL UNIQUE,
     email VARCHAR NOT NULL,
     password VARCHAR NOT NULL,
-    num_repos BIGINT NOT NULL,
+    num_repos INTEGER NOT NULL,
     is_admin BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS public_keys (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY,
     owner INTEGER REFERENCES users (id) ON DELETE CASCADE,
     name VARCHAR NOT NULL,
     fingerprint VARCHAR NOT NULL,
@@ -16,10 +16,11 @@ CREATE TABLE IF NOT EXISTS public_keys (
 );
 
 CREATE TABLE IF NOT EXISTS repos (
-    id BIGSERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY,
     name VARCHAR NOT NULL,
     description VARCHAR NOT NULL,
     owner INTEGER REFERENCES users (id) ON DELETE CASCADE,
     private BOOLEAN NOT NULL,
+    last_updated TIMESTAMP DEFAULT NOW(),
     unique (name, owner)
 );

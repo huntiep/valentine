@@ -20,8 +20,8 @@ pub fn run(config: Config, config_path: PathBuf) {
         // Run migrations
         use rusqlite_migration::{M, Migrations};
         let migrations = Migrations::new(vec![
-            //M::up(include_str!("../migrations/1/up.sql"))
-            //    .down(include_str!("../migrations/1/down.sql")),
+            M::up(include_str!("../../migrations/1/up.sql"))
+                .down(include_str!("../../migrations/1/down.sql")),
         ]);
         let mut conn = pool.get().unwrap();
         info!("Running migrations");
