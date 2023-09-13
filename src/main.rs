@@ -1,10 +1,11 @@
 #[macro_use] extern crate bart_derive;
 extern crate base64;
 extern crate bcrypt;
+#[macro_use] extern crate check_psql;
 extern crate chrono;
 #[macro_use] extern crate clap;
-#[macro_use] extern crate diesel;
-#[macro_use] extern crate diesel_migrations;
+//#[macro_use] extern crate diesel;
+//#[macro_use] extern crate diesel_migrations;
 extern crate dirs;
 extern crate env_logger;
 #[macro_use] extern crate explode;
@@ -15,6 +16,10 @@ extern crate humansize;
 extern crate pulldown_cmark;
 #[macro_use] extern crate quick_error;
 extern crate rand;
+extern crate r2d2;
+extern crate r2d2_sqlite;
+#[macro_use] extern crate rusqlite;
+extern crate rusqlite_migration;
 #[macro_use] extern crate serde_derive;
 extern crate serde_json;
 extern crate sessions;
@@ -58,13 +63,21 @@ quick_error! {
         Io(err: ::std::io::Error) {
             from()
         }
+        /*
         Diesel(err: ::diesel::result::Error) {
             from()
         }
         R2D2(err: ::diesel::r2d2::PoolError) {
             from()
         }
+        */
+        R2D2(err: ::r2d2::Error) {
+            from()
+        }
         Session(err: sessions::Error) {
+            from()
+        }
+        Sqlite(err: rusqlite::Error) {
             from()
         }
     }

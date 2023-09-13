@@ -1,12 +1,14 @@
-use diesel::{self, r2d2};
+//use diesel::{self, r2d2};
 
 pub mod create;
 pub mod delete;
 pub mod read;
 pub mod update;
 
-pub type Pool = r2d2::Pool<r2d2::ConnectionManager<diesel::pg::PgConnection>>;
+//pub type Pool = r2d2::Pool<r2d2::ConnectionManager<diesel::pg::PgConnection>>;
+pub type Pool = r2d2::Pool<r2d2_sqlite::SqliteConnectionManager>;
 
+/*
 table! {
     users {
         id -> Integer,
@@ -38,3 +40,4 @@ table! {
         last_updated -> Timestamp,
     }
 }
+*/
