@@ -16,9 +16,9 @@ pub fn public_key(pool: &Pool, key: &NewSshKey) -> Result<SshKey> {
     Ok(SshKey {
         id: id,
         owner: key.owner,
-        name: key.name,
-        fingerprint: key.fingerprint,
-        content: key.content,
+        name: key.name.to_string(),
+        fingerprint: key.fingerprint.to_string(),
+        content: key.content.to_string(),
     })
 }
 

@@ -89,6 +89,7 @@ route!{settings_name, req, res, ctx, {
     };
 
     db::update::repo_name(pool, username, &reponame, &new_name)?;
+    git::mov(ctx, username, &reponame, &new_name)?;
     redirect!(res, ctx, format!("{}/{}", username, new_name), "Repo name changed");
 }}
 

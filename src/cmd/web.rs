@@ -13,7 +13,7 @@ pub fn run(config: Config, config_path: PathBuf) {
     info!("Starting up server");
 
     // Create db connection pool
-    let manager = SqliteConnectionManager::file(config.db_url);
+    let manager = SqliteConnectionManager::file(config.db_path);
     let pool = r2d2::Pool::new(manager).expect("Failed to create pool");
 
     {
@@ -23,7 +23,7 @@ pub fn run(config: Config, config_path: PathBuf) {
             //M::up(include_str!("../migrations/1/up.sql"))
             //    .down(include_str!("../migrations/1/down.sql")),
         ]);
-        let conn = pool.get().unwrap();
+        let mut conn = pool.get().unwrap();
         info!("Running migrations");
         migrations.to_latest(&mut conn).unwrap();
     }

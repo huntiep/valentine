@@ -42,7 +42,7 @@ fn _run(config: Config, matches: &ArgMatches) -> Result<()> {
     };
 
     // Create db connection pool
-    let manager = SqliteConnectionManager::file(config.db_url);
+    let manager = SqliteConnectionManager::file(config.db_path);
     let pool = r2d2::Pool::new(manager).expect("Failed to create pool");
 
     if !db::read::user_exists(&pool, username)? {

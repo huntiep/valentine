@@ -77,6 +77,12 @@ pub fn init(ctx: &Context, username: &str, reponame: &str) -> Result<()> {
     Ok(())
 }
 
+pub fn mov<P: AsRef<Path>>(ctx: &Context, username: P, old_name: P, new_name: P) -> Result<()> {
+    let path = ctx.repo_dir.join(username);
+    fs::rename(path.join(old_name), path.join(new_name))?;
+    Ok(())
+}
+
 pub fn delete<P: AsRef<Path>>(ctx: &Context, username: P, repo_name: P) -> Result<()> {
     let path = ctx.repo_dir.join(username).join(repo_name);
     fs::remove_dir_all(path)?;

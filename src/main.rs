@@ -37,7 +37,6 @@ mod types;
 use clap::{Command, Arg};
 
 use std::fs;
-use std::io::Read;
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
@@ -93,7 +92,7 @@ pub struct Config {
     pub repo_dir: PathBuf,
     pub ssh_dir: Option<PathBuf>,
     pub sessions_dir: PathBuf,
-    pub db_url: String,
+    pub db_path: PathBuf,
     pub mount: Option<String>,
     pub name: Option<String>,
     pub url: Option<String>,
@@ -131,10 +130,8 @@ fn main() {
         .get_matches();
 
     // Read the config file
-    let config_path = matches.get_one::<String>("config").unwrap_or(&"valentine.toml".to_string());
-    let mut buf = String::new();
-    let mut file = fs::File::open(config_path).expect("Unable to open config file");
-    file.read_to_string(&mut buf).expect("Unable to read config file");
+    let config_path = matches.get_one::<&str>("config").unwrap_or(&"valentine.toml");
+    let buf = fs::read_to_string(config_path).expect("Unable to open config file");
     let config: Config = toml::from_str(&buf).expect("Invalid config file");
 
     if let Some(matches) = matches.subcommand_matches("backup") {

@@ -2,7 +2,6 @@ use {Context, Result};
 use types::*;
 
 use git2::{self, ObjectType, Repository};
-use hayaku::escape_html;
 use pulldown_cmark;
 
 use std::path::PathBuf;

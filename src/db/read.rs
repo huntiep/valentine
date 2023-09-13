@@ -35,7 +35,7 @@ pub fn repo_id(pool: &Pool, username: &str, reponame: &str) -> Result<Option<i64
 
     let conn = pool.get()?;
     let mut stmt = conn.prepare(query!("SELECT id FROM repos WHERE owner = ?1 AND reponame = ?2"))?;
-    match stmt.query_row(params![username, reponame], |row| row.get(0)) {
+    match stmt.query_row(params![owner, reponame], |row| row.get(0)) {
         Ok(id) => Ok(Some(id)),
         Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
         Err(e) => Err(Error::from(e)),
@@ -51,7 +51,7 @@ pub fn repo_is_private(pool: &Pool, username: &str, reponame: &str) -> Result<bo
 
     let conn = pool.get()?;
     let mut stmt = conn.prepare(query!("SELECT private FROM repos WHERE owner = ?1 AND reponame = ?2"))?;
-    match stmt.query_row(params![username, reponame], |row| row.get(0)) {
+    match stmt.query_row(params![owner, reponame], |row| row.get(0)) {
         Ok(private) => Ok(private),
         Err(rusqlite::Error::QueryReturnedNoRows) => Ok(true),
         Err(e) => Err(Error::from(e)),
@@ -92,7 +92,7 @@ pub fn user<'a, 'b>(pool: &Pool, username: &'b str, ctx: &'a Context, auth: bool
 
 pub fn users<'a>(pool: &Pool, ctx: &'a Context) -> Result<ExploreTmpl<'a>> {
     let conn = pool.get()?;
-    let stmt = conn.prepare(query!("SELECT name, owner FROM repos WHERE private = false ORDER BY last_updated DESC"))?;
+    let mut stmt = conn.prepare(query!("SELECT name, owner FROM repos WHERE private = false ORDER BY last_updated DESC"))?;
     let rows = stmt.query_map(params![], |row| {
         Ok((row.get(0)?, row.get(1)?))
     })?;
