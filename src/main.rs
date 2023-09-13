@@ -4,13 +4,12 @@ extern crate bcrypt;
 #[macro_use] extern crate check_psql;
 extern crate chrono;
 #[macro_use] extern crate clap;
-//#[macro_use] extern crate diesel;
-//#[macro_use] extern crate diesel_migrations;
 extern crate dirs;
 extern crate env_logger;
 #[macro_use] extern crate explode;
 extern crate git2;
 #[macro_use] extern crate hayaku;
+extern crate html_escape;
 extern crate humansize;
 #[macro_use] extern crate log;
 extern crate pulldown_cmark;
@@ -35,7 +34,7 @@ mod routes;
 mod templates;
 mod types;
 
-use clap::{App, Arg, SubCommand};
+use clap::{Command, Arg};
 
 use std::fs;
 use std::io::Read;
@@ -63,14 +62,6 @@ quick_error! {
         Io(err: ::std::io::Error) {
             from()
         }
-        /*
-        Diesel(err: ::diesel::result::Error) {
-            from()
-        }
-        R2D2(err: ::diesel::r2d2::PoolError) {
-            from()
-        }
-        */
         R2D2(err: ::r2d2::Error) {
             from()
         }
@@ -114,41 +105,40 @@ pub struct Config {
 fn main() {
     env_logger::init();
 
-    let matches = App::new(crate_name!())
+    let matches = Command::new(crate_name!())
         .version(crate_version!())
         .author(crate_authors!())
         .about(crate_description!())
-        .arg(Arg::with_name("config")
-             .short("c")
+        .arg(Arg::new("config")
+             .short('c')
              .long("config")
              .value_name("FILE")
-             .help("Specifies where to find the config file")
-             .takes_value(true))
-        .subcommand(SubCommand::with_name("backup")
+             .help("Specifies where to find the config file"))
+        .subcommand(Command::new("backup")
                     .about("Create a backup of the database and user repositories")
-                    .arg(Arg::with_name("FILE")
+                    .arg(Arg::new("FILE")
                          .help("The file to output the backup to e.g. val.tgz")
                          .required(true)
                          .index(1)))
-        .subcommand(SubCommand::with_name("ssh")
+        .subcommand(Command::new("ssh")
                     .about("Command used for ssh. Not intended to be used directly")
-                    .arg(Arg::with_name("KEYID")
+                    .arg(Arg::new("KEYID")
                          .help("The id of this ssh key")
                          .required(true)
                          .index(1)))
-        .subcommand(SubCommand::with_name("web")
+        .subcommand(Command::new("web")
                     .about("Run the valentine server"))
         .get_matches();
 
     // Read the config file
-    let config_path = matches.value_of("config").unwrap_or("valentine.toml");
+    let config_path = matches.get_one::<String>("config").unwrap_or(&"valentine.toml".to_string());
     let mut buf = String::new();
     let mut file = fs::File::open(config_path).expect("Unable to open config file");
     file.read_to_string(&mut buf).expect("Unable to read config file");
     let config: Config = toml::from_str(&buf).expect("Invalid config file");
 
     if let Some(matches) = matches.subcommand_matches("backup") {
-        let file = matches.value_of("FILE").unwrap();
+        let file = matches.get_one::<String>("FILE").unwrap();
         cmd::backup::run(file);
     } else if let Some(matches) = matches.subcommand_matches("ssh") {
         cmd::ssh::run(config, matches);

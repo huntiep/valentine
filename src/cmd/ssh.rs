@@ -2,7 +2,8 @@ use {db, Config, Result};
 use git::AccessMode;
 
 use clap::ArgMatches;
-use diesel::r2d2::{self, ConnectionManager};
+use r2d2;
+use r2d2_sqlite::SqliteConnectionManager;
 
 use std::{env, process};
 
@@ -13,7 +14,7 @@ pub fn run(config: Config, matches: &ArgMatches) {
 }
 
 fn _run(config: Config, matches: &ArgMatches) -> Result<()> {
-    let key_id = matches.value_of("KEYID").expect("Missing KEYID argument");
+    let key_id = matches.get_one::<String>("KEYID").expect("Missing KEYID argument");
     let key_id = key_id[4..].parse::<i32>().expect("Invalid KEYID");
     let cmd = if let Ok(cmd) = env::var("SSH_ORIGINAL_COMMAND") {
         cmd
@@ -32,7 +33,7 @@ fn _run(config: Config, matches: &ArgMatches) -> Result<()> {
     }
 
     let username = rr[0];
-    let reponame = rr[1].trim_right_matches(".git");
+    let reponame = rr[1].trim_end_matches(".git");
 
     let requested_mode = if let Some(mode) = AccessMode::new(&verb) {
         mode
@@ -41,7 +42,7 @@ fn _run(config: Config, matches: &ArgMatches) -> Result<()> {
     };
 
     // Create db connection pool
-    let manager = ConnectionManager::new(config.db_url);
+    let manager = SqliteConnectionManager::file(config.db_url);
     let pool = r2d2::Pool::new(manager).expect("Failed to create pool");
 
     if !db::read::user_exists(&pool, username)? {

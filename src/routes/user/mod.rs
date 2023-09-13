@@ -5,9 +5,7 @@ use templates::*;
 use types::*;
 use super::{not_found, util};
 
-use chrono::Duration;
-use hayaku::{Cookie, Status};
-use time;
+use hayaku::Status;
 
 // GET /signup
 route!{signup, req, res, ctx, {
@@ -78,6 +76,7 @@ route!{login_post, req, res, ctx, {
 
 // GET /logout
 route!{logout, req, res, ctx, {
+    /*
     let cookies = req.get_cookies();
     if let Some(cookie) = cookies.get("session_key") {
         let cookies = res.cookies();
@@ -94,6 +93,8 @@ route!{logout, req, res, ctx, {
             .finish();
         cookies.add(del_cookie);
     }
+    */
+    util::logout(&req.get_cookies(), &mut res.cookies(), ctx);
     redirect!(res, ctx, "", "Logout successful");
 }}
 

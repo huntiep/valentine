@@ -1,8 +1,9 @@
 use {Config, Context};
 use routes::*;
 
-use diesel::r2d2::{self, ConnectionManager};
 use hayaku::{Http, Router};
+use r2d2;
+use r2d2_sqlite::SqliteConnectionManager;
 
 use std::{env, fs, process};
 use std::path::PathBuf;
@@ -12,15 +13,19 @@ pub fn run(config: Config, config_path: PathBuf) {
     info!("Starting up server");
 
     // Create db connection pool
-    let manager = ConnectionManager::new(config.db_url);
+    let manager = SqliteConnectionManager::file(config.db_url);
     let pool = r2d2::Pool::new(manager).expect("Failed to create pool");
 
     {
         // Run migrations
-        embed_migrations!("migrations");
+        use rusqlite_migration::{M, Migrations};
+        let migrations = Migrations::new(vec![
+            //M::up(include_str!("../migrations/1/up.sql"))
+            //    .down(include_str!("../migrations/1/down.sql")),
+        ]);
         let conn = pool.get().unwrap();
         info!("Running migrations");
-        embedded_migrations::run(&*conn).expect("failed to run migrations");
+        migrations.to_latest(&mut conn).unwrap();
     }
 
     // Create repository folder

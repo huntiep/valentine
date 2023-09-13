@@ -1,29 +1,9 @@
 use Result;
-use db::{public_keys, repos, users};
 
-use base64;
 use bcrypt::{self, DEFAULT_COST};
 use hayaku::Request;
 use sha2::{Digest, Sha256};
 
-macro_rules! form_values {
-    ( $req:expr, $( $x:expr ),* ) => {
-        {
-            ($(
-                {
-                    let x =  try_opt!($req.form_value(stringify!($x)));
-                    if x.is_empty() {
-                        return None;
-                    }
-                    x
-                }
-            ),*)
-        }
-    };
-}
-
-#[derive(Insertable, Queryable)]
-#[table_name = "users"]
 pub struct NewUser {
     pub username: String,
     pub email: String,
@@ -33,8 +13,8 @@ pub struct NewUser {
 
 impl NewUser {
     pub fn new(req: &mut Request) -> Option<Self> {
-        let (username, email) = form_values!(req, username, email);
-        let (password, confirm) = form_values!(req, password, password_confirm);
+        let (username, email) = form_values!(req, "username", "email");
+        let (password, confirm) = form_values!(req, "password", "password_confirm");
 
         if password != confirm {
             return None;
@@ -57,7 +37,7 @@ pub struct Login {
 
 impl Login {
     pub fn new(req: &mut Request) -> Option<Self> {
-        let (username, password) = form_values!(req, username, password);
+        let (username, password) = form_values!(req, "username", "password");
 
         Some(Login {
             username: username,
@@ -66,8 +46,6 @@ impl Login {
     }
 }
 
-#[derive(Insertable, Queryable)]
-#[table_name = "repos"]
 pub struct Repo {
     pub name: String,
     pub description: String,
@@ -145,7 +123,6 @@ pub enum RepoSrc {
     Error,
 }
 
-#[derive(Queryable)]
 pub struct SshKey {
     pub id: i32,
     pub owner: i32,
@@ -154,8 +131,6 @@ pub struct SshKey {
     pub content: String,
 }
 
-#[derive(Insertable)]
-#[table_name = "public_keys"]
 pub struct NewSshKey {
     pub owner: i32,
     pub name: String,
@@ -165,7 +140,7 @@ pub struct NewSshKey {
 
 impl NewSshKey {
     pub fn new(req: &mut Request, owner: i32) -> Option<Self> {
-        let (name, ssh_key) = form_values!(req, name, ssh_key);
+        let (name, ssh_key) = form_values!(req, "name", "ssh_key");
         let fingerprint = try_opt!(NewSshKey::fingerprint(&ssh_key));
 
         Some(NewSshKey {
@@ -178,10 +153,13 @@ impl NewSshKey {
 
     pub fn fingerprint(key: &str) -> Option<String> {
         if let Some(key) = key.split_whitespace().nth(1) {
-            let fingerprint_bytes = Sha256::digest(&try_opt!(base64::decode(key).ok()));
+            use base64::engine::general_purpose;
+            use base64::Engine;
+
+            let fingerprint_bytes = Sha256::digest(&try_opt!(general_purpose::STANDARD_NO_PAD.decode(key).ok()));
             // TODO: this feels a bit inefficient
             let mut fingerprint = String::new();
-            for byte in fingerprint_bytes.as_ref() {
+            for byte in fingerprint_bytes.as_slice() {
                 fingerprint.push_str(&format!("{:x}", byte));
             }
             Some(fingerprint)

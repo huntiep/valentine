@@ -1,4 +1,4 @@
-use {Context, Result};
+use Context;
 
 use chrono::Duration;
 use hayaku::{Cookie, CookieJar};
@@ -18,21 +18,38 @@ pub fn check_login<'a>(ctx: &Context, cookies: &'a CookieJar) -> Option<&'a str>
 }
 
 pub fn login(username: String, cookies: &mut CookieJar, ctx: &Context) {
-    let key = ctx.logins.lock().unwrap().generate(Duration::days(1), username.clone());
+    let key = ctx.logins.lock().unwrap().generate(Duration::days(30), username.clone());
 
     let cookie = Cookie::build("session_key", key)
-        .secure(false)
-        .http_only(false)
+        .secure(true)
+        .http_only(true)
         .path("/")
-        .max_age(Duration::days(1))
+        .max_age(time::Duration::days(30))
         .finish();
     cookies.add(cookie);
 
     let cookie = Cookie::build("dotcom_user", username)
-        .secure(false)
-        .http_only(false)
+        .secure(true)
+        .http_only(true)
         .path("/")
-        .max_age(Duration::days(1))
+        .max_age(time::Duration::days(30))
         .finish();
     cookies.add(cookie);
+}
+
+pub fn logout(req_cookies: &CookieJar, res_cookies: &mut CookieJar, ctx: &Context) {
+    if let Some(cookie) = req_cookies.get("session_key") {
+        ctx.logins.lock().unwrap().remove(cookie.value());
+        let del_cookie = Cookie::build("session_key", "")
+            .max_age(time::Duration::seconds(0))
+            .expires(time::OffsetDateTime::UNIX_EPOCH)
+            .finish();
+        res_cookies.add(del_cookie);
+
+        let del_cookie = Cookie::build("dotcom_user", "")
+            .max_age(time::Duration::seconds(0))
+            .expires(time::OffsetDateTime::UNIX_EPOCH)
+            .finish();
+        res_cookies.add(del_cookie);
+    }
 }

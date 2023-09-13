@@ -79,7 +79,7 @@ fn handle_readme(repo: &Repository, entry: git2::TreeEntry, name_lower: String)
 }
 
 fn parse_readme(readme: &str) -> String {
-    let content = escape_html(readme);
+    let content = html_escape::encode_text(readme);
     content.lines().fold(String::with_capacity(content.len()),
                          |acc, line| acc + line + "<br>")
 }

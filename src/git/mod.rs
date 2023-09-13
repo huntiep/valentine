@@ -213,11 +213,10 @@ pub fn read_src<'a, 'b>(ctx: &'a Context,
             Ok(Some(RepoSrc::Dir { items, readme }))
         }
         Some(ObjectType::Blob) => {
-            use humansize::FileSize;
-            use humansize::file_size_opts::CONVENTIONAL;
+            use humansize::{format_size, DECIMAL};
             match read_file(&repo, &entry)? {
                 Some(c) => {
-                    let size = c.len().file_size(CONVENTIONAL).unwrap();
+                    let size = format_size(c.len(), DECIMAL);
                     let file = c.lines().enumerate()
                         .map(|(i, s)| (i+1, s.to_string()))
                         .collect::<Vec<_>>();

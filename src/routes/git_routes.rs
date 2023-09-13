@@ -10,7 +10,7 @@ route!{pull_handshake, req, res, ctx, {
 
     let pool = &ctx.db_pool;
     // Make sure that repo exists
-    let repo_name = repo.trim_right_matches(".git");
+    let repo_name = repo.trim_end_matches(".git");
     if !db::read::repo_exists(pool, &username, repo_name)? ||
        db::read::repo_is_private(pool, &username, repo_name)?
     {
@@ -58,7 +58,7 @@ route!{pull, req, res, ctx, {
     let username = req.get_param("user");
     let repo = req.get_param("repo");
 
-    let pack = git::network::pull(ctx, &username, &repo, req.body())?;
+    let pack = git::network::pull(ctx, &username, &repo, &req.body())?;
     res.add_header(header::EXPIRES, hval!("Fri, 01 Jan 1980 00:00:00 GMT"));
     res.add_header(header::PRAGMA, hval!("no-cache"));
     res.add_header(header::CACHE_CONTROL, hval!("no-cache, max-age=0, must-revalidate"));
