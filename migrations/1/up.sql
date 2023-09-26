@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR NOT NULL,
     password VARCHAR NOT NULL,
     num_repos INTEGER NOT NULL,
-    is_admin BOOLEAN NOT NULL DEFAULT FALSE
+    is_admin BOOLEAN NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS public_keys (
@@ -21,6 +21,6 @@ CREATE TABLE IF NOT EXISTS repos (
     description VARCHAR NOT NULL,
     owner INTEGER REFERENCES users (id) ON DELETE CASCADE,
     private BOOLEAN NOT NULL,
-    last_updated TIMESTAMP DEFAULT NOW(),
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     unique (name, owner)
 );
