@@ -34,7 +34,7 @@ pub fn repo_id(pool: &Pool, username: &str, reponame: &str) -> Result<Option<i64
     let owner = user_id(pool, username)?;
 
     let conn = pool.get()?;
-    let mut stmt = conn.prepare(query!("SELECT id FROM repos WHERE owner = ?1 AND reponame = ?2"))?;
+    let mut stmt = conn.prepare(query!("SELECT id FROM repos WHERE owner = ?1 AND name = ?2"))?;
     match stmt.query_row(params![owner, reponame], |row| row.get(0)) {
         Ok(id) => Ok(Some(id)),
         Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
@@ -50,7 +50,7 @@ pub fn repo_is_private(pool: &Pool, username: &str, reponame: &str) -> Result<bo
     let owner = user_id(pool, username)?;
 
     let conn = pool.get()?;
-    let mut stmt = conn.prepare(query!("SELECT private FROM repos WHERE owner = ?1 AND reponame = ?2"))?;
+    let mut stmt = conn.prepare(query!("SELECT private FROM repos WHERE owner = ?1 AND name = ?2"))?;
     match stmt.query_row(params![owner, reponame], |row| row.get(0)) {
         Ok(private) => Ok(private),
         Err(rusqlite::Error::QueryReturnedNoRows) => Ok(true),
@@ -184,7 +184,7 @@ pub fn user_owns_key(pool: &Pool, username: &str, id: i32) -> Result<bool> {
 pub fn user_owns_repo(pool: &Pool, owner: i32, reponame: &str) -> Result<bool> {
     let conn = pool.get()?;
 
-    let mut stmt = conn.prepare(query!("SELECT id FROM repos WHERE owner = ?1 AND reponame = ?2"))?;
+    let mut stmt = conn.prepare(query!("SELECT id FROM repos WHERE owner = ?1 AND name = ?2"))?;
     match stmt.query_row(params![owner, reponame], |row| row.get::<usize, i32>(0)) {
         Ok(_) => Ok(true),
         Err(rusqlite::Error::QueryReturnedNoRows) => Ok(false),

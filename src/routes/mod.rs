@@ -51,7 +51,17 @@ route!{not_found, req, res, ctx, {
 pub fn internal_error(_req: &mut Request, res: &mut Response, ctx: &Context, err: &Error) {
     res.status(Status::INTERNAL_SERVER_ERROR);
 
-    match *err {
+    match err {
+        /*
+        Error::Base64(e) => res.fmt_body(format!("Base64 error: {}", e)),
+        Error::Bcrypt(e) => res.fmt_body(format!("Bcrypt error: {}", e)),
+        Error::Chrono(e) => res.fmt_body(format!("Chrono error: {}", e)),
+        Error::Git(e) => res.fmt_body(format!("Git error: {}", e)),
+        Error::Io(e) => res.fmt_body(format!("Io error: {}", e)),
+        Error::R2D2(e) => res.fmt_body(format!("R2D2 error: {}", e)),
+        Error::Session(e) => res.fmt_body(format!("Session error: {}", e)),
+        Error::Sqlite(e) => res.fmt_body(format!("Sqlite error: {}", e)),
+        */
         _ => {
             let body = include_str!("../../templates/internal_error.html");
             let tmpl = Template::new(ctx, Some("500"), None, None, body);

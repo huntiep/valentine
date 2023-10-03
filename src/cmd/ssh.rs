@@ -8,8 +8,8 @@ use r2d2_sqlite::SqliteConnectionManager;
 use std::{env, process};
 
 pub fn run(config: Config, matches: &ArgMatches) {
-    if _run(config, matches).is_err() {
-        fail("Internal error", None);
+    if let Err(e) = _run(config, matches) {
+        fail(&format!("Internal error: {}", e), None);
     }
 }
 
@@ -19,8 +19,8 @@ fn _run(config: Config, matches: &ArgMatches) -> Result<()> {
     let cmd = if let Ok(cmd) = env::var("SSH_ORIGINAL_COMMAND") {
         cmd
     } else {
-        println!("Hi there, you've successfully authenticated, but Valentine does not provide shell access.");
-        println!("If this is unexpected, please log in with password and setup Valentine under another user.");
+        eprintln!("Hi there, you've successfully authenticated, but Valentine does not provide shell access.");
+        eprintln!("If this is unexpected, please log in with password and setup Valentine under another user.");
         return Ok(());
     };
 

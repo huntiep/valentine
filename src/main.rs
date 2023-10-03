@@ -130,8 +130,12 @@ fn main() {
         .get_matches();
 
     // Read the config file
-    let config_path = matches.get_one::<&str>("config").unwrap_or(&"valentine.toml");
-    let buf = fs::read_to_string(config_path).expect("Unable to open config file");
+    let config_path: String = if let Some(c) = matches.get_one::<String>("config") {
+        c.to_string()
+    } else {
+        String::from("valentine.toml")
+    };
+    let buf = fs::read_to_string(&config_path).expect("Unable to open config file");
     let config: Config = toml::from_str(&buf).expect("Invalid config file");
 
     if let Some(matches) = matches.subcommand_matches("backup") {
