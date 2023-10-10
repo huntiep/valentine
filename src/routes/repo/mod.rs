@@ -186,6 +186,12 @@ route!{raw, req, res, ctx, {
         RepoSrc::File{ file, size } => {
             res.add_header(header::CONTENT_TYPE, hval!("text/plain; charset=utf-8"));
             let body = file.iter().map(|(_, s)| s.as_str()).collect::<String>();
+            let body = file.iter().map(|(_, s)| s.as_str())
+                .fold(String::new(), |mut acc, s| {
+                    acc.push_str(s);
+                    acc.push('\n');
+                    acc
+                });
             ok!(res.body(body));
         }
     }
