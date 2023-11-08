@@ -1,3 +1,7 @@
 repo_dir = "/home/git/val-repos"
-db_url = "postgres://username:password@localhost/valentine"
-ssh = "git@localhost"
+db_path = "/home/git/valentine/val.sqlite"
+ssh = "git@example.com"
+url = "https://example.com"
+addr = "127.0.0.1:3000"
+signup = true
+sessions_dir = "/home/git/valentine/sessions"
