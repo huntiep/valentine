@@ -14,14 +14,11 @@ run: build
 clean:
     rm -r resources target valentine.tgz
 
-drop-tables:
-    @./drop_tables.sh
-
 build-release: css
     @cargo build --release
 
 run-release: build-release
-    @cargo run --release
+    @cargo run --release -- web
 
 tar: build-release
     @tar -cf valentine.tgz target/release/valentine resources
