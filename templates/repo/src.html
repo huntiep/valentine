@@ -16,16 +16,18 @@
             <span>{{.size}}</span>
             <a href="{{mount}}{{url}}/raw/{{filename}}">Raw</a>
         </div>
-        <table>
-            <tbody>
-                {{#.file}}
-                <tr>
-                    <td class="file-contents-line-number"><a href="#{{.0}}">{{.0}}</a></td>
-                    <td class="file-contents-line" id="{{.0}}"><span>{{.1}}</span></td>
-                </tr>
-                {{/.file}}
-            </tbody>
-        </table>
+        <div class="file-code">
+            <table>
+                <tbody>
+                    {{#.file}}
+                    <tr>
+                        <td class="file-contents-line-number"><a href="#{{.0}}">{{.0}}</a></td>
+                        <td class="file-contents-line" id="{{.0}}"><span>{{.1}}</span></td>
+                    </tr>
+                    {{/.file}}
+                </tbody>
+            </table>
+        </div>
     </div>
     {{/.File}}
     {{#.Dir}}
