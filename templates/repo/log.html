@@ -2,7 +2,7 @@
 <div class="content">
     {{>header.html}}
 
-    <p>{{log.len()}} commits<p>
+    <p>{{commits}} commits<p>
     <ul>
         {{#log}}
         <li><p><a href="{{mount}}{{username}}/{{repo.name}}/refs/{{.id}}">{{.short_id}}</a> {{.short_message}} by {{.author}} at {{.time}}</p></li>

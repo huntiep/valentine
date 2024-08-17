@@ -176,6 +176,7 @@ pub struct RepoLogTmpl<'a, 'b> {
     pub repo: Repo,
     pub id: String,
     pub log: Vec<Commit>,
+    pub commits: usize,
     pub next: Option<String>,
 }
 

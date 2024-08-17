@@ -77,7 +77,8 @@ route!{log, req, res, ctx, {
         repo: repo,
         id: req.get_param("id"),
         log: log.0,
-        next: log.1,
+        commits: log.1,
+        next: log.2,
     };
 
     let cookies = &req.get_cookies();

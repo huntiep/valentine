@@ -240,7 +240,7 @@ pub fn read_src<'a, 'b>(ctx: &'a Context,
 }
 
 pub fn log(ctx: &Context, username: &str, reponame: &str, id: &str)
-    -> Result<Option<(Vec<Commit>, Option<String>)>>
+    -> Result<Option<(Vec<Commit>, usize, Option<String>)>>
 {
     let path = build_repo_path(ctx, username, reponame);
     let repo = Repository::open(path)?;
@@ -263,21 +263,20 @@ pub fn log(ctx: &Context, username: &str, reponame: &str, id: &str)
     revwalk.push(oid)?;
     let mut i = 0;
     while let Some(id) = revwalk.next() {
-        let id = id?;
-        let commit = repo.find_commit(id)?;
-        let item = Commit::new(&commit)?;
-        log.push(item);
-        i += 1;
-        if i == 50 {
-            break;
+        if i < 1000 {
+            let id = id?;
+            let commit = repo.find_commit(id)?;
+            let item = Commit::new(&commit)?;
+            log.push(item);
         }
+        i += 1;
     }
     let next_page = if let Some(id) = revwalk.next() {
         Some(id?.to_string())
     } else {
         None
     };
-    Ok(Some((log, next_page)))
+    Ok(Some((log, i, next_page)))
 }
 
 pub fn commit<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo, id: &'b str)
