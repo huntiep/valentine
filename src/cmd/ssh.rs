@@ -28,7 +28,7 @@ fn _run(config: Config, matches: &ArgMatches) -> Result<()> {
 
     let repo_path = args.trim_matches('\'');
     let rr: Vec<&str> = repo_path.splitn(2, '/').collect();
-    if rr[1].is_empty() {
+    if rr.len() != 2 {
         fail("Invalid repository path", None);
     }
 
