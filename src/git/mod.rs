@@ -77,14 +77,15 @@ pub fn init(ctx: &Context, username: &str, reponame: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn mov<P: AsRef<Path>>(ctx: &Context, username: P, old_name: P, new_name: P) -> Result<()> {
-    let path = ctx.repo_dir.join(username);
-    fs::rename(path.join(old_name), path.join(new_name))?;
+pub fn mov(ctx: &Context, username: &str, old_name: &str, new_name: &str) -> Result<()> {
+    let old_path = build_repo_path(ctx, username, &old_name);
+    let new_path = build_repo_path(ctx, username, &new_name);
+    fs::rename(old_path, new_path)?;
     Ok(())
 }
 
-pub fn delete<P: AsRef<Path>>(ctx: &Context, username: P, repo_name: P) -> Result<()> {
-    let path = ctx.repo_dir.join(username).join(repo_name);
+pub fn delete(ctx: &Context, username: &str, repo_name: &str) -> Result<()> {
+    let path = build_repo_path(ctx, username, &repo_name);
     fs::remove_dir_all(path)?;
     Ok(())
 }
@@ -104,6 +105,7 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
             branches: Vec::new(),
             tags: Vec::new(),
             commits: Vec::new(),
+            items: Vec::new(),
             readme: None,
             empty: true,
         };
@@ -113,7 +115,8 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
     let oid = head.target().unwrap();
     let commit = repo.find_commit(oid)?;
     let tree = commit.tree()?;
-    let readme = read_readme(&repo, &tree)?;
+    let (items, readme) = read_tree(&repo, &tree)?;
+    //let readme = read_readme(&repo, &tree)?;
 
     let branches_raw = repo.branches(None)?.take(10);
     let mut branches = Vec::new();
@@ -155,6 +158,7 @@ pub fn read<'a, 'b>(ctx: &'a Context, username: &'b str, repo_info: Repo)
         branches: branches,
         tags: tags,
         commits: commits,
+        items: items,
         readme: readme,
         empty: false,
     };

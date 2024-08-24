@@ -39,6 +39,14 @@
             </ul>
             <a href="{{mount}}{{username}}/{{repo.name}}/log">View Log</a>
         </div>
+        <ul class="tree-items" style="border-bottom: 1px solid">
+            {{#items}}
+            <li>
+                <img src="{{mount}}resources/{{.obj_type.str()}}.svg" />
+                <a href="{{mount}}{{username}}/{{repo.name}}/refs/HEAD/{{.name}}">{{.name}}</a>
+            </li>
+            {{/items}}
+        </ul>
 
         {{#readme}}<div class="md">{{{.}}}</div>{{/readme}}
         </div>

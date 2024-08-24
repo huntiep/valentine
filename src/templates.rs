@@ -133,6 +133,7 @@ pub struct RepoTmpl<'a, 'b> {
     pub branches: Vec<Branch>,
     pub tags: Vec<Tag>,
     pub commits: Vec<Commit>,
+    pub items: Vec<RepoItem>,
     pub readme: Option<String>,
     pub empty: bool,
 }
